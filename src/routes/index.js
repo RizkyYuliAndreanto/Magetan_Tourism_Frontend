@@ -12,11 +12,21 @@ import UMKMView from "../views/admin/UMKM/UMKMView.vue";
 import StrukturAnggotaView from "../views/admin/struktur-anggota/StrukturAnggotaView.vue";
 import PengumumanView from "../views/admin/penggumuman/PengumumanView.vue";
 
+//user
+import PengumumanUserView from "../views/PengumumanUserView.vue";
+
+
 const routes = [
+  //User
   {
     path: "/",
     name: "home",
     component: HomeView,
+  },
+  {
+    path: "/pengumuman", // Rute publik
+    name: "pengumuman",
+    component: PengumumanUserView,
   },
   {
     path: "/login",
@@ -28,6 +38,8 @@ const routes = [
     name: "register",
     component: RegisterView,
   },
+  
+  //Admin
   {
     path: "/dashboard",
     name: "dashboard",
