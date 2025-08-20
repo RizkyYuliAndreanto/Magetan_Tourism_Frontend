@@ -298,6 +298,7 @@ const submitForm = () => {
 </script>
 
 <style scoped>
+/* Gaya CSS yang sama seperti sebelumnya */
 .form-card {
   background-color: #ffffff;
   border-radius: 8px;

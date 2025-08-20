@@ -1,3 +1,4 @@
+// src/routes/index.js
 import { createRouter, createWebHistory } from "vue-router";
 import HomeView from "../views/HomeView.vue";
 import LoginView from "../views/LoginView.vue";
@@ -11,6 +12,10 @@ import SejarahView from "../views/admin/sejarah/SejarahView.vue";
 import UMKMView from "../views/admin/UMKM/UMKMView.vue";
 import StrukturAnggotaView from "../views/admin/struktur-anggota/StrukturAnggotaView.vue";
 import PengumumanView from "../views/admin/penggumuman/PengumumanView.vue";
+import VisiMisiView from "../views/admin/visi-misi/VisiMisiView.vue";
+import StrukturOrganisasiView from "../views/admin/struktur-organisasi/StrukturOrganisasiView.vue";
+import AkomodasiView from "../views/admin/akomodasi/AkomodasiView.vue";
+import KontenPpidView from "../views/admin/ppid/KontenPpidView.vue";
 
 //user
 import PengumumanUserView from "../views/PengumumanUserView.vue";
@@ -22,6 +27,7 @@ const routes = [
     path: "/",
     name: "home",
     component: HomeView,
+    
   },
   {
     path: "/pengumuman", // Rute publik
@@ -44,55 +50,79 @@ const routes = [
     path: "/dashboard",
     name: "dashboard",
     component: AdminDashboard,
-    meta: { requiresAuth: true }, // Tambahkan ini untuk perlindungan rute
+    meta: { requiresAuth: true },
   },
   {
     path: "/admin/berita",
     name: "adminBerita",
     component: BeritaKategoriView,
-    meta: { requiresAuth: true }, // Tambahkan ini untuk perlindungan rute
+    meta: { requiresAuth: true },
   },
   {
     path: "/admin/destinasi",
     name: "adminDestinasi",
     component: KategoriDestinasiView,
-    meta: { requiresAuth: true }, // Tambahkan ini untuk perlindungan rute
+    meta: { requiresAuth: true },
   },
   {
     path: "/admin/event",
     name: "adminEvent",
     component: EventView,
-    meta: { requiresAuth: true }, // Tambahkan ini untuk perlindungan rute
+    meta: { requiresAuth: true },
   },
   {
     path: "/admin/media-galeri",
     name: "adminMediaGaleri",
     component: MediaGaleriView,
-    meta: { requiresAuth: true }, // Tambahkan ini untuk perlindungan rute
+    meta: { requiresAuth: true },
   },
   {
     path: "/admin/sejarah",
-    name: "adminMediaGaleri",
+    name: "adminSejarah", // <-- KOREKSI: Mengganti nama rute
     component: SejarahView,
-    meta: { requiresAuth: true }, // Tambahkan ini untuk perlindungan rute
+    meta: { requiresAuth: true },
   },
   {
-    path: "/admin/UMKM",
-    name: "adminMediaGaleri",
+    path: "/admin/umkm",
+    name: "adminUMKM", // <-- KOREKSI: Mengganti nama rute
     component: UMKMView,
-    meta: { requiresAuth: true }, // Tambahkan ini untuk perlindungan rute
+    meta: { requiresAuth: true },
   },
   {
     path: "/admin/struktur-anggota",
-    name: "adminMediaGaleri",
+    name: "adminStrukturAnggota", // <-- KOREKSI: Mengganti nama rute
     component: StrukturAnggotaView,
-    meta: { requiresAuth: true }, // Tambahkan ini untuk perlindungan rute
+    meta: { requiresAuth: true },
   },
   {
     path: "/admin/pengumuman",
-    name: "adminMediaGaleri",
+    name: "adminPengumuman", // <-- KOREKSI: Mengganti nama rute
     component: PengumumanView,
-    meta: { requiresAuth: true }, // Tambahkan ini untuk perlindungan rute
+    meta: { requiresAuth: true },
+  },
+  {
+    path: "/admin/visi-misi",
+    name: "adminVisiMisi", // <-- KOREKSI: Mengganti nama rute
+    component: VisiMisiView,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: "/admin/struktur-organisasi",
+    name: "adminStrukturOrganisasi", // <-- KOREKSI: Mengganti nama rute
+    component: StrukturOrganisasiView,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: "/admin/akomodasi",
+    name: "adminAkomodasi", // <-- KOREKSI: Mengganti nama rute
+    component: AkomodasiView,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: "/admin/ppid",
+    name: "adminKontenPpid", // <-- KOREKSI: Mengganti nama rute
+    component: KontenPpidView,
+    meta: { requiresAuth: true },
   },
 ];
 
@@ -102,17 +132,16 @@ const router = createRouter({
 });
 
 router.beforeEach((to, from, next) => {
-  // Periksa jika rute membutuhkan autentikasi
   if (to.meta.requiresAuth) {
     const token = localStorage.getItem("access_token");
     if (!token) {
       alert("Anda harus login untuk mengakses halaman ini.");
       next("/login");
     } else {
-      next(); // Lanjutkan ke rute yang dituju jika sudah login
+      next();
     }
   } else {
-    next(); // Lanjutkan ke rute yang dituju jika tidak membutuhkan autentikasi
+    next();
   }
 });
 
