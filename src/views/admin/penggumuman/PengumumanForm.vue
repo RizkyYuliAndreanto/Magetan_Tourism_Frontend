@@ -16,10 +16,19 @@
           <label for="isi_pengumuman">Isi Pengumuman</label>
           <textarea id="isi_pengumuman" v-model="formData.isi_pengumuman" class="form-input" rows="5"></textarea>
         </div>
-        <div class="form-group span-2">
+        <div class="form-group">
+          <label for="sampul_pengumuman">Sampul Pengumuman (Gambar)</label>
+          <input type="file" id="sampul_pengumuman" @change="handleFileUpload('sampul_pengumuman', $event)" class="form-input-file" :required="!isEditing">
+          <p v-if="isEditing && formData.sampul_pengumuman" class="mt-2 text-sm text-gray-500">
+            Gambar saat ini: <a :href="getFilePath(formData.sampul_pengumuman)" target="_blank" class="text-blue-500">{{ formData.sampul_pengumuman.split('/').pop() }}</a>
+          </p>
+        </div>
+        <div class="form-group">
           <label for="file_pdf_pengumuman">File PDF Pengumuman</label>
-          <input type="file" id="file_pdf_pengumuman" @change="handleFileUpload" class="form-input-file" :required="!isEditing">
-          <p v-if="isEditing && formData.file_pdf_path" class="mt-2 text-sm text-gray-500">File saat ini: <a :href="getFilePath(formData.file_pdf_path)" target="_blank" class="text-blue-500">{{ formData.file_pdf_path.split('/').pop() }}</a></p>
+          <input type="file" id="file_pdf_pengumuman" @change="handleFileUpload('file_pdf_pengumuman', $event)" class="form-input-file" :required="!isEditing">
+          <p v-if="isEditing && formData.file_pdf_path" class="mt-2 text-sm text-gray-500">
+            File saat ini: <a :href="getFilePath(formData.file_pdf_path)" target="_blank" class="text-blue-500">{{ formData.file_pdf_path.split('/').pop() }}</a>
+          </p>
         </div>
       </div>
       <div class="form-actions">
@@ -50,8 +59,12 @@ watch(() => props.initialData, (newVal) => {
   formData.value = { ...newVal };
 }, { immediate: true });
 
-const handleFileUpload = (event) => {
-  formData.value.file_pdf_pengumuman = event.target.files[0];
+const handleFileUpload = (field, event) => {
+  if (field === 'file_pdf_pengumuman') {
+    formData.value.file_pdf_pengumuman = event.target.files[0];
+  } else if (field === 'sampul_pengumuman') {
+    formData.value.sampul_pengumuman = event.target.files[0];
+  }
 };
 
 const getFilePath = (path) => {
@@ -61,12 +74,17 @@ const getFilePath = (path) => {
 const submitForm = () => {
   const submitData = new FormData();
   for (const key in formData.value) {
-    if (formData.value[key] !== null) {
+    // Only append data that is not null and is not the path string for files
+    if (formData.value[key] !== null && typeof formData.value[key] !== 'string') {
+      submitData.append(key, formData.value[key]);
+    } else if (key === 'judul_pengumuman' || key === 'isi_pengumuman') {
       submitData.append(key, formData.value[key]);
     }
   }
-
+  
   if (props.isEditing) {
+    // Append the ID for updates
+    submitData.append('id_pengumuman', formData.value.id_pengumuman);
     emit('update-pengumuman', submitData);
   } else {
     emit('save-pengumuman', submitData);
@@ -75,7 +93,7 @@ const submitForm = () => {
 </script>
 
 <style scoped>
-/* Gaya CSS untuk form pengumuman */
+/* No changes to styles */
 .form-card {
   background-color: #ffffff;
   padding: 1.5rem;

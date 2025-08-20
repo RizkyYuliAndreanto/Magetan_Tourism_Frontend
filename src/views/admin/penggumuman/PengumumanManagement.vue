@@ -73,10 +73,18 @@ const fetchPengumumanData = async () => {
 const openPengumumanForm = (pengumuman = null) => {
   isEditingPengumuman.value = !!pengumuman;
   if (pengumuman) {
-    formPengumuman.value = { ...pengumuman, file_pdf_pengumuman: null };
+    formPengumuman.value = { 
+      ...pengumuman,
+      file_pdf_pengumuman: null, // Ensure file input is reset
+      sampul_pengumuman: null // Ensure file input is reset
+    };
   } else {
     formPengumuman.value = {
-      id_pengumuman: null, judul_pengumuman: '', isi_pengumuman: '', file_pdf_pengumuman: null,
+      id_pengumuman: null, 
+      judul_pengumuman: '', 
+      isi_pengumuman: '', 
+      file_pdf_pengumuman: null,
+      sampul_pengumuman: null,
     };
   }
   formPengumumanOpen.value = true;
@@ -151,7 +159,7 @@ onMounted(() => {
 </script>
 
 <style scoped>
-/* Gaya CSS untuk tabel pengumuman dan tombol aksi */
+/* No changes to styles */
 .action-bar {
   display: flex;
   justify-content: flex-end;
