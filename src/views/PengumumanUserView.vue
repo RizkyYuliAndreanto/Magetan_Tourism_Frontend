@@ -19,6 +19,9 @@
 
       <ul class="pengumuman-list" v-if="pengumumanList.length > 0">
         <li v-for="pengumuman in pengumumanList" :key="pengumuman.id_pengumuman" class="pengumuman-card">
+          <div class="pengumuman-cover" v-if="pengumuman.sampul_pengumuman">
+            <img :src="baseUrl + pengumuman.sampul_pengumuman" :alt="`Sampul ${pengumuman.judul_pengumuman}`" class="cover-image">
+          </div>
           <div class="card-content">
             <h2 class="pengumuman-title">{{ pengumuman.judul_pengumuman }}</h2>
             <p class="pengumuman-meta">Dipublikasi pada: {{ formatDate(pengumuman.tanggal_publikasi) }}</p>
@@ -151,6 +154,20 @@ onMounted(() => {
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
 }
 
+/* Styling untuk foto sampul */
+.pengumuman-cover {
+  width: 250px;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+.cover-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
 .card-content {
   padding: 30px;
   display: flex;
@@ -178,24 +195,28 @@ onMounted(() => {
   margin-bottom: 20px;
 }
 
+/* --- PERBAIKAN CSS DI BAGIAN INI --- */
 .card-actions {
   display: flex;
   gap: 15px;
+  width: 100%;
 }
 
 .download-link, .view-link {
-  display: inline-flex;
+  display: flex;
   align-items: center;
-  gap: 10px;
+  justify-content: center;
+  gap: 8px;
   color: white;
-  padding: 12px 25px;
+  padding: 10px 20px;
   border-radius: 8px;
   text-decoration: none;
   font-weight: 600;
+  font-size: 0.95rem;
   transition: background-color 0.3s ease;
-  align-self: flex-start;
   border: none;
   cursor: pointer;
+  flex-grow: 1; /* Properti kunci untuk lebar yang sama */
 }
 
 .download-link {
@@ -213,6 +234,7 @@ onMounted(() => {
 .view-link:hover {
   background-color: #218838;
 }
+/* --- AKHIR DARI PERBAIKAN CSS --- */
 
 .pdf-modal-overlay {
   position: fixed;
@@ -300,6 +322,11 @@ onMounted(() => {
 @media (max-width: 768px) {
   .pengumuman-card {
     flex-direction: column;
+  }
+  
+  .pengumuman-cover {
+    width: 100%;
+    height: 200px;
   }
 }
 </style>
