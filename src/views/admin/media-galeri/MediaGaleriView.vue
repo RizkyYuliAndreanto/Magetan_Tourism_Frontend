@@ -17,16 +17,16 @@
       <h1 class="header-title">{{ pageTitle }}</h1>
       <div class="header-right"></div>
     </header>
-    
+
     <main class="content-area">
       <div class="content-wrapper">
         <div class="header-container">
-          <h2 class="page-title">Manajemen Pengumuman</h2>
-          <p class="page-subtitle">Kelola semua pengumuman yang ada di website Anda.</p>
+          <h2 class="page-title">Manajemen Media Galeri</h2>
+          <p class="page-subtitle">Kelola semua file gambar dan video yang terhubung ke konten lain.</p>
         </div>
 
         <div class="tab-content">
-          <PengumumanManagement />
+          <MediaGaleriManagement />
         </div>
       </div>
     </main>
@@ -35,11 +35,11 @@
 
 <script setup>
 import { ref, computed, inject } from 'vue';
-import PengumumanManagement from './PengumumanManagement.vue';
+import MediaGaleriManagement from './MediaGaleriManagement.vue';
 
 const toggleSidebar = inject('toggleSidebar');
 
-const pageTitle = computed(() => 'Manajemen Pengumuman');
+const pageTitle = computed(() => 'Manajemen Media Galeri');
 </script>
 
 <style scoped>
@@ -62,7 +62,7 @@ const pageTitle = computed(() => 'Manajemen Pengumuman');
   flex-direction: column;
   background-color: var(--background-light); 
   padding-top: calc(var(--navbar-height) + 2rem);
-  margin-top: 80px; /* Tambahkan margin atas untuk menghindari tumpang tindih dengan header */
+  margin-top: 80px;
 }
 .admin-header {
   position: fixed;
@@ -116,7 +116,7 @@ const pageTitle = computed(() => 'Manajemen Pengumuman');
   margin-bottom: 2rem;
   padding-bottom: 1rem;
   border-bottom: 1px solid var(--border-color);
-  margin-top: 32px;
+   margin-top: 32px;
 }
 .page-title {
   font-size: 2rem;

@@ -1,89 +1,73 @@
 <template>
-  <div class="admin-dashboard">
-    <AdminSidebar :is-open="sidebarOpen" @close-sidebar="sidebarOpen = false" />
-    
-    <div :class="['main-content', { 'sidebar-open': sidebarOpen }]">
-      <header class="admin-header">
-        <button class="mobile-menu-btn" @click="toggleSidebar">
-          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
-          </svg>
-        </button>
-        <h1 class="header-title">{{ pageTitle }}</h1>
-        <div class="header-right"></div>
-      </header>
-      
-      <main class="content-area">
-        <div class="content-wrapper">
-          <div class="header-container">
-            <h2 class="page-title">Manajemen Event</h2>
-            <p class="page-subtitle">Kelola semua event yang ada di website Anda.</p>
-          </div>
+  <div class="main-content-inner">
+    <header class="admin-header">
+      <button class="mobile-menu-btn" @click="toggleSidebar">
+        <svg
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+          xmlns="http://www.w3.org/2000/svg">
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M4 6h16M4 12h16M4 18h16"></path>
+        </svg>
+      </button>
+      <h1 class="header-title">{{ pageTitle }}</h1>
+      <div class="header-right"></div>
+    </header>
 
-          <div class="tab-content">
-            <EventManagement />
-          </div>
+    <main class="content-area">
+      <div class="content-wrapper">
+        <div class="header-container">
+          <h2 class="page-title">Manajemen Event</h2>
+          <p class="page-subtitle">
+            Kelola semua event yang ada di website Anda.
+          </p>
         </div>
-      </main>
-    </div>
+
+        <div class="tab-content">
+          <EventManagement />
+        </div>
+      </div>
+    </main>
   </div>
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
-import AdminSidebar from '../../../components/admin/AdminSidebar.vue';
+import { ref, computed, inject } from 'vue';
 import EventManagement from './EventManagement.vue';
 
-const sidebarOpen = ref(false);
-
-const toggleSidebar = () => {
-  sidebarOpen.value = !sidebarOpen.value;
-};
+const toggleSidebar = inject('toggleSidebar');
 
 const pageTitle = computed(() => 'Manajemen Event');
 </script>
 
 <style scoped>
+/* Variabel CSS yang disesuaikan dari BeritaKategoriView.vue */
 :root {
   --primary-blue: #007bff;
-  --secondary-blue: #17a2b8;
-  --background-light: #e9ecef;
+  --background-light: #f8f9fa;
   --background-dark: #ffffff;
-  --text-color-dark: #343a40;
-  --text-color-light: #ffffff;
+  --text-color-dark: #212529;
   --text-color-muted: #6c757d;
-  --border-color: #dee2e6;
+  --border-color: #e9ecef;
   --shadow-light: rgba(0, 0, 0, 0.08);
-  --shadow-medium: rgba(0, 0, 0, 0.15);
-  --green-accent: #28a745;
-  --red-accent: #dc3545;
-  --yellow-accent: #ffc107;
-  --border-radius: 12px;
-  --box-shadow: 0 5px 15px var(--shadow-light);
-  --transition: all 0.3s ease;
+  --box-shadow: 0 4px 15px var(--shadow-light);
   --sidebar-width: 260px;
   --navbar-height: 70px;
 }
 
-/* Gaya Umum untuk Dashboard */
-.admin-dashboard {
-  display: flex;
-  min-height: 100vh;
-  font-family: 'Inter', sans-serif;
-  background-color: var(--background-light);
-}
-
-.main-content {
+.main-content-inner {
   flex-grow: 1;
-  margin-left: var(--sidebar-width);
-  transition: margin-left 0.3s ease;
-  min-height: 100vh;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
-  padding-top: 90px;
+  padding-top: var(--navbar-height);
+  /* Latar belakang yang seragam */
+  background-color: var(--background-light); 
+  margin-top: 80px; 
 }
-
 .admin-header {
   position: fixed;
   top: 0;
@@ -99,8 +83,10 @@ const pageTitle = computed(() => 'Manajemen Event');
   justify-content: space-between;
   align-items: center;
   transition: left 0.3s ease;
+  
 }
 
+/* Menggunakan `main-content` dari parent layout */
 .main-content.sidebar-open .admin-header {
   left: var(--sidebar-width);
 }
@@ -131,7 +117,8 @@ const pageTitle = computed(() => 'Manajemen Event');
 
 .content-area {
   flex-grow: 1;
-  padding: 30px;
+  /* Padding 2rem di semua sisi kecuali atas yang diatur di parent */
+  padding: 0 2rem 2rem 2rem;
   background-color: var(--background-light);
 }
 
@@ -143,6 +130,7 @@ const pageTitle = computed(() => 'Manajemen Event');
   margin-bottom: 2rem;
   padding-bottom: 1rem;
   border-bottom: 1px solid var(--border-color);
+  margin-top: 32px;
 }
 
 .page-title {
@@ -158,11 +146,10 @@ const pageTitle = computed(() => 'Manajemen Event');
   margin: 0;
 }
 
-/* Gaya Konten dan Form */
 .tab-content {
   background-color: var(--background-dark);
-  padding: 1.5rem;
-  border-radius: var(--border-radius);
+  padding: 2rem;
+  border-radius: 12px;
   box-shadow: var(--box-shadow);
   overflow: hidden;
   border: 1px solid var(--border-color);
@@ -175,13 +162,8 @@ const pageTitle = computed(() => 'Manajemen Event');
 }
 
 @media (max-width: 768px) {
-  .main-content {
-    margin-left: 0;
-  }
-  .main-content.sidebar-open {
-    overflow: hidden;
-    position: fixed;
-    width: 100%;
+  .main-content-inner {
+    padding-top: calc(var(--navbar-height) + 1rem); /* Sesuaikan padding atas untuk mobile */
   }
   .admin-header {
     left: 0;
@@ -191,6 +173,9 @@ const pageTitle = computed(() => 'Manajemen Event');
   }
   .header-title {
     font-size: 1.3rem;
+  }
+  .content-area {
+    padding: 0 1rem 1rem 1rem;
   }
 }
 
