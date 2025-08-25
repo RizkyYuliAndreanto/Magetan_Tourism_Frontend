@@ -12,7 +12,7 @@
           class="menu-card"
         >
           <div class="card-icon">
-            <i :class="item.icon"></i>
+            <img :src="logoPemkab" alt="Logo Pemkab">
           </div>
           <h2 class="card-title">{{ item.title }}</h2>
           <p class="card-description">{{ item.description }}</p>
@@ -24,6 +24,7 @@
 
 <script setup>
 import { ref } from 'vue';
+import logoPemkab from '@/assets/LOGO PEMKAB.png';
 
 const menuItems = ref([
   {
@@ -69,7 +70,7 @@ const menuItems = ref([
 }
 
 .container {
-  max-width: 1000px;
+  max-width: 1300px;
   margin: 0 auto;
   padding: 40px 20px;
 }
@@ -92,19 +93,20 @@ const menuItems = ref([
 /* Menu grid layout */
 .menu-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 25px;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); /* Diperbesar dari 280px */
+  gap: 30px;
 }
 
 .menu-card {
   display: block;
   background: white;
-  padding: 30px;
+  padding: 40px; /* Padding diperbesar */
   border-radius: 12px;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
   text-decoration: none;
   color: inherit;
+  text-align: center;
 }
 
 .menu-card:hover {
@@ -113,40 +115,38 @@ const menuItems = ref([
 }
 
 .card-icon {
-  width: 60px;
-  height: 60px;
-  background-color: #e6f3fa;
+  width: 120px; /* Diperbesar dari 100px */
+  height: 120px; /* Diperbesar dari 100px */
   border-radius: 12px;
   display: flex;
   justify-content: center;
   align-items: center;
-  margin-bottom: 20px;
+  margin-bottom: 25px; /* Margin diperbesar */
   transition: background-color 0.3s ease;
+  background-color: #e6f3fa;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .menu-card:hover .card-icon {
   background-color: #0077b6;
 }
 
-.card-icon i {
-  font-size: 2rem;
-  color: #0077b6;
-  transition: color 0.3s ease;
-}
-
-.menu-card:hover .card-icon i {
-  color: white;
+.card-icon img {
+  max-width: 90%;
+  max-height: 90%;
+  object-fit: contain;
 }
 
 .card-title {
-  font-size: 1.5rem;
+  font-size: 1.8rem; /* Ukuran font diperbesar */
   font-weight: 600;
   color: #1a1a1a;
-  margin-bottom: 10px;
+  margin-bottom: 12px; /* Margin disesuaikan */
 }
 
 .card-description {
-  font-size: 1rem;
+  font-size: 1.1rem; /* Ukuran font diperbesar */
   color: #6c757d;
   line-height: 1.6;
 }

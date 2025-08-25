@@ -29,12 +29,9 @@
               <p>{{ truncateText(pengumuman.isi_pengumuman) }}</p>
             </div>
             <div class="card-actions">
-              <button @click="openPdfModal(pengumuman.file_pdf_path)" class="view-link">
+              <button @click="openPdfModal(pengumuman.file_pdf_path)" class="view-link full-width-button">
                 <i class="fas fa-eye"></i> Baca PDF
               </button>
-              <a :href="baseUrl + pengumuman.file_pdf_path" target="_blank" rel="noopener noreferrer" class="download-link">
-                <i class="fas fa-file-download"></i> Unduh File PDF
-              </a>
             </div>
           </div>
         </li>
@@ -113,7 +110,7 @@ onMounted(() => {
 }
 
 .container {
-  max-width: 900px;
+  max-width: 1300px; /* Diperlebar menjadi 1300px */
   margin: 0 auto;
   padding: 40px 20px;
 }
@@ -137,7 +134,8 @@ onMounted(() => {
   list-style: none;
   padding: 0;
   display: grid;
-  gap: 25px;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 30px;
 }
 
 .pengumuman-card {
@@ -147,6 +145,7 @@ onMounted(() => {
   transition: transform 0.3s ease, box-shadow 0.3s ease;
   overflow: hidden;
   display: flex;
+  flex-direction: row;
 }
 
 .pengumuman-card:hover {
@@ -156,7 +155,7 @@ onMounted(() => {
 
 /* Styling untuk foto sampul */
 .pengumuman-cover {
-  width: 250px;
+  width: 300px;
   flex-shrink: 0;
   overflow: hidden;
 }
@@ -169,22 +168,22 @@ onMounted(() => {
 }
 
 .card-content {
-  padding: 30px;
+  padding: 35px;
   display: flex;
   flex-direction: column;
   width: 100%;
 }
 
 .pengumuman-title {
-  font-size: 1.8rem;
+  font-size: 2rem;
   color: #1a1a1a;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
 }
 
 .pengumuman-meta {
-  font-size: 0.95rem;
+  font-size: 1rem;
   color: #888;
-  margin-bottom: 20px;
+  margin-bottom: 25px;
   font-style: italic;
 }
 
@@ -192,10 +191,11 @@ onMounted(() => {
   flex-grow: 1;
   color: #495057;
   line-height: 1.7;
-  margin-bottom: 20px;
+  font-size: 1rem;
+  margin-bottom: 25px;
 }
 
-/* --- PERBAIKAN CSS DI BAGIAN INI --- */
+/* Card Actions (Tombol) */
 .card-actions {
   display: flex;
   gap: 15px;
@@ -216,7 +216,7 @@ onMounted(() => {
   transition: background-color 0.3s ease;
   border: none;
   cursor: pointer;
-  flex-grow: 1; /* Properti kunci untuk lebar yang sama */
+  flex-grow: 1;
 }
 
 .download-link {
@@ -234,7 +234,12 @@ onMounted(() => {
 .view-link:hover {
   background-color: #218838;
 }
-/* --- AKHIR DARI PERBAIKAN CSS --- */
+
+/* Gaya baru untuk tombol tunggal agar mengambil lebar penuh */
+.full-width-button {
+  flex-grow: 1;
+  width: 100%;
+}
 
 .pdf-modal-overlay {
   position: fixed;
@@ -246,14 +251,14 @@ onMounted(() => {
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 1000;
+  z-index: 10000;
 }
 
 .pdf-modal-content {
   background: white;
-  width: 90%;
-  height: 90vh;
-  max-width: 900px;
+  width: 95%; /* Diperlebar dari 90% menjadi 95% */
+  height: 95vh; /* Diperlebar dari 90vh menjadi 95vh */
+  max-width: 1200px; /* Diperbesar dari 1100px menjadi 1200px */
   position: relative;
   border-radius: 8px;
   overflow: hidden;
@@ -281,7 +286,7 @@ onMounted(() => {
   font-size: 1.5rem;
   line-height: 1;
   cursor: pointer;
-  z-index: 1002;
+  z-index: 10001;
   transition: background-color 0.2s ease;
 }
 
@@ -327,6 +332,11 @@ onMounted(() => {
   .pengumuman-cover {
     width: 100%;
     height: 200px;
+  }
+
+  /* Untuk mobile, kembalikan ke 1 kolom */
+  .pengumuman-list {
+    grid-template-columns: 1fr;
   }
 }
 </style>

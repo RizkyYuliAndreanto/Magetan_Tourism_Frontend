@@ -54,7 +54,7 @@
         <div class="past-event-list">
           <div v-for="event in pastEvents" :key="event.id_event" class="past-event-item">
             <div class="item-left">
-              <div class="event-image-container">
+              <div class="event-image-container past-event-image-container">
                 <img :src="baseUrl + event.gambar_event" :alt="`Flyer ${event.nama_event}`" class="event-image" v-if="event.gambar_event">
                 <div v-else class="no-image">
                   <i class="fas fa-image"></i> Flyer Event
@@ -88,9 +88,9 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue';
 import axios from 'axios';
-import { useRouter } from 'vue-router'; // Impor useRouter
+import { useRouter } from 'vue-router';
 
-const router = useRouter(); // Inisialisasi router
+const router = useRouter();
 
 const eventList = ref([]);
 const loading = ref(true);
@@ -151,7 +151,6 @@ const pastEvents = computed(() => {
 });
 
 const viewEventDetail = (eventId) => {
-  // Ubah fungsi ini untuk navigasi ke halaman detail
   router.push({ name: 'EventDetail', params: { id: eventId } });
 };
 
@@ -161,10 +160,7 @@ onMounted(() => {
 </script>
 
 <style scoped>
-/*
-  ... (Semua styling dari kode sebelumnya,
-      kecuali bagian modal, tetap dipertahankan)
-*/
+/* Base styling */
 .event-view-user {
   padding-top: 80px;
   min-height: 100vh;
@@ -173,7 +169,7 @@ onMounted(() => {
 }
 
 .container {
-  max-width: 1000px;
+  max-width: 1300px;
   margin: 0 auto;
   padding: 40px 20px;
 }
@@ -245,11 +241,11 @@ onMounted(() => {
   background-color: #e0e0e0;
 }
 
-/* Coming Soon Grid Layout (Same as before) */
+/* Coming Soon Grid Layout */
 .event-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 25px;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); /* Diperbesar */
+  gap: 30px; /* Jarak antar kartu diperbesar */
 }
 
 .event-card {
@@ -262,7 +258,7 @@ onMounted(() => {
   flex-direction: column;
   text-align: center;
   position: relative;
-  padding-bottom: 20px;
+  padding-bottom: 25px; /* Padding bawah diperbesar */
 }
 
 .event-card:hover {
@@ -276,7 +272,7 @@ onMounted(() => {
   left: 15px;
   background-color: rgba(0, 119, 182, 0.9);
   color: white;
-  padding: 8px 12px;
+  padding: 10px 15px; /* Padding tanggal diperbesar */
   border-radius: 8px;
   font-weight: 700;
   display: flex;
@@ -286,19 +282,19 @@ onMounted(() => {
 }
 
 .event-card .event-date .day {
-  font-size: 1.8rem;
+  font-size: 2rem; /* Ukuran hari diperbesar */
   line-height: 1;
 }
 
 .event-card .event-date .month-year {
-  font-size: 0.8rem;
+  font-size: 0.9rem; /* Ukuran bulan/tahun diperbesar */
   text-transform: uppercase;
   line-height: 1;
 }
 
 .event-image-container {
   width: 100%;
-  height: 200px;
+  height: 250px; /* Tinggi gambar diperbesar */
   overflow: hidden;
   background-color: #e0e0e0;
   display: flex;
@@ -319,33 +315,34 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   align-items: center;
-  font-size: 1.1rem;
+  font-size: 1.2rem; /* Ukuran font diperbesar */
 }
 
 .no-image .fas {
-  font-size: 2.5rem;
-  margin-bottom: 10px;
+  font-size: 3rem; /* Ukuran ikon diperbesar */
+  margin-bottom: 15px;
 }
 
 .event-card .event-title {
-  font-size: 1.3rem;
+  font-size: 1.6rem; /* Ukuran judul diperbesar */
   color: #1a1a1a;
-  margin: 20px 15px 10px 15px;
+  margin: 25px 20px 12px 20px; /* Margin disesuaikan */
   flex-grow: 1;
   text-align: left;
 }
 
 .event-card .event-location {
-  font-size: 0.95rem;
+  font-size: 1.05rem; /* Ukuran lokasi diperbesar */
   color: #6c757d;
-  margin: 0 15px 20px 15px;
+  margin: 0 20px 25px 20px; /* Margin disesuaikan */
   text-align: left;
 }
 
+/* Card Actions (Tombol) - DIKEMBALIKAN KE UKURAN SEBELUMNYA */
 .card-actions {
   display: flex;
-  gap: 10px;
-  padding: 0 15px;
+  gap: 10px; /* Jarak antar tombol dikembalikan */
+  padding: 0 15px; /* Padding dikembalikan */
   margin-top: auto;
   width: 100%;
 }
@@ -354,13 +351,13 @@ onMounted(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: 8px; /* Jarak ikon/teks dikembalikan */
   color: white;
-  padding: 10px 15px;
+  padding: 10px 15px; /* Padding tombol dikembalikan */
   border-radius: 8px;
   text-decoration: none;
   font-weight: 600;
-  font-size: 0.9rem;
+  font-size: 0.9rem; /* Ukuran font tombol dikembalikan */
   transition: background-color 0.3s ease;
   border: none;
   cursor: pointer;
@@ -387,7 +384,7 @@ onMounted(() => {
 .past-event-list {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 25px;
+  gap: 30px;
 }
 
 .past-event-item {
@@ -408,19 +405,19 @@ onMounted(() => {
 
 .past-event-item .item-left {
   position: relative;
-  width: 280px; /* Lebar yang lebih besar untuk foto */
-  height: 200px; /* Tinggi yang lebih besar untuk foto */
+  width: 320px; /* Lebar item kiri diperbesar */
+  height: 250px; /* Tinggi item kiri diperbesar */
   flex-shrink: 0;
 }
 
 .past-event-item .item-right {
   display: flex;
   flex-direction: column;
-  padding: 20px;
+  padding: 25px; /* Padding diperbesar */
   flex-grow: 1;
 }
 
-.past-event-item .event-image-container {
+.past-event-item .event-image-container.past-event-image-container {
   height: 100%;
 }
 
@@ -430,7 +427,7 @@ onMounted(() => {
   left: 15px;
   background-color: rgba(108, 117, 125, 0.9);
   color: white;
-  padding: 8px 12px;
+  padding: 10px 15px;
   border-radius: 8px;
   font-weight: 700;
   display: flex;
@@ -440,40 +437,40 @@ onMounted(() => {
 }
 
 .past-event-item .event-date-overlay .day {
-  font-size: 1.8rem;
+  font-size: 2rem;
   line-height: 1;
 }
 
 .past-event-item .event-date-overlay .month-year {
-  font-size: 0.8rem;
+  font-size: 0.9rem;
   text-transform: uppercase;
   line-height: 1;
 }
 
 .past-event-item .event-title {
-  font-size: 1.5rem;
+  font-size: 1.8rem;
   color: #1a1a1a;
-  margin-bottom: 10px;
+  margin-bottom: 12px;
 }
 
 .past-event-item .event-location-past {
-  font-size: 0.95rem;
+  font-size: 1.05rem;
   color: #6c757d;
-  margin-bottom: 10px;
+  margin-bottom: 12px;
 }
 
 .past-event-item .event-description {
-  font-size: 0.95rem;
+  font-size: 1rem;
   color: #495057;
-  line-height: 1.6;
-  margin-bottom: 20px;
+  line-height: 1.7;
+  margin-bottom: 25px;
   flex-grow: 1;
 }
 
-/* Past Actions button override */
+/* Past Actions button override - DIKEMBALIKAN KE UKURAN SEBELUMNYA */
 .past-event-item .card-actions.past-actions {
   display: flex;
-  gap: 10px;
+  gap: 10px; /* Jarak antar tombol dikembalikan */
   margin-top: auto;
   width: auto;
   padding: 0;
@@ -482,23 +479,65 @@ onMounted(() => {
 
 .past-event-item .view-detail-button.past-button,
 .past-event-item .download-brosur-button.past-button {
-  padding: 8px 15px;
-  font-size: 0.85rem;
+  padding: 10px 15px; /* Padding tombol dikembalikan */
+  font-size: 0.9rem; /* Ukuran font tombol dikembalikan */
   flex-grow: 0;
   width: auto;
 }
 
-/* Responsiveness for Past Events */
+/* Responsiveness */
 @media (max-width: 768px) {
+  .event-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  .event-card {
+    padding-bottom: 20px;
+  }
+  .event-card .event-date {
+    padding: 8px 12px;
+  }
+  .event-card .event-date .day {
+    font-size: 1.8rem;
+  }
+  .event-card .event-date .month-year {
+    font-size: 0.8rem;
+  }
+  .event-image-container {
+    height: 200px;
+  }
+  .event-card .event-title {
+    font-size: 1.4rem;
+    margin: 20px 15px 10px 15px;
+  }
+  .event-card .event-location {
+    font-size: 0.95rem;
+    margin: 0 15px 20px 15px;
+  }
+  .card-actions {
+    padding: 0 15px;
+  }
+  .view-detail-button, .download-brosur-button {
+    padding: 10px 15px;
+    font-size: 0.9rem;
+  }
+
   .past-event-item {
     flex-direction: column;
   }
   .past-event-item .item-left {
     width: 100%;
-    height: 180px;
+    height: 200px;
   }
   .past-event-item .item-right {
     padding: 20px;
+  }
+  .past-event-item .event-title {
+    font-size: 1.5rem;
+  }
+  .past-event-item .event-location-past,
+  .past-event-item .event-description {
+    font-size: 0.95rem;
   }
   .past-event-item .card-actions.past-actions {
     flex-direction: row;
@@ -508,6 +547,8 @@ onMounted(() => {
   .past-event-item .download-brosur-button.past-button {
     flex-grow: 1;
     width: auto;
+    padding: 10px 15px;
+    font-size: 0.9rem;
   }
 }
 </style>

@@ -223,13 +223,14 @@ onMounted(() => {
 <style scoped>
 /* Base Page Styles */
 .detail-page-container {
-  padding-top: 80px;
+  padding-top: 100px;
+  padding-bottom: 20px;
   min-height: 100vh;
   background-color: #f4f7f9;
   color: #333;
 }
 .content-wrapper {
-  max-width: 900px;
+  max-width: 1300px;
   margin: 0 auto;
   padding: 40px 20px;
   background: white;
@@ -350,6 +351,7 @@ onMounted(() => {
   text-align: center;
   padding: 25px;
   cursor: pointer;
+
 }
 .anggota-card:hover {
   transform: translateY(-8px);

@@ -22,7 +22,7 @@
         
         <div v-if="visiMisiData.deskripsi" class="visi-misi-description">
           <h2 class="section-sub-title">Teks Visi Misi</h2>
-          <p class="page-description">{{ visiMisiData.deskripsi }}</p>
+          <div class="page-description-formatted" v-html="renderedMarkdown"></div>
         </div>
 
         <div v-if="visiMisiData.visi_misi_file_path" class="visi-misi-file">
@@ -38,9 +38,6 @@
               <button @click="openPdfModal(visiMisiData.visi_misi_file_path)" class="view-link">
                 <i class="fas fa-eye"></i> Lihat PDF
               </button>
-              <a :href="baseUrl + visiMisiData.visi_misi_file_path" target="_blank" rel="noopener noreferrer" class="download-link">
-                <i class="fas fa-file-download"></i> Unduh File
-              </a>
             </div>
           </div>
         </div>
@@ -57,11 +54,17 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import axios from 'axios';
+import MarkdownIt from 'markdown-it';
 
 const router = useRouter();
+const md = new MarkdownIt({
+  html: true,
+  linkify: true,
+  typographer: true,
+});
 
 const visiMisiData = ref(null);
 const loading = ref(true);
@@ -105,6 +108,13 @@ const closePdfModal = () => {
   currentPdfUrl.value = '';
 };
 
+const renderedMarkdown = computed(() => {
+  if (visiMisiData.value && visiMisiData.value.deskripsi) {
+    return md.render(visiMisiData.value.deskripsi);
+  }
+  return '';
+});
+
 onMounted(() => {
   fetchVisiMisiData();
 });
@@ -113,13 +123,14 @@ onMounted(() => {
 <style scoped>
 /* Gabungan dari base-page-styles dan style baru */
 .detail-page-container {
-  padding-top: 80px;
+  padding-top: 100px;
+  padding-bottom: 20px;
   min-height: 100vh;
   background-color: #f4f7f9;
   color: #333;
 }
 .content-wrapper {
-  max-width: 900px;
+  max-width: 1300px;
   margin: 0 auto;
   padding: 40px 20px;
   background: white;
@@ -148,7 +159,7 @@ onMounted(() => {
   color: #0077b6;
   margin-bottom: 20px;
 }
-.page-description {
+.page-description { /* Ini untuk teks biasa jika masih ada */
   font-size: 1rem;
   color: #495057;
   line-height: 1.8;
@@ -177,6 +188,44 @@ onMounted(() => {
 .visi-misi-description {
   margin-bottom: 30px;
 }
+
+/* Gaya untuk konten Markdown yang dirender */
+.page-description-formatted {
+  font-size: 1rem;
+  color: #495057;
+  line-height: 1.8;
+  margin-bottom: 20px;
+  padding: 0 20px;
+}
+/* Contoh gaya untuk elemen HTML yang dihasilkan dari Markdown */
+.page-description-formatted strong, .page-description-formatted b {
+  font-weight: bold;
+  color: #1a1a1a;
+}
+.page-description-formatted em, .page-description-formatted i {
+  font-style: italic;
+}
+.page-description-formatted p {
+  margin-bottom: 1em;
+}
+.page-description-formatted ul, .page-description-formatted ol {
+  margin-bottom: 1em;
+  padding-left: 20px;
+}
+.page-description-formatted ul li, .page-description-formatted ol li {
+    margin-bottom: 0.5em;
+}
+.page-description-formatted h1, .page-description-formatted h2, .page-description-formatted h3 {
+  color: #0077b6;
+  margin-top: 1.5em;
+  margin-bottom: 0.8em;
+}
+/* Gaya untuk teks tengah */
+.page-description-formatted p[style*="text-align: center"] {
+    text-align: center;
+}
+
+
 .visi-misi-file {
   margin-top: 30px;
 }
@@ -208,7 +257,7 @@ onMounted(() => {
   gap: 15px;
 }
 .view-link, .download-link {
-  display: inline-flex;
+  display: inline-flex; /* Menggunakan inline-flex agar tombol tidak mengambil lebar penuh */
   align-items: center;
   justify-content: center;
   gap: 8px;
@@ -222,6 +271,7 @@ onMounted(() => {
   border: none;
   cursor: pointer;
 }
+
 .view-link {
   background-color: #28a745;
 }
@@ -230,6 +280,12 @@ onMounted(() => {
 }
 .view-link:hover { background-color: #218838; }
 .download-link:hover { background-color: #005f91; }
+
+/* Gaya baru untuk tombol tunggal agar mengambil lebar penuh (ini dihapus dari template) */
+/* .full-width-button {
+  flex-grow: 1;
+  width: 100%;
+} */
 
 /* Modal Styles (untuk preview PDF) */
 .pdf-modal-overlay {
@@ -242,13 +298,13 @@ onMounted(() => {
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 1000;
+  z-index: 10000;
 }
 .pdf-modal-content {
   background: white;
-  width: 90%;
-  height: 90vh;
-  max-width: 900px;
+  width: 95%;
+  height: 95vh;
+  max-width: 1200px;
   position: relative;
   border-radius: 8px;
   overflow: hidden;
@@ -274,7 +330,7 @@ onMounted(() => {
   font-size: 1.5rem;
   line-height: 1;
   cursor: pointer;
-  z-index: 1002;
+  z-index: 10001;
   transition: background-color 0.2s ease;
 }
 .close-button:hover { background-color: rgba(0, 0, 0, 0.7); }
