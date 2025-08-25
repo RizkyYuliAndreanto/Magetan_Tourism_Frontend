@@ -19,7 +19,14 @@ import KontenPpidView from "../views/admin/ppid/KontenPpidView.vue";
 
 //user
 import PengumumanUserView from "../views/PengumumanUserView.vue";
-
+import EventUserView from '../views/EventUserView.vue';
+import DetailEventUserView from '../views/DetailEventUserView.vue';
+import ProfilDinasView from '../views/ProfilDinasView.vue';
+import DetailProfilDinasView from '../views/DetailProfilDinasView.vue';
+import VisiMisiUserView from '../views/VisiMisiUserView.vue';
+import StrukturOrganisasiUserView from '../views/StrukturOrganisasiUserView.vue';
+import StrukturAnggotaUserView from '../views/StrukturAnggotaUserView.vue';
+import PpidView from '../views/PpidView.vue';
 
 const routes = [
   //User
@@ -27,12 +34,53 @@ const routes = [
     path: "/",
     name: "home",
     component: HomeView,
-    
+
   },
   {
     path: "/pengumuman", // Rute publik
     name: "pengumuman",
     component: PengumumanUserView,
+  },
+  {
+    path: '/event',
+    name: 'EventViewUser', // Nama rute tidak harus diubah
+    component: EventUserView, // Ubah nama komponen di sini
+  },
+    {
+    path: '/event/:id', // Rute dinamis untuk detail event
+    name: 'EventDetail',
+    component: DetailEventUserView,
+    props: true, // Mengaktifkan props untuk mengambil ID dari URL
+  },
+  {
+    path: '/profil-dinas',
+    name: 'ProfilDinas',
+    component: ProfilDinasView
+  },
+  {
+    path: '/profil-dinas/detail',
+    name: 'DetailProfilDinas',
+    component: DetailProfilDinasView
+  },
+  {
+    path: '/profil-dinas/visimisi',
+    name: 'VisiMisi',
+    component: VisiMisiUserView
+  },
+  {
+    path: '/profil-dinas/struktur-organisasi',
+    name: 'StrukturOrganisasi',
+    component: StrukturOrganisasiUserView
+  },
+  {
+    path: '/profil-dinas/struktur-anggota',
+    name: 'StrukturAnggota',
+    component: StrukturAnggotaUserView
+  },
+  {
+    path: '/profil-dinas/ppid',
+    name: 'PPID',
+    component: PpidView
   },
   {
     path: "/login",
