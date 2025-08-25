@@ -17,40 +17,74 @@
       />
     </div>
 
-    <div v-else class="table-container card">
-      <div class="table-responsive">
-        <table class="data-table">
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Nama Kategori</th>
-              <th>Level</th>
-              <th>Kategori Induk</th>
-              <th>Aksi</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-if="kategoriList.length === 0">
-              <td colspan="5" class="no-data-found">
-                Tidak ada data kategori yang tersedia.
-              </td>
-            </tr>
-            <tr v-for="kategori in kategoriList" :key="kategori.id_kategori_ppid">
-              <td>{{ kategori.id_kategori_ppid }}</td>
-              <td>{{ kategori.nama_kategori }}</td>
-              <td>{{ kategori.level_kategori }}</td>
-              <td>{{ kategori.kategoriInduk ? kategori.kategoriInduk.nama_kategori : '-' }}</td>
-              <td class="actions">
-                <button class="action-button edit-button" @click="openKategoriForm(kategori)" title="Edit">
-                  <i class="fas fa-edit"></i>
-                </button>
-                <button class="action-button delete-button" @click="handleDeleteKategori(kategori.id_kategori_ppid)" title="Hapus">
-                  <i class="fas fa-trash-alt"></i>
-                </button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+    <div v-else>
+      <div class="table-container card">
+        <h3 class="table-title">Tabel Kategori Induk (Level 1)</h3>
+        <div class="table-responsive">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Nama Kategori</th>
+                <th>Deskripsi</th>
+                <th>Aksi</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-if="kategoriIndukData.length === 0">
+                <td colspan="4" class="no-data-found">
+                  Tidak ada data kategori induk yang tersedia.
+                </td>
+              </tr>
+              <tr v-for="kategori in kategoriIndukData" :key="kategori.id_kategori_ppid">
+                <td>{{ kategori.id_kategori_ppid }}</td>
+                <td>{{ kategori.nama_kategori }}</td>
+                <td>{{ kategori.deskripsi_kategori || '-' }}</td>
+                <td class="actions">
+                  <button class="action-button edit-button" @click="openKategoriForm(kategori)" title="Edit">
+                    <i class="fas fa-edit"></i>
+                  </button>
+                  <button class="action-button delete-button" @click="handleDeleteKategori(kategori.id_kategori_ppid)" title="Hapus">
+                    <i class="fas fa-trash-alt"></i>
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      
+      <div v-for="induk in kategoriIndukData" :key="`sub-kategori-${induk.id_kategori_ppid}`">
+        <div v-if="induk.subKategoris && induk.subKategoris.length > 0" class="table-container card mt-4">
+          <h3 class="table-title">Tabel Sub-Kategori dari: {{ induk.nama_kategori }}</h3>
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Nama Kategori</th>
+                  <th>Deskripsi</th>
+                  <th>Aksi</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="subKategori in induk.subKategoris" :key="subKategori.id_kategori_ppid">
+                  <td>{{ subKategori.id_kategori_ppid }}</td>
+                  <td>{{ subKategori.nama_kategori }}</td>
+                  <td>{{ subKategori.deskripsi_kategori || '-' }}</td>
+                  <td class="actions">
+                    <button class="action-button edit-button" @click="openKategoriForm(subKategori)" title="Edit">
+                      <i class="fas fa-edit"></i>
+                    </button>
+                    <button class="action-button delete-button" @click="handleDeleteKategori(subKategori.id_kategori_ppid)" title="Hapus">
+                      <i class="fas fa-trash-alt"></i>
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -63,6 +97,7 @@ import KategoriPpidForm from './KategoriPpidForm.vue';
 
 const kategoriList = ref([]);
 const kategoriIndukList = ref([]);
+const kategoriIndukData = ref([]);
 const formKategoriOpen = ref(false);
 const isEditingKategori = ref(false);
 const formKategori = ref(null);
@@ -71,7 +106,10 @@ const fetchKategoriData = async () => {
   try {
     const response = await axios.get('http://localhost:5000/api/kategori-ppid?includeSubKategori=true');
     kategoriList.value = response.data;
-    kategoriIndukList.value = response.data.filter(k => !k.id_kategori_induk);
+    
+    // Memfilter data menjadi kategori induk dan sub-kategori
+    kategoriIndukData.value = response.data.filter(k => k.id_kategori_induk === null);
+    kategoriIndukList.value = kategoriIndukData.value;
   } catch (err) {
     console.error('Gagal memuat data kategori PPID:', err);
   }
@@ -82,7 +120,7 @@ const openKategoriForm = (kategori = null) => {
   if (kategori) {
     formKategori.value = { 
       ...kategori,
-      id_kategori_induk: kategori.kategoriInduk ? kategori.kategoriInduk.id_kategori_ppid : null,
+      id_kategori_induk: kategori.id_kategori_induk ? kategori.id_kategori_induk : null,
     };
   } else {
     formKategori.value = {
@@ -96,6 +134,7 @@ const closeKategoriForm = () => {
   formKategoriOpen.value = false;
   formKategori.value = null;
   isEditingKategori.value = false;
+  fetchKategoriData();
 };
 
 const handleSaveKategori = async (kategoriData) => {
@@ -150,42 +189,22 @@ onMounted(() => {
 </script>
 
 <style scoped>
-/* =========== Perubahan Styling untuk Konsistensi =========== */
-.action-bar {
-  display: flex;
-  justify-content: flex-end;
-  margin-bottom: 1.5rem;
-}
-.action-button {
-  padding: 0.75rem 1.5rem;
-  border-radius: 8px;
-  border: none;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  color: white;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 0.9rem;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-}
-.create-button {
-  background-color: #007bff;
-}
-.create-button:hover {
-  background-color: #0069d9;
-  box-shadow: 0 6px 16px rgba(0, 123, 255, 0.2);
-}
-.form-card.card {
-  padding: 2rem;
-}
+/* Perubahan kecil pada styling untuk judul tabel */
 .table-container.card {
   padding: 0;
   border: 1px solid #e0e6ed;
   border-radius: 12px;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
   overflow: hidden;
+}
+.table-container .table-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #212529;
+  padding: 1.5rem;
+  border-bottom: 1px solid #e0e6ed;
+  margin: 0;
+  background-color: #f8f9fa;
 }
 .data-table {
   width: 100%;
@@ -262,5 +281,8 @@ onMounted(() => {
   font-size: 0.8rem;
   font-weight: 500;
   white-space: nowrap;
+}
+.mt-4 {
+    margin-top: 1.5rem;
 }
 </style>

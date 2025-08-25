@@ -3,12 +3,44 @@
     <div class="form-header">
       <h3 class="form-title">{{ isEditing ? 'Edit Konten PPID' : 'Tambah Konten PPID Baru' }}</h3>
       <button class="close-form-btn" @click="$emit('close-form')">
-        <i class="fas fa-times"></i>
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          class="feather feather-x">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
       </button>
     </div>
     <form @submit.prevent="submitForm" class="form-container">
       <div class="form-section">
-        <h4 class="section-title"><i class="fas fa-file-alt"></i> Detail Konten</h4>
+        <h4 class="section-title">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            class="feather feather-file-text">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+            <line x1="16" y1="13" x2="8" y2="13"></line>
+            <line x1="16" y1="17" x2="8" y2="17"></line>
+            <polyline points="10 9 9 9 8 9"></polyline>
+          </svg>
+          Detail Konten
+        </h4>
         <div class="form-grid">
           <div class="form-group">
             <label for="judul_konten">Judul Konten <span class="required">*</span></label>
@@ -27,10 +59,15 @@
             <label for="deskripsi_konten">Deskripsi Konten</label>
             <textarea id="deskripsi_konten" v-model="formData.deskripsi_konten" class="form-input" rows="5"></textarea>
           </div>
-          <div class="form-group span-2">
+          <div class="form-group">
             <label for="file_pdf_ppid">File PDF Utama <span class="required" v-if="!isEditing">*</span></label>
-            <input type="file" id="file_pdf_ppid" @change="handlePdfUpload" class="form-input-file" :required="!isEditing && !formData.file_pdf_path">
-            <p v-if="formData.file_pdf_path" class="mt-2 text-sm text-gray-500">File saat ini: <a :href="getFilePath(formData.file_pdf_path)" target="_blank">{{ formData.file_pdf_path.split('/').pop() }}</a></p>
+            <input type="file" id="file_pdf_ppid" @change="handlePdfUpload" class="form-input-file" accept="application/pdf" :required="!isEditing && !formData.file_pdf_path">
+            <p v-if="isEditing && formData.file_pdf_path" class="mt-2 text-sm text-gray-500">File saat ini: <a :href="getFilePath(formData.file_pdf_path)" target="_blank">{{ formData.file_pdf_path.split('/').pop() }}</a></p>
+          </div>
+          <div class="form-group">
+            <label for="gambar_sampul_ppid">Gambar Sampul <span class="required" v-if="!isEditing">*</span></label>
+            <input type="file" id="gambar_sampul_ppid" @change="handleSampulUpload" class="form-input-file" accept="image/*" :required="!isEditing && !formData.gambar_sampul">
+            <p v-if="isEditing && formData.gambar_sampul" class="mt-2 text-sm text-gray-500">Gambar saat ini: <a :href="getFilePath(formData.gambar_sampul)" target="_blank">{{ formData.gambar_sampul.split('/').pop() }}</a></p>
           </div>
         </div>
       </div>
@@ -38,7 +75,23 @@
       <hr class="form-divider">
       
       <div class="form-section">
-        <h4 class="section-title"><i class="fas fa-camera"></i> Media Galeri</h4>
+        <h4 class="section-title">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            class="feather feather-camera">
+            <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+            <circle cx="12" cy="13" r="4"></circle>
+          </svg>
+          Media Galeri
+        </h4>
         <div class="gallery-preview-container" v-if="isEditing && initialGalleryFiles.length > 0">
           <div v-for="file in initialGalleryFiles" :key="file.id_media_galeri" class="media-card">
             <img v-if="file.jenis_file === 'gambar'" :src="getMediaUrl(file.path_file)" class="media-thumbnail" alt="Galeri Media">
@@ -125,6 +178,11 @@ const handlePdfUpload = (event) => {
   formData.value.file_pdf_ppid = event.target.files[0];
 };
 
+// BARU: Fungsi untuk menangani upload gambar sampul
+const handleSampulUpload = (event) => {
+  formData.value.gambar_sampul_ppid = event.target.files[0];
+};
+
 const handleGalleryFileUpload = (event) => {
   const files = event.target.files;
   addGalleryFiles(files);
@@ -185,6 +243,14 @@ const submitForm = () => {
     }
   }
 
+  // Menambahkan file ke FormData
+  if (formData.value.file_pdf_ppid) {
+    submitData.append('file_pdf_ppid', formData.value.file_pdf_ppid);
+  }
+  if (formData.value.gambar_sampul_ppid) {
+    submitData.append('gambar_sampul_ppid', formData.value.gambar_sampul_ppid);
+  }
+
   if (props.isEditing) {
     initialGalleryFiles.value.forEach(item => {
         submitData.append('existing_gallery_updates', JSON.stringify({
@@ -201,233 +267,169 @@ const submitForm = () => {
 </script>
 
 <style scoped>
-/* Gaya CSS untuk form konten PPID */
+/* Core Styling & Layout */
 .form-card {
   background-color: #ffffff;
-  padding: 1.5rem;
-  border-radius: 12px;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
-  margin-top: 1rem;
-  border: 1px solid #dee2e6;
+  padding: 2.5rem;
+  border-radius: 16px;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  border: 1px solid #f0f4f8;
 }
+
 .form-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  margin-bottom: 2rem;
   padding-bottom: 1rem;
-  border-bottom: 1px solid #dee2e6;
-  margin-bottom: 1rem;
+  border-bottom: 2px solid #e9ecef;
 }
+
 .form-title {
-  font-size: 1.3rem;
-  font-weight: 600;
-  color: #343a40;
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #212529;
   margin: 0;
 }
+
 .close-form-btn {
   background: none;
   border: none;
   color: #6c757d;
   cursor: pointer;
-  font-size: 1.25rem;
-  padding: 0.25rem;
-  transition: all 0.3s ease;
+  font-size: 1.5rem;
+  padding: 0.5rem;
+  transition: color 0.3s ease, transform 0.2s ease;
 }
+
 .close-form-btn:hover {
   color: #dc3545;
+  transform: rotate(90deg);
 }
+
 .form-container {
   padding-top: 1rem;
 }
+
+.form-section {
+  margin-bottom: 2.5rem;
+}
+
+.section-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #495057;
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.section-title svg {
+  color: #007bff;
+  width: 20px;
+  height: 20px;
+}
+
+/* Form Elements */
 .form-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 1.2rem;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 2rem;
 }
+
 .form-group.span-2 {
-  grid-column: span 2;
+  grid-column: 1 / -1;
 }
+
 .form-group label {
   display: block;
-  font-size: 0.9rem;
+  font-size: 0.95rem;
   font-weight: 600;
-  color: #343a40;
-  margin-bottom: 0.5rem;
+  color: #495057;
+  margin-bottom: 0.75rem;
 }
+
 .form-input {
   width: 100%;
-  padding: 0.8rem;
-  border-radius: 8px;
-  border: 1px solid #dee2e6;
+  padding: 0.9rem 1rem;
+  border-radius: 10px;
+  border: 1px solid #ced4da;
   background-color: #f8f9fa;
-  color: #343a40;
-  font-size: 0.95rem;
-  transition: all 0.3s ease;
+  color: #495057;
+  font-size: 1rem;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
 }
+
 .form-input:focus {
   outline: none;
   border-color: #007bff;
-  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
+  box-shadow: 0 0 0 4px rgba(0, 123, 255, 0.15);
+  background-color: #ffffff;
 }
+
 textarea.form-input {
-  min-height: 100px;
+  min-height: 120px;
   resize: vertical;
 }
-.form-input-file {
-  width: 100%;
-  padding: 0.5rem;
-  border-radius: 8px;
-  border: 1px solid #dee2e6;
-  background-color: #f8f9fa;
-  color: #343a40;
-  font-size: 0.95rem;
-}
-.form-actions {
-  display: flex;
-  gap: 0.8rem;
-  justify-content: flex-end;
-  margin-top: 1.5rem;
-  padding-top: 1rem;
-  border-top: 1px solid #dee2e6;
-}
-.save-button {
-  background-color: #007bff;
-  color: white;
-  padding: 0.6rem 1.2rem;
-  border-radius: 12px;
-  border: none;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 0.9rem;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-}
-.save-button:hover {
-  background-color: #0069d9;
-  transform: translateY(-2px);
-}
-.cancel-button {
-  background-color: #6c757d;
-  color: white;
-  padding: 0.6rem 1.2rem;
-  border-radius: 12px;
-  border: none;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 0.9rem;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-}
-.cancel-button:hover {
-  background-color: #5a6268;
-  transform: translateY(-2px);
-}
-.gallery-preview-container {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: 1rem;
-  margin-top: 1rem;
-}
-.media-card {
-  position: relative;
-  border: 1px solid #dee2e6;
-  border-radius: 8px;
-  overflow: hidden;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-  transition: all 0.2s ease;
-}
-.media-card:hover {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  transform: translateY(-2px);
-}
-.media-thumbnail {
-  width: 100%;
-  height: 120px;
-  object-fit: cover;
-  display: block;
-}
-.media-description {
-  padding: 0.5rem;
-  font-size: 0.8rem;
-  color: #343a40;
-  text-align: center;
-  margin: 0;
-  background-color: #e9ecef;
-}
-.delete-media-button {
-  position: absolute;
-  top: 5px;
-  right: 5px;
-  background-color: rgba(220, 53, 69, 0.8);
-  color: white;
-  border: none;
-  border-radius: 50%;
-  width: 28px;
-  height: 28px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  opacity: 0.8;
-  transition: all 0.2s ease;
-}
-.delete-media-button:hover {
-  opacity: 1;
-  background-color: #dc3545;
-}
-.form-section {
-  margin-bottom: 1.5rem;
-}
-.section-title {
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: #007bff;
-  margin-bottom: 1rem;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  text-transform: uppercase;
-}
+
 .required {
   color: #dc3545;
 }
+
+/* File Drop Area */
 .file-drop-area {
-  border: 1px dashed #dee2e6;
-  border-radius: 8px;
-  padding: 1.5rem;
+  border: 2px dashed #ced4da;
+  border-radius: 10px;
+  padding: 2rem;
   text-align: center;
   cursor: pointer;
   position: relative;
-  transition: all 0.2s ease;
+  transition: all 0.3s ease;
   background-color: #f8f9fa;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 }
-.file-drop-area.has-file {
-  border: 1px solid #007bff;
-}
-.file-drop-area:hover {
+
+.file-drop-area.is-dragover {
   border-color: #007bff;
-  background-color: #e6f2ff;
+  background-color: #eaf5ff;
 }
+
+.file-drop-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
 .file-icon {
-  font-size: 2rem;
+  font-size: 2.5rem;
   color: #007bff;
-  margin-bottom: 0.5rem;
 }
+
 .file-message {
-  font-size: 0.875rem;
+  font-size: 0.95rem;
   color: #6c757d;
+  font-weight: 500;
 }
+
 .file-link {
   color: #007bff;
-  text-decoration: underline;
-  cursor: pointer;
+  text-decoration: none;
+  font-weight: 600;
+  transition: color 0.2s;
 }
+
+.file-link:hover {
+  color: #0056b3;
+}
+
 .file-input {
   opacity: 0;
   position: absolute;
@@ -437,5 +439,147 @@ textarea.form-input {
   height: 100%;
   cursor: pointer;
   z-index: 10;
+}
+
+.image-preview-main, .file-preview-main {
+  width: 100%;
+  position: relative;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  background-color: #e9ecef;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.5rem;
+}
+
+.hero-image-preview {
+  width: 100%;
+  max-height: 300px;
+  object-fit: contain;
+  display: block;
+}
+
+.cancel-image-btn {
+  position: relative;
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.cancel-image-btn:hover {
+  background-color: #c82333;
+  transform: translateY(-2px);
+}
+
+.pdf-link {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  color: #007bff;
+  text-decoration: none;
+  font-weight: 600;
+  transition: color 0.2s;
+}
+
+.pdf-link:hover {
+  color: #0056b3;
+}
+
+.pdf-icon {
+  font-size: 2.5rem;
+  color: #dc3545;
+}
+
+.pdf-file-name {
+  font-size: 0.95rem;
+  color: #495057;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+
+/* Action Buttons */
+.form-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 2px solid #e9ecef;
+}
+
+.action-button {
+  padding: 0.75rem 1.5rem;
+  border-radius: 12px;
+  border: none;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1rem;
+}
+
+.action-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.save-button {
+  background-color: #007bff;
+  color: white;
+}
+
+.save-button:hover {
+  background-color: #0069d9;
+}
+
+.cancel-button {
+  background-color: #6c757d;
+  color: white;
+}
+
+.cancel-button:hover {
+  background-color: #5a6268;
+}
+
+/* Responsiveness */
+@media (max-width: 768px) {
+  .form-card {
+    padding: 1.5rem;
+  }
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+  .form-group.span-2 {
+    grid-column: 1;
+  }
+  .form-actions {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  .action-button {
+    width: 100%;
+    justify-content: center;
+  }
+  .image-preview-main {
+    padding: 1rem;
+  }
 }
 </style>

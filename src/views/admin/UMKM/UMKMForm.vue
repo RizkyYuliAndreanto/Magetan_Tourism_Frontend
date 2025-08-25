@@ -451,6 +451,8 @@
 
 <script setup>
 import { ref, onUnmounted, nextTick, watch } from 'vue';
+import 'leaflet/dist/leaflet.css';
+import L from 'leaflet';
 import axios from 'axios';
 
 const props = defineProps({
