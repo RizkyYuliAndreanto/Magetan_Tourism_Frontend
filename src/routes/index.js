@@ -1,11 +1,11 @@
-// src/routes/index.js
 import { createRouter, createWebHistory } from "vue-router";
 import HomeView from "../views/HomeView.vue";
 import LoginView from "../views/LoginView.vue";
 import RegisterView from "../views/RegisterView.vue";
-import AdminDashboard from "../views/admin/AdminDashboard.vue";
+import AdminLayout from "../layouts/AdminLayout.vue";
+import AdminDashboard from "../views/admin/dashboard/AdminDashboard.vue";
 import EventView from "../views/admin/event/EventView.vue";
-import MediaGaleriView from "../views/admin/MediaGaleriView.vue";
+import MediaGaleriView from "../views/admin/media-galeri/MediaGaleriView.vue";
 import BeritaKategoriView from "../views/admin/berita/BeritaKategoriView.vue";
 import KategoriDestinasiView from "../views/admin/destinasi/KategoriDestinasiView.vue";
 import SejarahView from "../views/admin/sejarah/SejarahView.vue";
@@ -34,7 +34,7 @@ const routes = [
     path: "/",
     name: "home",
     component: HomeView,
-
+    
   },
   {
     path: "/pengumuman", // Rute publik
@@ -95,82 +95,80 @@ const routes = [
   
   //Admin
   {
-    path: "/dashboard",
-    name: "dashboard",
-    component: AdminDashboard,
+    path: "/admin",
+    component: AdminLayout,
     meta: { requiresAuth: true },
-  },
-  {
-    path: "/admin/berita",
-    name: "adminBerita",
-    component: BeritaKategoriView,
-    meta: { requiresAuth: true },
-  },
-  {
-    path: "/admin/destinasi",
-    name: "adminDestinasi",
-    component: KategoriDestinasiView,
-    meta: { requiresAuth: true },
-  },
-  {
-    path: "/admin/event",
-    name: "adminEvent",
-    component: EventView,
-    meta: { requiresAuth: true },
-  },
-  {
-    path: "/admin/media-galeri",
-    name: "adminMediaGaleri",
-    component: MediaGaleriView,
-    meta: { requiresAuth: true },
-  },
-  {
-    path: "/admin/sejarah",
-    name: "adminSejarah", // <-- KOREKSI: Mengganti nama rute
-    component: SejarahView,
-    meta: { requiresAuth: true },
-  },
-  {
-    path: "/admin/umkm",
-    name: "adminUMKM", // <-- KOREKSI: Mengganti nama rute
-    component: UMKMView,
-    meta: { requiresAuth: true },
-  },
-  {
-    path: "/admin/struktur-anggota",
-    name: "adminStrukturAnggota", // <-- KOREKSI: Mengganti nama rute
-    component: StrukturAnggotaView,
-    meta: { requiresAuth: true },
-  },
-  {
-    path: "/admin/pengumuman",
-    name: "adminPengumuman", // <-- KOREKSI: Mengganti nama rute
-    component: PengumumanView,
-    meta: { requiresAuth: true },
-  },
-  {
-    path: "/admin/visi-misi",
-    name: "adminVisiMisi", // <-- KOREKSI: Mengganti nama rute
-    component: VisiMisiView,
-    meta: { requiresAuth: true },
-  },
-  {
-    path: "/admin/struktur-organisasi",
-    name: "adminStrukturOrganisasi", // <-- KOREKSI: Mengganti nama rute
-    component: StrukturOrganisasiView,
-    meta: { requiresAuth: true },
-  },
-  {
-    path: "/admin/akomodasi",
-    name: "adminAkomodasi", // <-- KOREKSI: Mengganti nama rute
-    component: AkomodasiView,
-    meta: { requiresAuth: true },
-  },
-  {
-    path: "/admin/ppid",
-    name: "adminKontenPpid", // <-- KOREKSI: Mengganti nama rute
-    component: KontenPpidView,
-    meta: { requiresAuth: true },
+    children: [
+      {
+        path: "",
+        redirect: "/admin/dashboard",
+      },
+      {
+        path: "dashboard",
+        name: "dashboard",
+        component: AdminDashboard,
+      },
+      {
+        path: "berita",
+        name: "adminBerita",
+        component: BeritaKategoriView,
+      },
+      {
+        path: "destinasi",
+        name: "adminDestinasi",
+        component: KategoriDestinasiView,
+      },
+      {
+        path: "event",
+        name: "adminEvent",
+        component: EventView,
+      },
+      {
+        path: "media-galeri",
+        name: "adminMediaGaleri",
+        component: MediaGaleriView,
+      },
+      {
+        path: "sejarah",
+        name: "adminSejarah",
+        component: SejarahView,
+      },
+      {
+        path: "umkm",
+        name: "adminUMKM",
+        component: UMKMView,
+      },
+      {
+        path: "struktur-anggota",
+        name: "adminStrukturAnggota",
+        component: StrukturAnggotaView,
+      },
+      {
+        path: "pengumuman",
+        name: "adminPengumuman",
+        component: PengumumanView,
+      },
+      {
+        path: "visi-misi",
+        name: "adminVisiMisi",
+        component: VisiMisiView,
+      },
+      {
+        path: "struktur-organisasi",
+        name: "adminStrukturOrganisasi",
+        component: StrukturOrganisasiView,
+      },
+      {
+        path: "akomodasi",
+        name: "adminAkomodasi",
+        component: AkomodasiView,
+      },
+      {
+        path: "ppid",
+        name: "adminKontenPpid",
+        component: KontenPpidView,
+      },
+    ],
   },
 ];
 

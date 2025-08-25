@@ -18,8 +18,8 @@
       />
     </div>
 
-    <div v-else class="table-container">
-      <div class="table-responsive card">
+    <div v-else class="table-container card">
+      <div class="table-responsive">
         <table class="data-table">
           <thead>
             <tr>
@@ -218,6 +218,8 @@ onMounted(() => {
 </script>
 
 <style scoped>
+/* =========== Perubahan Styling untuk Konsistensi =========== */
+
 .action-bar {
   display: flex;
   justify-content: flex-end;
@@ -225,31 +227,36 @@ onMounted(() => {
 }
 
 .action-button {
-  padding: 0.5rem 1rem;
+  padding: 0.75rem 1.5rem;
   border-radius: 8px;
   border: none;
-  font-weight: 500;
+  font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.3s ease;
   color: white;
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  font-size: 0.875rem;
+  font-size: 0.9rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .create-button {
-  background-color: #2563eb;
+  background-color: #007bff;
 }
 
 .create-button:hover {
-  background-color: #3b82f6;
+  background-color: #0069d9;
+  box-shadow: 0 6px 16px rgba(0, 123, 255, 0.2);
 }
 
-.table-responsive.card {
+/* Mengubah .table-container dari `.table-responsive.card` */
+.table-container.card {
   padding: 0;
-  border: none;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e0e6ed; /* Border yang jelas */
+  border-radius: 12px; /* Sudut lebih membulat */
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08); /* Bayangan yang jelas */
+  overflow: hidden; /* Penting untuk border-radius */
 }
 
 .data-table {
@@ -260,17 +267,22 @@ onMounted(() => {
 
 .data-table th,
 .data-table td {
-  padding: 0.75rem 1rem;
+  padding: 1rem 1.5rem;
   text-align: left;
-  border-bottom: 1px solid #e2e8f0;
+  border-bottom: 1px solid #e9ecef; /* Border yang lebih halus */
 }
 
 .data-table th {
-  background-color: #f8fafc;
-  color: #1e293b;
+  background-color: #f8f9fa; /* Latar belakang header lebih terang */
+  color: #6c757d; /* Teks lebih halus */
   font-weight: 600;
-  font-size: 0.75rem;
+  font-size: 0.8rem;
   text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.data-table td {
+  color: #212529; /* Warna teks data yang mudah dibaca */
 }
 
 .data-table tr:last-child td {
@@ -278,7 +290,7 @@ onMounted(() => {
 }
 
 .data-table tr:hover {
-  background-color: rgba(59, 130, 246, 0.05);
+  background-color: #f1f3f5; /* Warna hover yang lebih halus */
 }
 
 .actions {
@@ -287,39 +299,43 @@ onMounted(() => {
 }
 
 .actions .action-button {
-  padding: 0.5rem;
-  width: 2rem;
-  height: 2rem;
+  padding: 0.6rem;
+  width: 2.2rem;
+  height: 2.2rem;
+  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 50%;
 }
 
 .actions .edit-button {
-  background-color: #f59e0b;
+  background-color: #ffc107;
   color: white;
+  box-shadow: 0 2px 8px rgba(255, 193, 7, 0.2);
 }
 
 .actions .edit-button:hover {
-  background-color: #eab308;
+  background-color: #e0a800;
+  box-shadow: 0 4px 12px rgba(255, 193, 7, 0.3);
 }
 
 .actions .delete-button {
-  background-color: #ef4444;
+  background-color: #dc3545;
+  box-shadow: 0 2px 8px rgba(220, 53, 69, 0.2);
 }
 
 .actions .delete-button:hover {
-  background-color: #dc2626;
+  background-color: #c82333;
+  box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
 }
 
 .category-badge {
   display: inline-block;
-  padding: 0.25rem 0.5rem;
+  padding: 0.3rem 0.7rem;
   border-radius: 20px;
-  background-color: #2563eb;
+  background-color: #28a745;
   color: white;
-  font-size: 0.75rem;
+  font-size: 0.8rem;
   font-weight: 500;
   white-space: nowrap;
 }

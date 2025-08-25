@@ -6,12 +6,13 @@
       </button>
     </div>
 
-    <div v-if="formKategoriOpen">
-      <CategoryDestinasiForm
+    <div v-if="formKategoriOpen" class="form-card card">
+      <KategoriForm
         :is-editing="isEditingKategori"
         :initial-data="formKategori"
         @close-form="closeKategoriForm"
         @save-kategori="handleSaveKategori"
+        @update-kategori="handleUpdateKategori"
       />
     </div>
 
@@ -23,19 +24,29 @@
               <th>ID</th>
               <th>Nama Kategori</th>
               <th>Deskripsi</th>
+              <th>Gambar Sampul</th>
               <th>Aksi</th>
             </tr>
           </thead>
           <tbody>
-            <tr v-for="kategori in kategoriList" :key="kategori.id_kategori_destinasi">
-              <td>{{ kategori.id_kategori_destinasi }}</td>
+            <tr v-if="kategoriList.length === 0">
+              <td colspan="5" class="no-data-found">
+                Tidak ada kategori yang tersedia.
+              </td>
+            </tr>
+            <tr v-for="kategori in kategoriList" :key="kategori.id_kategori_umkm">
+              <td>{{ kategori.id_kategori_umkm }}</td>
               <td>{{ kategori.nama_kategori }}</td>
-              <td>{{ kategori.deskripsi_kategori || '-' }}</td>
+              <td>{{ kategori.deskripsi_kategori }}</td>
+              <td>
+                <img v-if="kategori.gambar_sampul" :src="`http://localhost:5000${kategori.gambar_sampul}`" alt="Gambar Sampul" class="thumbnail-image"/>
+                <span v-else>Tidak ada gambar</span>
+              </td>
               <td class="actions">
                 <button class="action-button edit-button" @click="openKategoriForm(kategori)" title="Edit">
                   <i class="fas fa-edit"></i>
                 </button>
-                <button class="action-button delete-button" @click="handleDeleteKategori(kategori.id_kategori_destinasi)" title="Hapus">
+                <button class="action-button delete-button" @click="handleDeleteKategori(kategori.id_kategori_umkm)" title="Hapus">
                   <i class="fas fa-trash-alt"></i>
                 </button>
               </td>
@@ -50,7 +61,7 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import axios from 'axios';
-import CategoryDestinasiForm from './CategoryDestinasiForm.vue';
+import KategoriForm from './KategoriForm.vue';
 
 const kategoriList = ref([]);
 const formKategoriOpen = ref(false);
@@ -59,16 +70,25 @@ const formKategori = ref(null);
 
 const fetchKategoriData = async () => {
   try {
-    const response = await axios.get('http://localhost:5000/api/kategori-destinasi');
+    const response = await axios.get('http://localhost:5000/api/kategori-umkm');
     kategoriList.value = response.data;
   } catch (err) {
-    console.error('Gagal memuat data kategori destinasi:', err);
+    console.error('Gagal memuat data kategori:', err);
+    alert('Gagal memuat data kategori.');
   }
 };
 
 const openKategoriForm = (kategori = null) => {
   isEditingKategori.value = !!kategori;
-  formKategori.value = kategori ? { ...kategori } : { id_kategori_destinasi: null, nama_kategori: '', deskripsi_kategori: '' };
+  if (kategori) {
+    formKategori.value = { ...kategori };
+  } else {
+    formKategori.value = {
+      nama_kategori: '',
+      deskripsi_kategori: '',
+      gambar_sampul: null,
+    };
+  }
   formKategoriOpen.value = true;
 };
 
@@ -76,27 +96,41 @@ const closeKategoriForm = () => {
   formKategoriOpen.value = false;
   formKategori.value = null;
   isEditingKategori.value = false;
+  fetchKategoriData();
 };
 
-const handleSaveKategori = async (kategoriData) => {
+const handleSaveKategori = async (formData) => {
   try {
     const token = localStorage.getItem('access_token');
-    if (isEditingKategori.value) {
-      await axios.put(`http://localhost:5000/api/kategori-destinasi/${kategoriData.id_kategori_destinasi}`, kategoriData, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      alert('Kategori berhasil diperbarui!');
-    } else {
-      await axios.post('http://localhost:5000/api/kategori-destinasi', kategoriData, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      alert('Kategori berhasil ditambahkan!');
-    }
+    await axios.post('http://localhost:5000/api/kategori-umkm', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+        Authorization: `Bearer ${token}`
+      }
+    });
+    alert('Kategori berhasil ditambahkan!');
     closeKategoriForm();
-    fetchKategoriData();
   } catch (err) {
     console.error('Gagal menyimpan kategori:', err.response?.data);
     alert(err.response?.data?.error || 'Gagal menyimpan kategori.');
+  }
+};
+
+const handleUpdateKategori = async (formData) => {
+  try {
+    const token = localStorage.getItem('access_token');
+    const id = formData.get('id_kategori_umkm');
+    await axios.put(`http://localhost:5000/api/kategori-umkm/${id}`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+        Authorization: `Bearer ${token}`
+      }
+    });
+    alert('Kategori berhasil diperbarui!');
+    closeKategoriForm();
+  } catch (err) {
+    console.error('Gagal memperbarui kategori:', err.response?.data);
+    alert(err.response?.data?.error || 'Gagal memperbarui kategori.');
   }
 };
 
@@ -104,7 +138,7 @@ const handleDeleteKategori = async (id) => {
   if (confirm('Apakah Anda yakin ingin menghapus kategori ini?')) {
     try {
       const token = localStorage.getItem('access_token');
-      await axios.delete(`http://localhost:5000/api/kategori-destinasi/${id}`, {
+      await axios.delete(`http://localhost:5000/api/kategori-umkm/${id}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       alert('Kategori berhasil dihapus!');
@@ -123,11 +157,13 @@ onMounted(() => {
 
 <style scoped>
 /* =========== Perubahan Styling untuk Konsistensi =========== */
+
 .action-bar {
   display: flex;
   justify-content: flex-end;
   margin-bottom: 1.5rem;
 }
+
 .action-button {
   padding: 0.75rem 1.5rem;
   border-radius: 8px;
@@ -142,13 +178,16 @@ onMounted(() => {
   font-size: 0.9rem;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
+
 .create-button {
   background-color: #007bff;
 }
+
 .create-button:hover {
   background-color: #0069d9;
   box-shadow: 0 6px 16px rgba(0, 123, 255, 0.2);
 }
+
 .table-container.card {
   padding: 0;
   border: 1px solid #e0e6ed;
@@ -156,17 +195,20 @@ onMounted(() => {
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
   overflow: hidden;
 }
+
 .data-table {
   width: 100%;
   border-collapse: collapse;
   min-width: 600px;
 }
-.data-table th, 
+
+.data-table th,
 .data-table td {
   padding: 1rem 1.5rem;
   text-align: left;
   border-bottom: 1px solid #e9ecef;
 }
+
 .data-table th {
   background-color: #f8f9fa;
   color: #6c757d;
@@ -175,19 +217,31 @@ onMounted(() => {
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
+
 .data-table td {
   color: #212529;
 }
+
 .data-table tr:last-child td {
   border-bottom: none;
 }
+
 .data-table tr:hover {
   background-color: #f1f3f5;
 }
+
+.no-data-found {
+  text-align: center;
+  font-style: italic;
+  color: #888;
+  padding: 2rem;
+}
+
 .actions {
   display: flex;
   gap: 0.5rem;
 }
+
 .actions .action-button {
   padding: 0.6rem;
   width: 2.2rem;
@@ -198,31 +252,33 @@ onMounted(() => {
   justify-content: center;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
+
 .actions .edit-button {
   background-color: #ffc107;
   color: white;
   box-shadow: 0 2px 8px rgba(255, 193, 7, 0.2);
 }
+
 .actions .edit-button:hover {
   background-color: #e0a800;
   box-shadow: 0 4px 12px rgba(255, 193, 7, 0.3);
 }
+
 .actions .delete-button {
   background-color: #dc3545;
   box-shadow: 0 2px 8px rgba(220, 53, 69, 0.2);
 }
+
 .actions .delete-button:hover {
   background-color: #c82333;
   box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
 }
-.category-badge {
-  display: inline-block;
-  padding: 0.3rem 0.7rem;
-  border-radius: 20px;
-  background-color: #28a745;
-  color: white;
-  font-size: 0.8rem;
-  font-weight: 500;
-  white-space: nowrap;
+
+.thumbnail-image {
+  width: 50px;
+  height: 50px;
+  object-fit: cover;
+  border-radius: 8px; /* Lebih membulat dari 4px */
+  border: 1px solid #e9ecef; /* Border ringan */
 }
 </style>

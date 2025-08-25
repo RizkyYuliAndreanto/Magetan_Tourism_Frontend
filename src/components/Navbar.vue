@@ -44,7 +44,7 @@
           <router-link v-if="!isLoggedIn" to="/login" class="navbar-links button-login" @click="closeMenu">Login</router-link>
           
           <div v-else class="admin-profile">
-            <router-link to="/dashboard" class="user-icon-link" @click="closeMenu">
+            <router-link to="/admin" class="user-icon-link" @click="closeMenu">
               <img :src="avatarUrl" alt="Admin Avatar" class="admin-avatar" />
             </router-link>
           </div>
@@ -57,7 +57,6 @@
 <script setup>
 import { ref, onMounted, onBeforeUnmount } from "vue";
 import { useRouter } from "vue-router";
-// Import logo-logo
 import logoMagetanTourismPng from "../assets/Logo Magetan Tourism (png).png";
 import logoMagetanNgangeniOutline from "../assets/LOGO MAGETAN NGANGENI outline.png";
 import logoWonderfulIndonesiaFinal from "../assets/Logo Wonderful indonesia Final.png";
@@ -100,17 +99,13 @@ const closeMenu = () => {
 
 onMounted(() => {
   checkLoginStatus();
-  // Tambahkan event listener untuk memantau perubahan di localStorage
   window.addEventListener('storage', checkLoginStatus);
 });
 
-// Hapus event listener saat komponen tidak lagi digunakan
 onBeforeUnmount(() => {
   window.removeEventListener('storage', checkLoginStatus);
 });
 
-// Gunakan navigation guard global untuk memperbarui status
-// Setiap kali rute berubah
 router.beforeEach((to, from, next) => {
   checkLoginStatus();
   next();
@@ -118,19 +113,23 @@ router.beforeEach((to, from, next) => {
 </script>
 
 <style scoped>
-/* Gaya CSS yang Diberikan */
 .navbar {
   width: 100%;
-  background-color: #0077b6;
+  background-color: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(8px);
   padding: 10px 20px;
-  color: white;
+  color: #333;
   display: flex;
   align-items: center;
   justify-content: space-between;
   box-sizing: border-box;
   height: 80px;
   position: fixed;
+  top: 0;
+  left: 0;
   z-index: 999;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease-in-out;
 }
 
 .navbar-container {
@@ -176,22 +175,22 @@ router.beforeEach((to, from, next) => {
   width: 100%;
   padding: 8px 15px 8px 35px;
   border-radius: 20px;
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  background-color: rgba(255, 255, 255, 0.1);
-  color: white;
+  border: 1px solid #e0e0e0;
+  background-color: #f1f3f5;
+  color: #333;
   font-size: 0.9rem;
   outline: none;
   transition: all 0.3s ease;
 }
 
 .navbar-search-mobile input::placeholder {
-  color: rgba(255, 255, 255, 0.6);
+  color: #888;
 }
 
 .navbar-search-mobile .search-icon {
   position: absolute;
   left: 12px;
-  color: rgba(255, 255, 255, 0.6);
+  color: #888;
   font-size: 0.9rem;
 }
 
@@ -209,7 +208,7 @@ router.beforeEach((to, from, next) => {
 .menu-toggle .bar {
   width: 100%;
   height: 4px;
-  background-color: white;
+  background-color: #0077b6;
   border-radius: 5px;
   transition: all 0.3s ease-in-out;
 }
@@ -239,7 +238,7 @@ router.beforeEach((to, from, next) => {
 }
 
 .navbar-links {
-  color: white;
+  color: #333;
   display: flex;
   align-items: center;
   text-decoration: none;
@@ -258,8 +257,13 @@ router.beforeEach((to, from, next) => {
   transform: translateX(-50%);
   height: 3px;
   width: 0;
-  background-color: white;
+  background-color: #0077b6;
   transition: width 0.3s ease-out;
+}
+
+.navbar-links:hover,
+.navbar-item.active .navbar-links {
+  color: #0077b6;
 }
 
 .navbar-links:hover::after,
@@ -267,25 +271,21 @@ router.beforeEach((to, from, next) => {
   width: 100%;
 }
 
-.navbar-item.active .navbar-links {
-  color: white;
-}
-
 .button-login {
-  border: 1px solid white;
+  border: 1px solid #0077b6;
   padding: 8px 20px;
   border-radius: 8px;
   margin-left: 15px;
-  color: white;
+  color: #0077b6;
+  transition: all 0.3s ease;
 }
 
 .button-login:hover {
-  background-color: white;
-  color: #0077b6;
-  border-color: white;
+  background-color: #0077b6;
+  color: white;
+  border-color: #0077b6;
 }
 
-/* Gaya baru untuk user icon */
 .user-menu-container {
   display: flex;
   align-items: center;
@@ -293,18 +293,18 @@ router.beforeEach((to, from, next) => {
 }
 
 .user-icon-link {
-  color: white;
+  color: #333;
   font-size: 1.8rem;
   display: flex;
   align-items: center;
   transition: color 0.3s ease;
-  padding: 8px 10px; /* Tambahkan padding untuk area klik yang lebih besar */
+  padding: 8px 10px;
   border-radius: 8px;
 }
 
 .user-icon-link:hover {
-  background-color: rgba(255, 255, 255, 0.1);
-  color: #c9e9ff;
+  background-color: rgba(0, 0, 0, 0.05);
+  color: #0077b6;
 }
 
 .user-icon {
@@ -322,22 +322,22 @@ router.beforeEach((to, from, next) => {
   width: 250px;
   padding: 8px 15px 8px 35px;
   border-radius: 20px;
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  background-color: rgba(255, 255, 255, 0.1);
-  color: white;
+  border: 1px solid #e0e0e0;
+  background-color: #f1f3f5;
+  color: #333;
   font-size: 0.9rem;
   outline: none;
   transition: all 0.3s ease;
 }
 .navbar-search-desktop input::placeholder {
-  color: rgba(255, 255, 255, 0.6);
+  color: #888;
 }
 .navbar-search-desktop .search-icon {
   position: absolute;
   left: 12px;
   top: 50%;
   transform: translateY(-50%);
-  color: rgba(255, 255, 255, 0.6);
+  color: #888;
   font-size: 0.9rem;
 }
 
@@ -369,14 +369,15 @@ router.beforeEach((to, from, next) => {
     position: absolute;
     top: 80px;
     left: 0;
-    background: rgba(0, 0, 0, 0.9);
+    background: rgba(255, 255, 255, 0.98);
     backdrop-filter: blur(8px);
     transition: all 0.5s ease-in-out;
     opacity: 0;
     visibility: hidden;
     transform: translateY(-100%);
     padding: 20px 0;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    border-bottom: 1px solid #e0e0e0;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
   }
   .navbar-menu.active {
     opacity: 1;
@@ -460,13 +461,13 @@ router.beforeEach((to, from, next) => {
   display: flex;
   align-items: center;
   text-decoration: none;
-  color: white;
+  color: #333;
   transition: color 0.3s ease;
   gap: 10px;
 }
 
 .admin-profile .user-icon-link:hover {
-  color: #c9e9ff;
+  color: #0077b6;
 }
 
 .admin-profile .admin-avatar {
@@ -474,17 +475,17 @@ router.beforeEach((to, from, next) => {
   height: 40px;
   border-radius: 50%;
   object-fit: cover;
-  border: 2px solid white;
+  border: 2px solid #0077b6;
   transition: border-color 0.3s ease;
 }
 
 .admin-profile .admin-avatar:hover {
-  border-color: #c9e9ff;
+  border-color: #333;
 }
 
 .admin-profile {
   font-weight: 500;
-  color: white;
+  color: #333;
   display: none;
 }
 
@@ -510,7 +511,7 @@ router.beforeEach((to, from, next) => {
     width: 60px;
     height: 60px;
   }
-  .admin-profile  {
+  .admin-profile {
     display: block;
     font-size: 1.2rem;
     margin-top: 5px;
