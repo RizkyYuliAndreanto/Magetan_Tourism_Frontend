@@ -48,7 +48,7 @@ const handleLogin = async () => {
     localStorage.setItem('user', JSON.stringify(response.data.admin));
 
     // Arahkan ke dashboard admin setelah login berhasil
-    router.push('/dashboard');
+    router.push('/admin');
     
   } catch (error) {
     console.error('Login gagal:', error.response?.data || error.message);

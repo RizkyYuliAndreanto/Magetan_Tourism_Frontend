@@ -41,13 +41,13 @@
               <td>{{ umkm.id_umkm }}</td>
               <td>{{ umkm.nama_umkm }}</td>
               <td><span class="category-badge">{{ umkm.jenis_usaha }}</span></td>
-              <td>{{ umkm.kategoriUmkm.nama_kategori }}</td>
+              <td>{{ umkm.kategoriUMKM?.nama_kategori || '-' }}</td>
               <td>{{ umkm.adminPembuat.username }}</td>
               <td class="actions">
                 <button class="action-button edit-button" @click="openUMKMForm(umkm)" title="Edit">
                   <i class="fas fa-edit"></i>
                 </button>
-                <button class="action-button delete-button" @click="handleDeleteUMKM(umkm.id_umkm)" title="Hapus">
+                <button class="action-button delete-button" @click="showDeleteConfirm(umkm.id_umkm)" title="Hapus">
                   <i class="fas fa-trash-alt"></i>
                 </button>
               </td>
@@ -56,13 +56,25 @@
         </table>
       </div>
     </div>
+
+    <BasePopUp
+      v-if="showPopUp"
+      :key="`${popUpStatus}-${popUpAction}`"
+      :status="popUpStatus"
+      :action="popUpAction"
+      :entity-name="popUpEntity"
+      :error-message="popUpMessage"
+      @close="closePopUp"
+      @confirmed="handleDeleteConfirmed"
+    />
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, nextTick } from 'vue';
 import axios from 'axios';
 import UMKMForm from './UMKMForm.vue';
+import BasePopUp from '../../../components/pop-up/BasePopUp.vue';
 
 const umkmList = ref([]);
 const kategoriList = ref([]);
@@ -71,13 +83,70 @@ const isEditingUMKM = ref(false);
 const formUMKM = ref(null);
 const editingUMKMGallery = ref([]);
 
+// State untuk pop-up
+const showPopUp = ref(false);
+const popUpStatus = ref("");
+const popUpAction = ref("");
+const popUpEntity = ref("UMKM");
+const popUpMessage = ref("");
+const umkmToDeleteId = ref(null);
+
+// Fungsi yang memicu pop-up konfirmasi
+const showDeleteConfirm = (id) => {
+  umkmToDeleteId.value = id;
+  popUpStatus.value = "confirm";
+  popUpAction.value = "confirmDelete";
+  showPopUp.value = true;
+};
+
+// Fungsi yang dipanggil setelah konfirmasi hapus dari pop-up
+const handleDeleteConfirmed = async () => {
+  // Tutup popup konfirmasi agar komponen unmount
+  closePopUp();
+  await nextTick();
+
+  try {
+    const token = localStorage.getItem('access_token');
+    await axios.delete(`http://localhost:5000/api/umkm/${umkmToDeleteId.value}`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    openPopUp("success", "delete");
+    fetchUMKMData();
+  } catch (err) {
+    console.error('Gagal menghapus UMKM:', err.response?.data);
+    openPopUp("error", "delete", err.response?.data?.error || "Gagal menghapus UMKM.");
+  } finally {
+    umkmToDeleteId.value = null;
+  }
+};
+
+// Fungsi utilitas untuk mengontrol pop-up
+const openPopUp = (status, action, message = "") => {
+  popUpStatus.value = status;
+  popUpAction.value = action;
+  popUpMessage.value = message;
+
+  if (showPopUp.value) {
+    showPopUp.value = false;
+    requestAnimationFrame(() => {
+      showPopUp.value = true;
+    });
+  } else {
+    showPopUp.value = true;
+  }
+};
+
+const closePopUp = () => {
+  showPopUp.value = false;
+};
+
 const fetchUMKMData = async () => {
   try {
     const response = await axios.get('http://localhost:5000/api/umkm');
     umkmList.value = response.data;
   } catch (err) {
     console.error('Gagal memuat data UMKM:', err);
-    alert('Gagal memuat data UMKM.');
+    openPopUp("error", "fetch", "Gagal memuat data UMKM.");
   }
 };
 
@@ -87,6 +156,7 @@ const fetchKategoriData = async () => {
     kategoriList.value = response.data;
   } catch (err) {
     console.error('Gagal memuat data kategori:', err);
+    openPopUp("error", "fetch", "Gagal memuat data kategori.");
   }
 };
 
@@ -103,7 +173,7 @@ const openUMKMForm = async (umkm = null) => {
       editingUMKMGallery.value = fullUMKMData.galeriUMKM;
     } catch (error) {
       console.error('Gagal memuat detail UMKM:', error);
-      alert('Gagal memuat detail UMKM untuk diedit.');
+      openPopUp("error", "fetch", "Gagal memuat detail UMKM untuk diedit.");
       return;
     }
   } else {
@@ -111,8 +181,8 @@ const openUMKMForm = async (umkm = null) => {
       id_umkm: null,
       nama_umkm: '',
       deskripsi_umkm: '',
-      jenis_usaha: '', // Mengembalikan jenis_usaha
-      id_kategori_umkm: '', // Tambahkan id_kategori_umkm
+      jenis_usaha: '',
+      id_kategori_umkm: '',
       alamat_umkm: '',
       kontak_umkm: '',
       website_umkm: '',
@@ -162,13 +232,11 @@ const handleSaveUMKM = async (formData, galleryFiles) => {
         }
       });
     }
-    
-    alert('UMKM dan galeri berhasil ditambahkan!');
+    openPopUp("success", "create");
     closeUMKMForm();
-    fetchUMKMData();
   } catch (err) {
     console.error('Gagal menyimpan UMKM:', err.response?.data);
-    alert(err.response?.data?.error || 'Gagal menyimpan UMKM. Periksa kembali input Anda.');
+    openPopUp("error", "create", err.response?.data?.error || "Gagal menyimpan UMKM. Periksa kembali input Anda.");
   }
 };
 
@@ -209,29 +277,11 @@ const handleUpdateUMKM = async (formData, galleryFiles, deletedGalleryIds) => {
         });
       }));
     }
-
-    alert('UMKM berhasil diperbarui!');
+    openPopUp("success", "update");
     closeUMKMForm();
-    fetchUMKMData();
   } catch (err) {
     console.error('Gagal memperbarui UMKM:', err.response?.data);
-    alert(err.response?.data?.error || 'Gagal memperbarui UMKM.');
-  }
-};
-
-const handleDeleteUMKM = async (id) => {
-  if (confirm('Apakah Anda yakin ingin menghapus UMKM ini?')) {
-    try {
-      const token = localStorage.getItem('access_token');
-      await axios.delete(`http://localhost:5000/api/umkm/${id}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      alert('UMKM berhasil dihapus!');
-      fetchUMKMData();
-    } catch (err) {
-      console.error('Gagal menghapus UMKM:', err.response?.data);
-      alert(err.response?.data?.error || 'Gagal menghapus UMKM.');
-    }
+    openPopUp("error", "update", err.response?.data?.error || "Gagal memperbarui UMKM.");
   }
 };
 

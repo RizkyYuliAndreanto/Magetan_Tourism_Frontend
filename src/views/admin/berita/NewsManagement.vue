@@ -32,6 +32,11 @@
             </tr>
           </thead>
           <tbody>
+            <tr v-if="beritaList.length === 0">
+              <td colspan="6" class="no-data-found">
+                Tidak ada berita yang tersedia.
+              </td>
+            </tr>
             <tr v-for="berita in beritaList" :key="berita.id_berita">
               <td>{{ berita.id_berita }}</td>
               <td>{{ berita.judul }}</td>
@@ -42,7 +47,7 @@
                 <button class="action-button edit-button" @click="openBeritaForm(berita)" title="Edit">
                   <i class="fas fa-edit"></i>
                 </button>
-                <button class="action-button delete-button" @click="handleDeleteBerita(berita.id_berita)" title="Hapus">
+                <button class="action-button delete-button" @click="showDeleteConfirm(berita.id_berita)" title="Hapus">
                   <i class="fas fa-trash-alt"></i>
                 </button>
               </td>
@@ -51,13 +56,25 @@
         </table>
       </div>
     </div>
+
+    <BasePopUp
+      v-if="showPopUp"
+      :key="`${popUpStatus}-${popUpAction}`"
+      :status="popUpStatus"
+      :action="popUpAction"
+      :entity-name="popUpEntity"
+      :error-message="popUpMessage"
+      @close="closePopUp"
+      @confirmed="handleDeleteConfirmed"
+    />
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, nextTick } from 'vue';
 import axios from 'axios';
 import NewsForm from './NewsForm.vue';
+import BasePopUp from '../../../components/pop-up/BasePopUp.vue';
 
 const beritaList = ref([]);
 const kategoriList = ref([]);
@@ -66,12 +83,70 @@ const isEditingBerita = ref(false);
 const formBerita = ref(null);
 const editingBeritaGallery = ref([]);
 
+// State untuk pop-up
+const showPopUp = ref(false);
+const popUpStatus = ref("");
+const popUpAction = ref("");
+const popUpEntity = ref("Berita");
+const popUpMessage = ref("");
+const beritaToDeleteId = ref(null);
+
+// Fungsi yang memicu pop-up konfirmasi
+const showDeleteConfirm = (id) => {
+  beritaToDeleteId.value = id;
+  popUpStatus.value = "confirm";
+  popUpAction.value = "confirmDelete";
+  showPopUp.value = true;
+};
+
+// Fungsi yang dipanggil setelah konfirmasi hapus dari pop-up
+const handleDeleteConfirmed = async () => {
+  // Tutup popup konfirmasi agar komponen unmount
+  closePopUp();
+  await nextTick();
+
+  try {
+    const token = localStorage.getItem('access_token');
+    await axios.delete(`http://localhost:5000/api/berita/${beritaToDeleteId.value}`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    openPopUp("success", "delete");
+    fetchBeritaData();
+  } catch (err) {
+    console.error('Gagal menghapus berita:', err.response?.data);
+    openPopUp("error", "delete", err.response?.data?.error || "Gagal menghapus berita.");
+  } finally {
+    beritaToDeleteId.value = null;
+  }
+};
+
+// Fungsi utilitas untuk mengontrol pop-up
+const openPopUp = (status, action, message = "") => {
+  popUpStatus.value = status;
+  popUpAction.value = action;
+  popUpMessage.value = message;
+
+  if (showPopUp.value) {
+    showPopUp.value = false;
+    requestAnimationFrame(() => {
+      showPopUp.value = true;
+    });
+  } else {
+    showPopUp.value = true;
+  }
+};
+
+const closePopUp = () => {
+  showPopUp.value = false;
+};
+
 const fetchBeritaData = async () => {
   try {
     const response = await axios.get('http://localhost:5000/api/berita');
     beritaList.value = response.data.data || response.data;
   } catch (err) {
     console.error('Gagal memuat data berita:', err);
+    openPopUp("error", "fetch", "Gagal memuat data berita.");
   }
 };
 
@@ -81,6 +156,7 @@ const fetchKategoriData = async () => {
     kategoriList.value = response.data;
   } catch (err) {
     console.error('Gagal memuat data kategori berita:', err);
+    openPopUp("error", "fetch", "Gagal memuat data kategori berita.");
   }
 };
 
@@ -99,7 +175,7 @@ const openBeritaForm = async (berita = null) => {
       editingBeritaGallery.value = fullBeritaData.galeriBerita;
     } catch (error) {
       console.error('Gagal memuat detail berita:', error);
-      alert('Gagal memuat detail berita untuk diedit.');
+      openPopUp("error", "fetch", "Gagal memuat detail berita untuk diedit.");
       return;
     }
   } else {
@@ -117,6 +193,7 @@ const closeBeritaForm = () => {
   formBerita.value = null;
   editingBeritaGallery.value = [];
   isEditingBerita.value = false;
+  fetchBeritaData();
 };
 
 const handleSaveBerita = async (formData, galleryFiles) => {
@@ -141,12 +218,11 @@ const handleSaveBerita = async (formData, galleryFiles) => {
         headers: { 'Content-Type': 'multipart/form-data', Authorization: `Bearer ${token}` }
       });
     }
-    alert('Berita dan galeri berhasil ditambahkan!');
+    openPopUp("success", "create");
     closeBeritaForm();
-    fetchBeritaData();
   } catch (err) {
     console.error('Gagal menyimpan berita:', err.response?.data);
-    alert(err.response?.data?.error || 'Gagal menyimpan berita. Periksa kembali input Anda.');
+    openPopUp("error", "create", err.response?.data?.error || "Gagal menyimpan berita. Periksa kembali input Anda.");
   }
 };
 
@@ -181,28 +257,11 @@ const handleUpdateBerita = async (formData, galleryFiles, deletedGalleryIds) => 
         });
       }));
     }
-    alert('Berita berhasil diperbarui!');
+    openPopUp("success", "update");
     closeBeritaForm();
-    fetchBeritaData();
   } catch (err) {
     console.error('Gagal memperbarui berita:', err.response?.data);
-    alert(err.response?.data?.error || 'Gagal memperbarui berita.');
-  }
-};
-
-const handleDeleteBerita = async (id) => {
-  if (confirm('Apakah Anda yakin ingin menghapus berita ini?')) {
-    try {
-      const token = localStorage.getItem('access_token');
-      await axios.delete(`http://localhost:5000/api/berita/${id}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      alert('Berita berhasil dihapus!');
-      fetchBeritaData();
-    } catch (err) {
-      console.error('Gagal menghapus berita:', err.response?.data);
-      alert(err.response?.data?.error || 'Gagal menghapus berita.');
-    }
+    openPopUp("error", "update", err.response?.data?.error || "Gagal memperbarui berita.");
   }
 };
 
@@ -218,14 +277,12 @@ onMounted(() => {
 </script>
 
 <style scoped>
-/* =========== Perubahan Styling untuk Konsistensi =========== */
-
+/* Anda dapat mempertahankan gaya CSS yang sudah ada */
 .action-bar {
   display: flex;
   justify-content: flex-end;
   margin-bottom: 1.5rem;
 }
-
 .action-button {
   padding: 0.75rem 1.5rem;
   border-radius: 8px;
@@ -240,64 +297,58 @@ onMounted(() => {
   font-size: 0.9rem;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
-
 .create-button {
   background-color: #007bff;
 }
-
 .create-button:hover {
   background-color: #0069d9;
   box-shadow: 0 6px 16px rgba(0, 123, 255, 0.2);
 }
-
-/* Mengubah .table-container dari `.table-responsive.card` */
 .table-container.card {
   padding: 0;
-  border: 1px solid #e0e6ed; /* Border yang jelas */
-  border-radius: 12px; /* Sudut lebih membulat */
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08); /* Bayangan yang jelas */
-  overflow: hidden; /* Penting untuk border-radius */
+  border: 1px solid #e0e6ed;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
 }
-
 .data-table {
   width: 100%;
   border-collapse: collapse;
   min-width: 600px;
 }
-
 .data-table th,
 .data-table td {
   padding: 1rem 1.5rem;
   text-align: left;
-  border-bottom: 1px solid #e9ecef; /* Border yang lebih halus */
+  border-bottom: 1px solid #e9ecef;
 }
-
 .data-table th {
-  background-color: #f8f9fa; /* Latar belakang header lebih terang */
-  color: #6c757d; /* Teks lebih halus */
+  background-color: #f8f9fa;
+  color: #6c757d;
   font-weight: 600;
   font-size: 0.8rem;
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
-
 .data-table td {
-  color: #212529; /* Warna teks data yang mudah dibaca */
+  color: #212529;
 }
-
 .data-table tr:last-child td {
   border-bottom: none;
 }
-
 .data-table tr:hover {
-  background-color: #f1f3f5; /* Warna hover yang lebih halus */
+  background-color: #f1f3f5;
 }
-
+.no-data-found {
+  text-align: center;
+  font-style: italic;
+  color: #888;
+  padding: 2rem;
+}
 .actions {
   display: flex;
   gap: 0.5rem;
 }
-
 .actions .action-button {
   padding: 0.6rem;
   width: 2.2rem;
@@ -307,28 +358,23 @@ onMounted(() => {
   align-items: center;
   justify-content: center;
 }
-
 .actions .edit-button {
   background-color: #ffc107;
   color: white;
   box-shadow: 0 2px 8px rgba(255, 193, 7, 0.2);
 }
-
 .actions .edit-button:hover {
   background-color: #e0a800;
   box-shadow: 0 4px 12px rgba(255, 193, 7, 0.3);
 }
-
 .actions .delete-button {
   background-color: #dc3545;
   box-shadow: 0 2px 8px rgba(220, 53, 69, 0.2);
 }
-
 .actions .delete-button:hover {
   background-color: #c82333;
   box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
 }
-
 .category-badge {
   display: inline-block;
   padding: 0.3rem 0.7rem;

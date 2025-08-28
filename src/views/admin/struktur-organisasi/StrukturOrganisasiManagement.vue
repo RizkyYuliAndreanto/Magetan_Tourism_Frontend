@@ -44,17 +44,55 @@
         <p>Belum ada data Struktur Organisasi. Silakan tambahkan satu.</p>
       </div>
     </div>
+
+    <BasePopUp
+      v-if="showPopUp"
+      :key="`${popUpStatus}-${popUpAction}`"
+      :status="popUpStatus"
+      :action="popUpAction"
+      :entity-name="popUpEntity"
+      :error-message="popUpMessage"
+      @close="closePopUp"
+    />
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, nextTick } from 'vue';
 import axios from 'axios';
 import StrukturOrganisasiForm from './StrukturOrganisasiForm.vue';
+import BasePopUp from '../../../components/pop-up/BasePopUp.vue';
 
 const strukturOrganisasiData = ref(null);
 const formStrukturOrganisasi = ref({});
 const formOpen = ref(false);
+
+// State untuk pop-up
+const showPopUp = ref(false);
+const popUpStatus = ref("");
+const popUpAction = ref("");
+const popUpEntity = ref("Struktur Organisasi");
+const popUpMessage = ref("");
+
+// Fungsi utilitas untuk mengontrol pop-up
+const openPopUp = (status, action, message = "") => {
+  popUpStatus.value = status;
+  popUpAction.value = action;
+  popUpMessage.value = message;
+
+  if (showPopUp.value) {
+    showPopUp.value = false;
+    requestAnimationFrame(() => {
+      showPopUp.value = true;
+    });
+  } else {
+    showPopUp.value = true;
+  }
+};
+
+const closePopUp = () => {
+  showPopUp.value = false;
+};
 
 const fetchStrukturOrganisasiData = async () => {
   try {
@@ -68,6 +106,7 @@ const fetchStrukturOrganisasiData = async () => {
     }
   } catch (err) {
     console.error('Gagal memuat data Struktur Organisasi:', err);
+    openPopUp("error", "fetch", "Gagal memuat data Struktur Organisasi.");
     strukturOrganisasiData.value = null;
   }
 };
@@ -91,11 +130,11 @@ const handleSave = async (formData) => {
         Authorization: `Bearer ${token}`
       }
     });
-    alert('Struktur Organisasi berhasil ditambahkan!');
+    openPopUp("success", "create");
     closeForm();
   } catch (err) {
     console.error('Gagal menyimpan Struktur Organisasi:', err.response?.data);
-    alert(err.response?.data?.error || 'Gagal menyimpan Struktur Organisasi.');
+    openPopUp("error", "create", err.response?.data?.error || 'Gagal menyimpan Struktur Organisasi.');
   }
 };
 
@@ -108,11 +147,11 @@ const handleUpdate = async (id, formData) => {
         Authorization: `Bearer ${token}`
       }
     });
-    alert('Struktur Organisasi berhasil diperbarui!');
+    openPopUp("success", "update");
     closeForm();
   } catch (err) {
     console.error('Gagal memperbarui Struktur Organisasi:', err.response?.data);
-    alert(err.response?.data?.error || 'Gagal memperbarui Struktur Organisasi.');
+    openPopUp("error", "update", err.response?.data?.error || 'Gagal memperbarui Struktur Organisasi.');
   }
 };
 
@@ -207,6 +246,8 @@ onMounted(() => {
 }
 .file-preview-area {
   margin-top: 1rem;
+  display: flex;
+  justify-content: center;
 }
 .file-thumbnail {
   max-width: 100%;

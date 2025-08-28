@@ -27,6 +27,11 @@
             </tr>
           </thead>
           <tbody>
+            <tr v-if="kategoriList.length === 0">
+              <td colspan="4" class="no-data-found">
+                Tidak ada kategori destinasi yang tersedia.
+              </td>
+            </tr>
             <tr v-for="kategori in kategoriList" :key="kategori.id_kategori_destinasi">
               <td>{{ kategori.id_kategori_destinasi }}</td>
               <td>{{ kategori.nama_kategori }}</td>
@@ -35,7 +40,7 @@
                 <button class="action-button edit-button" @click="openKategoriForm(kategori)" title="Edit">
                   <i class="fas fa-edit"></i>
                 </button>
-                <button class="action-button delete-button" @click="handleDeleteKategori(kategori.id_kategori_destinasi)" title="Hapus">
+                <button class="action-button delete-button" @click="showDeleteConfirm(kategori.id_kategori_destinasi)" title="Hapus">
                   <i class="fas fa-trash-alt"></i>
                 </button>
               </td>
@@ -44,18 +49,87 @@
         </table>
       </div>
     </div>
+
+    <BasePopUp
+      v-if="showPopUp"
+      :key="`${popUpStatus}-${popUpAction}`"
+      :status="popUpStatus"
+      :action="popUpAction"
+      :entity-name="popUpEntity"
+      :error-message="popUpMessage"
+      @close="closePopUp"
+      @confirmed="handleDeleteConfirmed"
+    />
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, nextTick } from 'vue';
 import axios from 'axios';
 import CategoryDestinasiForm from './CategoryDestinasiForm.vue';
+import BasePopUp from '../../../components/pop-up/BasePopUp.vue';
 
 const kategoriList = ref([]);
 const formKategoriOpen = ref(false);
 const isEditingKategori = ref(false);
 const formKategori = ref(null);
+
+// State untuk pop-up
+const showPopUp = ref(false);
+const popUpStatus = ref("");
+const popUpAction = ref("");
+const popUpEntity = ref("Kategori Destinasi");
+const popUpMessage = ref("");
+const kategoriToDeleteId = ref(null);
+
+// Fungsi yang memicu pop-up konfirmasi
+const showDeleteConfirm = (id) => {
+  kategoriToDeleteId.value = id;
+  popUpStatus.value = "confirm";
+  popUpAction.value = "confirmDelete";
+  showPopUp.value = true;
+};
+
+// Fungsi yang dipanggil setelah konfirmasi hapus dari pop-up
+const handleDeleteConfirmed = async () => {
+  // Tutup popup konfirmasi agar komponen unmount
+  closePopUp();
+  await nextTick();
+
+  try {
+    const token = localStorage.getItem('access_token');
+    await axios.delete(`http://localhost:5000/api/kategori-destinasi/${kategoriToDeleteId.value}`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    openPopUp("success", "delete");
+    fetchKategoriData();
+  } catch (err) {
+    console.error('Gagal menghapus kategori:', err.response?.data);
+    openPopUp("error", "delete", err.response?.data?.error || "Gagal menghapus kategori.");
+  } finally {
+    kategoriToDeleteId.value = null;
+  }
+};
+
+// Fungsi utilitas untuk mengontrol pop-up
+const openPopUp = (status, action, message = "") => {
+  popUpStatus.value = status;
+  popUpAction.value = action;
+  popUpMessage.value = message;
+
+  if (showPopUp.value) {
+    showPopUp.value = false;
+    requestAnimationFrame(() => {
+      showPopUp.value = true;
+    });
+  } else {
+    showPopUp.value = true;
+  }
+};
+
+const closePopUp = () => {
+  showPopUp.value = false;
+};
 
 const fetchKategoriData = async () => {
   try {
@@ -63,6 +137,7 @@ const fetchKategoriData = async () => {
     kategoriList.value = response.data;
   } catch (err) {
     console.error('Gagal memuat data kategori destinasi:', err);
+    openPopUp("error", "fetch", "Gagal memuat data kategori destinasi.");
   }
 };
 
@@ -76,6 +151,7 @@ const closeKategoriForm = () => {
   formKategoriOpen.value = false;
   formKategori.value = null;
   isEditingKategori.value = false;
+  fetchKategoriData();
 };
 
 const handleSaveKategori = async (kategoriData) => {
@@ -85,34 +161,17 @@ const handleSaveKategori = async (kategoriData) => {
       await axios.put(`http://localhost:5000/api/kategori-destinasi/${kategoriData.id_kategori_destinasi}`, kategoriData, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      alert('Kategori berhasil diperbarui!');
+      openPopUp("success", "update");
     } else {
       await axios.post('http://localhost:5000/api/kategori-destinasi', kategoriData, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      alert('Kategori berhasil ditambahkan!');
+      openPopUp("success", "create");
     }
     closeKategoriForm();
-    fetchKategoriData();
   } catch (err) {
     console.error('Gagal menyimpan kategori:', err.response?.data);
-    alert(err.response?.data?.error || 'Gagal menyimpan kategori.');
-  }
-};
-
-const handleDeleteKategori = async (id) => {
-  if (confirm('Apakah Anda yakin ingin menghapus kategori ini?')) {
-    try {
-      const token = localStorage.getItem('access_token');
-      await axios.delete(`http://localhost:5000/api/kategori-destinasi/${id}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      alert('Kategori berhasil dihapus!');
-      fetchKategoriData();
-    } catch (err) {
-      console.error('Gagal menghapus kategori:', err.response?.data);
-      alert(err.response?.data?.error || 'Gagal menghapus kategori.');
-    }
+    openPopUp("error", isEditingKategori.value ? "update" : "create", err.response?.data?.error || "Gagal menyimpan kategori.");
   }
 };
 
