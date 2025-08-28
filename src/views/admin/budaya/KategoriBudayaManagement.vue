@@ -1,18 +1,17 @@
 <template>
   <div>
     <div class="action-bar">
-      <button v-if="!formAnggotaOpen" class="action-button create-button" @click="openAnggotaForm()">
-        <i class="fas fa-plus-circle"></i> Tambah Anggota Baru
+      <button v-if="!formKategoriOpen" class="action-button create-button" @click="openKategoriForm()">
+        <i class="fas fa-plus-circle"></i> Tambah Kategori Baru
       </button>
     </div>
 
-    <div v-if="formAnggotaOpen" class="form-card card">
-      <StrukturAnggotaForm
-        :is-editing="isEditingAnggota"
-        :initial-data="formAnggota"
-        @close-form="closeAnggotaForm"
-        @save-anggota="handleSaveAnggota"
-        @update-anggota="handleUpdateAnggota"
+    <div v-if="formKategoriOpen">
+      <CategoryBudayaForm
+        :is-editing="isEditingKategori"
+        :initial-data="formKategori"
+        @close-form="closeKategoriForm"
+        @save-kategori="handleSaveKategori"
       />
     </div>
 
@@ -22,30 +21,26 @@
           <thead>
             <tr>
               <th>ID</th>
-              <th>Nama Anggota</th>
-              <th>Jabatan</th>
-              <th>Urutan</th>
-              <th>Admin Pengelola</th>
+              <th>Nama Kategori</th>
+              <th>Deskripsi</th>
               <th>Aksi</th>
             </tr>
           </thead>
           <tbody>
-            <tr v-if="anggotaList.length === 0">
-              <td colspan="6" class="no-data-found">
-                Tidak ada data anggota yang tersedia.
+            <tr v-if="kategoriList.length === 0">
+              <td colspan="4" class="no-data-found">
+                Tidak ada kategori budaya yang tersedia.
               </td>
             </tr>
-            <tr v-for="anggota in anggotaList" :key="anggota.id_anggota">
-              <td>{{ anggota.id_anggota }}</td>
-              <td>{{ anggota.nama_anggota }}</td>
-              <td>{{ anggota.jabatan }}</td>
-              <td>{{ anggota.urutan_tampilan }}</td>
-              <td>{{ anggota.adminPengelola.username }}</td>
+            <tr v-for="kategori in kategoriList" :key="kategori.id_kategori_budaya">
+              <td>{{ kategori.id_kategori_budaya }}</td>
+              <td>{{ kategori.nama_kategori }}</td>
+              <td>{{ kategori.deskripsi_kategori || '-' }}</td>
               <td class="actions">
-                <button class="action-button edit-button" @click="openAnggotaForm(anggota)" title="Edit">
+                <button class="action-button edit-button" @click="openKategoriForm(kategori)" title="Edit">
                   <i class="fas fa-edit"></i>
                 </button>
-                <button class="action-button delete-button" @click="showDeleteConfirm(anggota.id_anggota)" title="Hapus">
+                <button class="action-button delete-button" @click="showDeleteConfirm(kategori.id_kategori_budaya)" title="Hapus">
                   <i class="fas fa-trash-alt"></i>
                 </button>
               </td>
@@ -71,25 +66,25 @@
 <script setup>
 import { ref, onMounted, nextTick } from 'vue';
 import axios from 'axios';
-import StrukturAnggotaForm from './StrukturAnggotaForm.vue';
+import CategoryBudayaForm from './KategoriBudayaForm.vue';
 import BasePopUp from '../../../components/pop-up/BasePopUp.vue';
 
-const anggotaList = ref([]);
-const formAnggotaOpen = ref(false);
-const isEditingAnggota = ref(false);
-const formAnggota = ref(null);
+const kategoriList = ref([]);
+const formKategoriOpen = ref(false);
+const isEditingKategori = ref(false);
+const formKategori = ref(null);
 
 // State untuk pop-up
 const showPopUp = ref(false);
 const popUpStatus = ref("");
 const popUpAction = ref("");
-const popUpEntity = ref("Anggota");
+const popUpEntity = ref("Kategori Budaya");
 const popUpMessage = ref("");
-const anggotaToDeleteId = ref(null);
+const kategoriToDeleteId = ref(null);
 
 // Fungsi yang memicu pop-up konfirmasi
 const showDeleteConfirm = (id) => {
-  anggotaToDeleteId.value = id;
+  kategoriToDeleteId.value = id;
   popUpStatus.value = "confirm";
   popUpAction.value = "confirmDelete";
   showPopUp.value = true;
@@ -103,16 +98,16 @@ const handleDeleteConfirmed = async () => {
 
   try {
     const token = localStorage.getItem('access_token');
-    await axios.delete(`http://localhost:5000/api/struktur-anggota/${anggotaToDeleteId.value}`, {
+    await axios.delete(`http://localhost:5000/api/kategori-budaya/${kategoriToDeleteId.value}`, {
       headers: { Authorization: `Bearer ${token}` }
     });
     openPopUp("success", "delete");
-    fetchAnggotaData();
+    fetchKategoriData();
   } catch (err) {
-    console.error('Gagal menghapus anggota:', err.response?.data);
-    openPopUp("error", "delete", err.response?.data?.error || "Gagal menghapus anggota.");
+    console.error('Gagal menghapus kategori:', err.response?.data);
+    openPopUp("error", "delete", err.response?.data?.error || "Gagal menghapus kategori.");
   } finally {
-    anggotaToDeleteId.value = null;
+    kategoriToDeleteId.value = null;
   }
 };
 
@@ -136,83 +131,63 @@ const closePopUp = () => {
   showPopUp.value = false;
 };
 
-const fetchAnggotaData = async () => {
+const fetchKategoriData = async () => {
   try {
-    const response = await axios.get('http://localhost:5000/api/struktur-anggota');
-    anggotaList.value = response.data;
+    const response = await axios.get('http://localhost:5000/api/kategori-budaya');
+    kategoriList.value = response.data;
   } catch (err) {
-    console.error('Gagal memuat data struktur anggota:', err);
-    openPopUp("error", "fetch", "Gagal memuat data struktur anggota.");
+    console.error('Gagal memuat data kategori budaya:', err);
+    openPopUp("error", "fetch", "Gagal memuat data kategori budaya.");
   }
 };
 
-const openAnggotaForm = (anggota = null) => {
-  isEditingAnggota.value = !!anggota;
-  if (anggota) {
-    formAnggota.value = { ...anggota };
-  } else {
-    formAnggota.value = {
-      id_anggota: null, nama_anggota: '', jabatan: '', deskripsi_tugas: '', foto_anggota: null, urutan_tampilan: 0,
-    };
-  }
-  formAnggotaOpen.value = true;
+const openKategoriForm = (kategori = null) => {
+  isEditingKategori.value = !!kategori;
+  formKategori.value = kategori ? { ...kategori } : { id_kategori_budaya: null, nama_kategori: '', deskripsi_kategori: '' };
+  formKategoriOpen.value = true;
 };
 
-const closeAnggotaForm = () => {
-  formAnggotaOpen.value = false;
-  formAnggota.value = null;
-  isEditingAnggota.value = false;
-  fetchAnggotaData();
+const closeKategoriForm = () => {
+  formKategoriOpen.value = false;
+  formKategori.value = null;
+  isEditingKategori.value = false;
+  fetchKategoriData();
 };
 
-const handleSaveAnggota = async (formData) => {
+const handleSaveKategori = async (formData) => {
   try {
     const token = localStorage.getItem('access_token');
-    await axios.post('http://localhost:5000/api/struktur-anggota', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-        Authorization: `Bearer ${token}`
-      }
-    });
-    openPopUp("success", "create");
-    closeAnggotaForm();
+    
+    if (isEditingKategori.value) {
+      await axios.put(`http://localhost:5000/api/kategori-budaya/${formData.get('id_kategori_budaya')}`, formData, {
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'multipart/form-data' }
+      });
+      openPopUp("success", "update");
+    } else {
+      await axios.post('http://localhost:5000/api/kategori-budaya', formData, {
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'multipart/form-data' }
+      });
+      openPopUp("success", "create");
+    }
+    closeKategoriForm();
   } catch (err) {
-    console.error('Gagal menyimpan anggota:', err.response?.data);
-    openPopUp("error", "create", err.response?.data?.error || "Gagal menyimpan anggota.");
-  }
-};
-
-const handleUpdateAnggota = async (formData) => {
-  try {
-    const token = localStorage.getItem('access_token');
-    await axios.put(`http://localhost:5000/api/struktur-anggota/${formData.get('id_anggota')}`, formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-        Authorization: `Bearer ${token}`
-      }
-    });
-    openPopUp("success", "update");
-    closeAnggotaForm();
-  } catch (err) {
-    console.error('Gagal memperbarui anggota:', err.response?.data);
-    openPopUp("error", "update", err.response?.data?.error || "Gagal memperbarui anggota.");
+    console.error('Gagal menyimpan kategori:', err.response?.data);
+    openPopUp("error", isEditingKategori.value ? "update" : "create", err.response?.data?.error || "Gagal menyimpan kategori.");
   }
 };
 
 onMounted(() => {
-  fetchAnggotaData();
+  fetchKategoriData();
 });
 </script>
 
 <style scoped>
-/* =========== Perubahan Styling untuk Konsistensi =========== */
-
+/* Styling yang sama dari CategoryDestinasiManagement.vue */
 .action-bar {
   display: flex;
   justify-content: flex-end;
   margin-bottom: 1.5rem;
 }
-
 .action-button {
   padding: 0.75rem 1.5rem;
   border-radius: 8px;
@@ -227,17 +202,13 @@ onMounted(() => {
   font-size: 0.9rem;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
-
 .create-button {
   background-color: #007bff;
 }
-
 .create-button:hover {
   background-color: #0069d9;
   box-shadow: 0 6px 16px rgba(0, 123, 255, 0.2);
 }
-
-.form-card.card,
 .table-container.card {
   padding: 0;
   border: 1px solid #e0e6ed;
@@ -245,28 +216,17 @@ onMounted(() => {
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
   overflow: hidden;
 }
-
-.form-card.card {
-  padding: 2rem;
-}
-
-.table-container.card {
-  padding: 0;
-}
-
 .data-table {
   width: 100%;
   border-collapse: collapse;
   min-width: 600px;
 }
-
-.data-table th,
+.data-table th, 
 .data-table td {
   padding: 1rem 1.5rem;
   text-align: left;
   border-bottom: 1px solid #e9ecef;
 }
-
 .data-table th {
   background-color: #f8f9fa;
   color: #6c757d;
@@ -275,31 +235,19 @@ onMounted(() => {
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
-
 .data-table td {
   color: #212529;
 }
-
 .data-table tr:last-child td {
   border-bottom: none;
 }
-
 .data-table tr:hover {
   background-color: #f1f3f5;
 }
-
-.no-data-found {
-  text-align: center;
-  font-style: italic;
-  color: #888;
-  padding: 2rem;
-}
-
 .actions {
   display: flex;
   gap: 0.5rem;
 }
-
 .actions .action-button {
   padding: 0.6rem;
   width: 2.2rem;
@@ -310,26 +258,31 @@ onMounted(() => {
   justify-content: center;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
-
 .actions .edit-button {
   background-color: #ffc107;
   color: white;
   box-shadow: 0 2px 8px rgba(255, 193, 7, 0.2);
 }
-
 .actions .edit-button:hover {
   background-color: #e0a800;
   box-shadow: 0 4px 12px rgba(255, 193, 7, 0.3);
 }
-
 .actions .delete-button {
   background-color: #dc3545;
-  color: white;
   box-shadow: 0 2px 8px rgba(220, 53, 69, 0.2);
 }
-
 .actions .delete-button:hover {
   background-color: #c82333;
   box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+}
+.category-badge {
+  display: inline-block;
+  padding: 0.3rem 0.7rem;
+  border-radius: 20px;
+  background-color: #28a745;
+  color: white;
+  font-size: 0.8rem;
+  font-weight: 500;
+  white-space: nowrap;
 }
 </style>

@@ -44,17 +44,56 @@
         <p>Belum ada data Visi Misi. Silakan tambahkan satu.</p>
       </div>
     </div>
+    
+    <!-- Implementasi komponen pop-up -->
+    <BasePopUp
+      v-if="showPopUp"
+      :key="`${popUpStatus}-${popUpAction}`"
+      :status="popUpStatus"
+      :action="popUpAction"
+      :entity-name="popUpEntity"
+      :error-message="popUpMessage"
+      @close="closePopUp"
+    />
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, nextTick } from 'vue';
 import axios from 'axios';
 import VisiMisiForm from './VisiMisiForm.vue';
+import BasePopUp from '../../../components/pop-up/BasePopUp.vue';
 
 const visiMisiData = ref(null);
 const formVisiMisi = ref({});
 const formOpen = ref(false);
+
+// State untuk pop-up
+const showPopUp = ref(false);
+const popUpStatus = ref("");
+const popUpAction = ref("");
+const popUpEntity = ref("Visi Misi");
+const popUpMessage = ref("");
+
+// Fungsi utilitas untuk mengontrol pop-up
+const openPopUp = (status, action, message = "") => {
+  popUpStatus.value = status;
+  popUpAction.value = action;
+  popUpMessage.value = message;
+  
+  if (showPopUp.value) {
+    showPopUp.value = false;
+    requestAnimationFrame(() => {
+      showPopUp.value = true;
+    });
+  } else {
+    showPopUp.value = true;
+  }
+};
+
+const closePopUp = () => {
+  showPopUp.value = false;
+};
 
 const fetchVisiMisiData = async () => {
   try {
@@ -68,6 +107,7 @@ const fetchVisiMisiData = async () => {
     }
   } catch (err) {
     console.error('Gagal memuat data Visi Misi:', err);
+    openPopUp("error", "fetch", "Gagal memuat data Visi Misi.");
     visiMisiData.value = null;
   }
 };
@@ -91,11 +131,11 @@ const handleSave = async (formData) => {
         Authorization: `Bearer ${token}`
       }
     });
-    alert('Visi Misi berhasil ditambahkan!');
+    openPopUp("success", "create");
     closeForm();
   } catch (err) {
     console.error('Gagal menyimpan Visi Misi:', err.response?.data);
-    alert(err.response?.data?.error || 'Gagal menyimpan Visi Misi.');
+    openPopUp("error", "create", err.response?.data?.error || 'Gagal menyimpan Visi Misi.');
   }
 };
 
@@ -108,11 +148,11 @@ const handleUpdate = async (id, formData) => {
         Authorization: `Bearer ${token}`
       }
     });
-    alert('Visi Misi berhasil diperbarui!');
+    openPopUp("success", "update");
     closeForm();
   } catch (err) {
     console.error('Gagal memperbarui Visi Misi:', err.response?.data);
-    alert(err.response?.data?.error || 'Gagal memperbarui Visi Misi.');
+    openPopUp("error", "update", err.response?.data?.error || 'Gagal memperbarui Visi Misi.');
   }
 };
 
@@ -207,6 +247,8 @@ onMounted(() => {
 }
 .file-preview-area {
   margin-top: 1rem;
+  display: flex; /* Menjadikan kontainer flexbox */
+  justify-content: center; /* Memposisikan konten di tengah secara horizontal */
 }
 .file-thumbnail {
   max-width: 100%;
@@ -214,6 +256,10 @@ onMounted(() => {
   border-radius: 8px;
   border: 1px solid #e9ecef;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  margin: auto;
+  width: 50%;
+  padding: 10px;
+  ;
 }
 .pdf-link {
   display: flex;

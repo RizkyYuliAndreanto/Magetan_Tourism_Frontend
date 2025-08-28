@@ -44,7 +44,7 @@
                 <button class="action-button edit-button" @click="openSejarahForm(sejarah)" title="Edit">
                   <i class="fas fa-edit"></i>
                 </button>
-                <button class="action-button delete-button" @click="handleDeleteSejarah(sejarah.id_sejarah)" title="Hapus">
+                <button class="action-button delete-button" @click="showDeleteConfirm(sejarah.id_sejarah)" title="Hapus">
                   <i class="fas fa-trash-alt"></i>
                 </button>
               </td>
@@ -53,13 +53,25 @@
         </table>
       </div>
     </div>
+
+    <BasePopUp
+      v-if="showPopUp"
+      :key="`${popUpStatus}-${popUpAction}`"
+      :status="popUpStatus"
+      :action="popUpAction"
+      :entity-name="popUpEntity"
+      :error-message="popUpMessage"
+      @close="closePopUp"
+      @confirmed="handleDeleteConfirmed"
+    />
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, nextTick } from 'vue';
 import axios from 'axios';
 import SejarahForm from './SejarahForm.vue';
+import BasePopUp from '../../../components/pop-up/BasePopUp.vue';
 
 const sejarahList = ref([]);
 const formSejarahOpen = ref(false);
@@ -67,13 +79,70 @@ const isEditingSejarah = ref(false);
 const formSejarah = ref(null);
 const editingSejarahGallery = ref([]);
 
+// State untuk pop-up
+const showPopUp = ref(false);
+const popUpStatus = ref("");
+const popUpAction = ref("");
+const popUpEntity = ref("Sejarah");
+const popUpMessage = ref("");
+const sejarahToDeleteId = ref(null);
+
+// Fungsi yang memicu pop-up konfirmasi
+const showDeleteConfirm = (id) => {
+  sejarahToDeleteId.value = id;
+  popUpStatus.value = "confirm";
+  popUpAction.value = "confirmDelete";
+  showPopUp.value = true;
+};
+
+// Fungsi yang dipanggil setelah konfirmasi hapus dari pop-up
+const handleDeleteConfirmed = async () => {
+  // Tutup popup konfirmasi agar komponen unmount
+  closePopUp();
+  await nextTick();
+
+  try {
+    const token = localStorage.getItem('access_token');
+    await axios.delete(`http://localhost:5000/api/sejarah/${sejarahToDeleteId.value}`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    openPopUp("success", "delete");
+    fetchSejarahData();
+  } catch (err) {
+    console.error('Gagal menghapus sejarah:', err.response?.data);
+    openPopUp("error", "delete", err.response?.data?.error || "Gagal menghapus sejarah.");
+  } finally {
+    sejarahToDeleteId.value = null;
+  }
+};
+
+// Fungsi utilitas untuk mengontrol pop-up
+const openPopUp = (status, action, message = "") => {
+  popUpStatus.value = status;
+  popUpAction.value = action;
+  popUpMessage.value = message;
+
+  if (showPopUp.value) {
+    showPopUp.value = false;
+    requestAnimationFrame(() => {
+      showPopUp.value = true;
+    });
+  } else {
+    showPopUp.value = true;
+  }
+};
+
+const closePopUp = () => {
+  showPopUp.value = false;
+};
+
 const fetchSejarahData = async () => {
   try {
     const response = await axios.get('http://localhost:5000/api/sejarah');
     sejarahList.value = response.data;
   } catch (err) {
     console.error('Gagal memuat data sejarah:', err);
-    alert('Gagal memuat data sejarah.');
+    openPopUp("error", "fetch", "Gagal memuat data sejarah.");
   }
 };
 
@@ -90,7 +159,7 @@ const openSejarahForm = async (sejarah = null) => {
       editingSejarahGallery.value = fullSejarahData.galeriSejarah;
     } catch (error) {
       console.error('Gagal memuat detail sejarah:', error);
-      alert('Gagal memuat detail sejarah untuk diedit.');
+      openPopUp("error", "fetch", "Gagal memuat detail sejarah untuk diedit.");
       return;
     }
   } else {
@@ -141,13 +210,11 @@ const handleSaveSejarah = async (formData, galleryFiles) => {
         }
       });
     }
-    
-    alert('Sejarah dan galeri berhasil ditambahkan!');
+    openPopUp("success", "create");
     closeSejarahForm();
-    fetchSejarahData();
   } catch (err) {
     console.error('Gagal menyimpan sejarah:', err.response?.data);
-    alert(err.response?.data?.error || 'Gagal menyimpan sejarah. Periksa kembali input Anda.');
+    openPopUp("error", "create", err.response?.data?.error || "Gagal menyimpan sejarah. Periksa kembali input Anda.");
   }
 };
 
@@ -188,29 +255,11 @@ const handleUpdateSejarah = async (formData, galleryFiles, deletedGalleryIds) =>
         });
       }));
     }
-
-    alert('Sejarah berhasil diperbarui!');
+    openPopUp("success", "update");
     closeSejarahForm();
-    fetchSejarahData();
   } catch (err) {
     console.error('Gagal memperbarui sejarah:', err.response?.data);
-    alert(err.response?.data?.error || 'Gagal memperbarui sejarah.');
-  }
-};
-
-const handleDeleteSejarah = async (id) => {
-  if (confirm('Apakah Anda yakin ingin menghapus sejarah ini?')) {
-    try {
-      const token = localStorage.getItem('access_token');
-      await axios.delete(`http://localhost:5000/api/sejarah/${id}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      alert('Sejarah berhasil dihapus!');
-      fetchSejarahData();
-    } catch (err) {
-      console.error('Gagal menghapus sejarah:', err.response?.data);
-      alert(err.response?.data?.error || 'Gagal menghapus sejarah.');
-    }
+    openPopUp("error", "update", err.response?.data?.error || "Gagal memperbarui sejarah.");
   }
 };
 

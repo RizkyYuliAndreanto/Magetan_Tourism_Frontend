@@ -42,7 +42,7 @@
           <input type="text" id="nama_kategori" v-model="formData.nama_kategori" class="form-input" required>
         </div>
         
-        <div v-if="isCreatingSubcategory || isEditing && formData.id_kategori_induk !== null" class="form-group">
+        <div v-if="isCreatingSubcategory || (isEditing && formData.id_kategori_induk !== null)" class="form-group">
           <label for="id_kategori_induk">Kategori Induk <span class="required" v-if="isCreatingSubcategory">*</span></label>
           <select id="id_kategori_induk" v-model="formData.id_kategori_induk" class="form-input" :required="isCreatingSubcategory">
             <option :value="null">-- Pilih Kategori Induk --</option>
@@ -112,11 +112,9 @@ watch(() => props.initialData, (newVal) => {
 }, { immediate: true });
 
 watch(isCreatingSubcategory, (newVal) => {
-    if (!newVal) {
-        formData.value.id_kategori_induk = null;
-    } else {
-        formData.value.id_kategori_induk = '';
-    }
+  if (!newVal) {
+    formData.value.id_kategori_induk = null;
+  }
 });
 
 const submitForm = () => {
@@ -124,11 +122,8 @@ const submitForm = () => {
   
   if (!isCreatingSubcategory.value) {
     submitData.id_kategori_induk = null;
-    delete submitData.level_kategori;
-  } else {
-    // Memastikan level_kategori di-set ke 2 jika sub-kategori
-    submitData.level_kategori = 2;
   }
+  delete submitData.level_kategori;
   
   if (props.isEditing) {
     emit('update-kategori', submitData);
@@ -139,7 +134,7 @@ const submitForm = () => {
 </script>
 
 <style scoped>
-/* Gaya yang sudah diperbaiki */
+/* =========== Gaya CSS yang diselaraskan dengan AkomodasiForm.vue =========== */
 .form-card {
   background-color: #ffffff;
   padding: 2.5rem;

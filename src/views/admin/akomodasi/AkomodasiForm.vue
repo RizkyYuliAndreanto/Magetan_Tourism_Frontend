@@ -4,9 +4,9 @@
       <h3 class="form-title">{{ isEditing ? 'Edit Akomodasi' : 'Tambah Akomodasi Baru' }}</h3>
       <button class="close-form-btn" @click="$emit('close-form')">
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-x">
-            <line x1="18" y1="6" x2="6" y2="18"></line>
-            <line x1="6" y1="6" x2="18" y2="18"></line>
-          </svg>
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
       </button>
     </div>
     <form @submit.prevent="submitForm" class="form-container">
@@ -33,20 +33,20 @@
         </h4>
         <div class="form-grid">
           <div class="form-group">
-            <label for="nama_akomodasi">Nama Akomodasi <span class="required">*</span></label>
-            <input type="text" id="nama_akomodasi" v-model="formData.nama_akomodasi" class="form-input" required>
+            <label for="nama_hotel">Nama Akomodasi <span class="required">*</span></label>
+            <input type="text" id="nama_hotel" v-model="formData.nama_hotel" class="form-input" required>
           </div>
           <div class="form-group">
             <label for="kontak">Kontak <span class="required">*</span></label>
             <input type="text" id="kontak" v-model="formData.kontak" class="form-input" required>
           </div>
           <div class="form-group span-2">
-            <label for="deskripsi_akomodasi">Deskripsi Akomodasi <span class="required">*</span></label>
-            <textarea id="deskripsi_akomodasi" v-model="formData.deskripsi_akomodasi" class="form-input" rows="5" required></textarea>
+            <label for="deskripsi_hotel">Deskripsi Akomodasi <span class="required">*</span></label>
+            <textarea id="deskripsi_hotel" v-model="formData.deskripsi_hotel" class="form-input" rows="5" required></textarea>
           </div>
           <div class="form-group span-2">
-            <label for="alamat">Alamat <span class="required">*</span></label>
-            <textarea id="alamat" v-model="formData.alamat" class="form-input" rows="3" required></textarea>
+            <label for="alamat_hotel">Alamat <span class="required">*</span></label>
+            <textarea id="alamat_hotel" v-model="formData.alamat_hotel" class="form-input" rows="3" required></textarea>
           </div>
           <div class="form-group">
             <label for="link_website">Link Website</label>

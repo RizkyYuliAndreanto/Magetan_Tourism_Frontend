@@ -1,19 +1,20 @@
 <template>
   <div>
     <div class="action-bar">
-      <button v-if="!formAkomodasiOpen" class="action-button create-button" @click="openAkomodasiForm()">
-        <i class="fas fa-plus-circle"></i> Tambah Akomodasi Baru
+      <button v-if="!formBudayaOpen" class="action-button create-button" @click="openBudayaForm()">
+        <i class="fas fa-plus-circle"></i> Tambah Budaya Baru
       </button>
     </div>
 
-    <div v-if="formAkomodasiOpen" class="form-card card">
-      <AkomodasiForm
-        :is-editing="isEditingAkomodasi"
-        :initial-data="formAkomodasi"
-        :gallery-list="editingAkomodasiGallery"
-        @close-form="closeAkomodasiForm"
-        @save-akomodasi="handleSaveAkomodasi"
-        @update-akomodasi="handleUpdateAkomodasi"
+    <div v-if="formBudayaOpen">
+      <BudayaForm
+        :is-editing="isEditingBudaya"
+        :initial-data="formBudaya"
+        :kategori-list="kategoriBudayaList"
+        :gallery-list="editingBudayaGallery"
+        @close-form="closeBudayaForm"
+        @save-budaya="handleSaveBudaya"
+        @update-budaya="handleUpdateBudaya"
       />
     </div>
 
@@ -23,28 +24,28 @@
           <thead>
             <tr>
               <th>ID</th>
-              <th>Nama Akomodasi</th>
-              <th>Alamat</th>
-              <th>Admin Pengelola</th>
+              <th>Judul Budaya</th>
+              <th>Kategori</th>
+              <th>Admin</th>
               <th>Aksi</th>
             </tr>
           </thead>
           <tbody>
-            <tr v-if="akomodasiList.length === 0">
+            <tr v-if="budayaList.length === 0">
               <td colspan="5" class="no-data-found">
-                Tidak ada data akomodasi yang tersedia.
+                Tidak ada budaya yang tersedia.
               </td>
             </tr>
-            <tr v-for="akomodasi in akomodasiList" :key="akomodasi.id_akomodasi">
-              <td>{{ akomodasi.id_akomodasi }}</td>
-              <td>{{ akomodasi.nama_akomodasi }}</td>
-              <td>{{ akomodasi.alamat }}</td>
-              <td>{{ akomodasi.adminPengelola.username }}</td>
+            <tr v-for="budaya in budayaList" :key="budaya.id_budaya">
+              <td>{{ budaya.id_budaya }}</td>
+              <td>{{ budaya.judul_budaya }}</td>
+              <td><span class="category-badge">{{ budaya.kategori.nama_kategori }}</span></td>
+              <td>{{ budaya.adminPengelola.username }}</td>
               <td class="actions">
-                <button class="action-button edit-button" @click="openAkomodasiForm(akomodasi)" title="Edit">
+                <button class="action-button edit-button" @click="openBudayaForm(budaya)" title="Edit">
                   <i class="fas fa-edit"></i>
                 </button>
-                <button class="action-button delete-button" @click="showDeleteConfirm(akomodasi.id_akomodasi)" title="Hapus">
+                <button class="action-button delete-button" @click="showDeleteConfirm(budaya.id_budaya)" title="Hapus">
                   <i class="fas fa-trash-alt"></i>
                 </button>
               </td>
@@ -70,26 +71,27 @@
 <script setup>
 import { ref, onMounted, nextTick } from 'vue';
 import axios from 'axios';
-import AkomodasiForm from './AkomodasiForm.vue';
+import BudayaForm from './BudayaForm.vue';
 import BasePopUp from '../../../components/pop-up/BasePopUp.vue';
 
-const akomodasiList = ref([]);
-const formAkomodasiOpen = ref(false);
-const isEditingAkomodasi = ref(false);
-const formAkomodasi = ref(null);
-const editingAkomodasiGallery = ref([]);
+const budayaList = ref([]);
+const kategoriBudayaList = ref([]);
+const formBudayaOpen = ref(false);
+const isEditingBudaya = ref(false);
+const formBudaya = ref(null);
+const editingBudayaGallery = ref([]);
 
 // State untuk pop-up
 const showPopUp = ref(false);
 const popUpStatus = ref("");
 const popUpAction = ref("");
-const popUpEntity = ref("Akomodasi");
+const popUpEntity = ref("Budaya");
 const popUpMessage = ref("");
-const akomodasiToDeleteId = ref(null);
+const budayaToDeleteId = ref(null);
 
 // Fungsi yang memicu pop-up konfirmasi
 const showDeleteConfirm = (id) => {
-  akomodasiToDeleteId.value = id;
+  budayaToDeleteId.value = id;
   popUpStatus.value = "confirm";
   popUpAction.value = "confirmDelete";
   showPopUp.value = true;
@@ -103,16 +105,16 @@ const handleDeleteConfirmed = async () => {
 
   try {
     const token = localStorage.getItem('access_token');
-    await axios.delete(`http://localhost:5000/api/akomodasi/${akomodasiToDeleteId.value}`, {
+    await axios.delete(`http://localhost:5000/api/budaya/${budayaToDeleteId.value}`, {
       headers: { Authorization: `Bearer ${token}` }
     });
     openPopUp("success", "delete");
-    fetchAkomodasiData();
+    fetchBudayaData();
   } catch (err) {
-    console.error('Gagal menghapus akomodasi:', err.response?.data);
-    openPopUp("error", "delete", err.response?.data?.error || "Gagal menghapus akomodasi.");
+    console.error('Gagal menghapus budaya:', err.response?.data);
+    openPopUp("error", "delete", err.response?.data?.error || "Gagal menghapus budaya.");
   } finally {
-    akomodasiToDeleteId.value = null;
+    budayaToDeleteId.value = null;
   }
 };
 
@@ -136,73 +138,81 @@ const closePopUp = () => {
   showPopUp.value = false;
 };
 
-const fetchAkomodasiData = async () => {
+const fetchBudayaData = async () => {
   try {
-    const response = await axios.get('http://localhost:5000/api/akomodasi');
-    akomodasiList.value = response.data;
+    const response = await axios.get('http://localhost:5000/api/budaya');
+    budayaList.value = response.data;
   } catch (err) {
-    console.error('Gagal memuat data akomodasi:', err);
-    openPopUp("error", "fetch", "Gagal memuat data akomodasi.");
+    console.error('Gagal memuat data budaya:', err);
+    openPopUp("error", "fetch", "Gagal memuat data budaya.");
   }
 };
 
-const openAkomodasiForm = async (akomodasi = null) => {
-  isEditingAkomodasi.value = !!akomodasi;
-  if (akomodasi) {
+const fetchKategoriBudayaData = async () => {
+  try {
+    const response = await axios.get('http://localhost:5000/api/kategori-budaya');
+    kategoriBudayaList.value = response.data;
+  } catch (err) {
+    console.error('Gagal memuat data kategori budaya:', err);
+    openPopUp("error", "fetch", "Gagal memuat data kategori budaya.");
+  }
+};
+
+const openBudayaForm = async (budaya = null) => {
+  isEditingBudaya.value = !!budaya;
+  if (budaya) {
     try {
-      const response = await axios.get(`http://localhost:5000/api/akomodasi/${akomodasi.id_akomodasi}`);
-      const fullAkomodasiData = response.data;
-      formAkomodasi.value = { 
-        ...fullAkomodasiData,
-        gambar_akomodasi: null // reset file input
+      const response = await axios.get(`http://localhost:5000/api/budaya/${budaya.id_budaya}`);
+      const fullBudayaData = response.data;
+      formBudaya.value = {
+        ...fullBudayaData,
+        id_kategori_budaya: fullBudayaData.kategori.id_kategori_budaya,
       };
-      editingAkomodasiGallery.value = fullAkomodasiData.galeriAkomodasi;
+      editingBudayaGallery.value = fullBudayaData.galeriBudaya;
     } catch (error) {
-      console.error('Gagal memuat detail akomodasi:', error);
-      openPopUp("error", "fetch", "Gagal memuat detail akomodasi untuk diedit.");
+      console.error('Gagal memuat detail budaya:', error);
+      openPopUp("error", "fetch", "Gagal memuat detail budaya untuk diedit.");
       return;
     }
   } else {
-    formAkomodasi.value = {
-      id_akomodasi: null, nama_akomodasi: '', deskripsi_akomodasi: '', alamat: '', kontak: '',
-      link_website: '', harga_akomodasi: null, gambar_akomodasi: null, koordinat_lokasi: '',
+    formBudaya.value = {
+      id_budaya: null, judul_budaya: '', deskripsi_budaya: '',
+      gambar_budaya: null, id_kategori_budaya: '',
     };
-    editingAkomodasiGallery.value = [];
+    editingBudayaGallery.value = [];
   }
-  formAkomodasiOpen.value = true;
+  formBudayaOpen.value = true;
 };
 
-const closeAkomodasiForm = () => {
-  formAkomodasiOpen.value = false;
-  formAkomodasi.value = null;
-  editingAkomodasiGallery.value = [];
-  isEditingAkomodasi.value = false;
-  fetchAkomodasiData();
+const closeBudayaForm = () => {
+  formBudayaOpen.value = false;
+  formBudaya.value = null;
+  editingBudayaGallery.value = [];
+  isEditingBudaya.value = false;
+  fetchBudayaData();
 };
 
-const handleSaveAkomodasi = async (formData, galleryFiles) => {
+const handleSaveBudaya = async (formData, galleryFiles) => {
   try {
     const token = localStorage.getItem('access_token');
     
-    const akomodasiResponse = await axios.post('http://localhost:5000/api/akomodasi', formData, {
+    const budayaResponse = await axios.post('http://localhost:5000/api/budaya', formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
         Authorization: `Bearer ${token}`
       }
     });
-
-    const id_akomodasi = akomodasiResponse.data.akomodasi.id_akomodasi;
-
+    const id_budaya = budayaResponse.data.budaya.id_budaya;
+    
     if (galleryFiles && galleryFiles.length > 0) {
       const galleryFormData = new FormData();
-      galleryFormData.append('id_konten', id_akomodasi);
-      galleryFormData.append('tipe_konten', 'akomodasi');
-      
-      galleryFiles.forEach((galleryItem) => {
-        galleryFormData.append(`media_galeri_files`, galleryItem.file);
-        galleryFormData.append('deskripsi_file', galleryItem.deskripsi || '');
-        galleryFormData.append('jenis_file', galleryItem.jenis_file);
-        galleryFormData.append('urutan_tampil', galleryItem.urutan);
+      galleryFormData.append('id_konten', id_budaya);
+      galleryFormData.append('tipe_konten', 'budaya');
+      galleryFiles.forEach(item => {
+        galleryFormData.append('media_galeri_files', item.file);
+        galleryFormData.append('deskripsi_file', item.deskripsi);
+        galleryFormData.append('jenis_file', item.jenis_file);
+        galleryFormData.append('urutan_tampil', item.urutan);
       });
       await axios.post('http://localhost:5000/api/media-galeri', galleryFormData, {
         headers: {
@@ -212,19 +222,19 @@ const handleSaveAkomodasi = async (formData, galleryFiles) => {
       });
     }
     openPopUp("success", "create");
-    closeAkomodasiForm();
+    closeBudayaForm();
   } catch (err) {
-    console.error('Gagal menyimpan akomodasi:', err.response?.data);
-    openPopUp("error", "create", err.response?.data?.error || "Gagal menyimpan akomodasi. Periksa kembali input Anda.");
+    console.error('Gagal menyimpan budaya:', err.response?.data);
+    openPopUp("error", "create", err.response?.data?.error || "Gagal menyimpan budaya.");
   }
 };
 
-const handleUpdateAkomodasi = async (formData, galleryFiles, deletedGalleryIds) => {
+const handleUpdateBudaya = async (formData, galleryFiles, deletedGalleryIds) => {
   try {
     const token = localStorage.getItem('access_token');
-    const id = formData.get('id_akomodasi');
+    const id = formData.get('id_budaya');
     
-    await axios.put(`http://localhost:5000/api/akomodasi/${id}`, formData, {
+    await axios.put(`http://localhost:5000/api/budaya/${id}`, formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
         Authorization: `Bearer ${token}`
@@ -234,12 +244,12 @@ const handleUpdateAkomodasi = async (formData, galleryFiles, deletedGalleryIds) 
     if (galleryFiles && galleryFiles.length > 0) {
       const galleryFormData = new FormData();
       galleryFormData.append('id_konten', id);
-      galleryFormData.append('tipe_konten', 'akomodasi');
-      galleryFiles.forEach((galleryItem) => {
-        galleryFormData.append(`media_galeri_files`, galleryItem.file);
-        galleryFormData.append('deskripsi_file', galleryItem.deskripsi || '');
-        galleryFormData.append('jenis_file', galleryItem.jenis_file);
-        galleryFormData.append('urutan_tampil', galleryItem.urutan);
+      galleryFormData.append('tipe_konten', 'budaya');
+      galleryFiles.forEach(item => {
+        galleryFormData.append('media_galeri_files', item.file);
+        galleryFormData.append('deskripsi_file', item.deskripsi);
+        galleryFormData.append('jenis_file', item.jenis_file);
+        galleryFormData.append('urutan_tampil', item.urutan);
       });
       await axios.post('http://localhost:5000/api/media-galeri', galleryFormData, {
         headers: {
@@ -257,21 +267,21 @@ const handleUpdateAkomodasi = async (formData, galleryFiles, deletedGalleryIds) 
       }));
     }
     openPopUp("success", "update");
-    closeAkomodasiForm();
+    closeBudayaForm();
   } catch (err) {
-    console.error('Gagal memperbarui akomodasi:', err.response?.data);
-    openPopUp("error", "update", err.response?.data?.error || "Gagal memperbarui akomodasi.");
+    console.error('Gagal memperbarui budaya:', err.response?.data);
+    openPopUp("error", "update", err.response?.data?.error || "Gagal memperbarui budaya.");
   }
 };
 
 onMounted(() => {
-  fetchAkomodasiData();
+  fetchBudayaData();
+  fetchKategoriBudayaData();
 });
 </script>
 
 <style scoped>
-/* =========== Perubahan Styling untuk Konsistensi =========== */
-
+/* Styling yang sama dari DestinasiManagement.vue */
 .action-bar {
   display: flex;
   justify-content: flex-end;
@@ -358,11 +368,20 @@ onMounted(() => {
 }
 .actions .delete-button {
   background-color: #dc3545;
-  color: white;
   box-shadow: 0 2px 8px rgba(220, 53, 69, 0.2);
 }
 .actions .delete-button:hover {
   background-color: #c82333;
   box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
 }
-</style>  
+.category-badge {
+  display: inline-block;
+  padding: 0.3rem 0.7rem;
+  border-radius: 20px;
+  background-color: #28a745;
+  color: white;
+  font-size: 0.8rem;
+  font-weight: 500;
+  white-space: nowrap;
+}
+</style>

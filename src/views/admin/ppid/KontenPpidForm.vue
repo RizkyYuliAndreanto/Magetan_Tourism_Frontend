@@ -1,7 +1,9 @@
 <template>
   <div class="form-card">
     <div class="form-header">
-      <h3 class="form-title">{{ isEditing ? 'Edit Konten PPID' : 'Tambah Konten PPID Baru' }}</h3>
+      <h3 class="form-title">
+        {{ isEditing ? 'Edit Konten PPID' : 'Tambah Konten PPID Baru' }}
+      </h3>
       <button class="close-form-btn" @click="$emit('close-form')">
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -13,7 +15,8 @@
           stroke-width="2"
           stroke-linecap="round"
           stroke-linejoin="round"
-          class="feather feather-x">
+          class="feather feather-x"
+        >
           <line x1="18" y1="6" x2="6" y2="18"></line>
           <line x1="6" y1="6" x2="18" y2="18"></line>
         </svg>
@@ -32,7 +35,8 @@
             stroke-width="2"
             stroke-linecap="round"
             stroke-linejoin="round"
-            class="feather feather-file-text">
+            class="feather feather-file-text"
+          >
             <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
             <polyline points="14 2 14 8 20 8"></polyline>
             <line x1="16" y1="13" x2="8" y2="13"></line>
@@ -44,38 +48,225 @@
         <div class="form-grid">
           <div class="form-group">
             <label for="judul_konten">Judul Konten <span class="required">*</span></label>
-            <input type="text" id="judul_konten" v-model="formData.judul_konten" class="form-input" required>
+            <input
+              type="text"
+              id="judul_konten"
+              v-model="formData.judul_konten"
+              class="form-input"
+              required
+            />
           </div>
           <div class="form-group">
             <label for="id_kategori_ppid">Kategori PPID <span class="required">*</span></label>
-            <select id="id_kategori_ppid" v-model="formData.id_kategori_ppid" class="form-input" required>
+            <select
+              id="id_kategori_ppid"
+              v-model="formData.id_kategori_ppid"
+              class="form-input"
+              required
+            >
               <option value="">Pilih Kategori</option>
-              <option v-for="kategori in kategoriList" :key="kategori.id_kategori_ppid" :value="kategori.id_kategori_ppid">
+              <option
+                v-for="kategori in kategoriList"
+                :key="kategori.id_kategori_ppid"
+                :value="kategori.id_kategori_ppid"
+              >
                 {{ kategori.nama_kategori }}
               </option>
             </select>
           </div>
           <div class="form-group span-2">
             <label for="deskripsi_konten">Deskripsi Konten</label>
-            <textarea id="deskripsi_konten" v-model="formData.deskripsi_konten" class="form-input" rows="5"></textarea>
+            <textarea
+              id="deskripsi_konten"
+              v-model="formData.deskripsi_konten"
+              class="form-input"
+              rows="5"
+            ></textarea>
           </div>
           <div class="form-group">
             <label for="file_pdf_ppid">File PDF Utama <span class="required" v-if="!isEditing">*</span></label>
-            <input type="file" id="file_pdf_ppid" @change="handlePdfUpload" class="form-input-file" accept="application/pdf" :required="!isEditing && !formData.file_pdf_path">
-            <p v-if="isEditing && formData.file_pdf_path" class="mt-2 text-sm text-gray-500">File saat ini: <a :href="getFilePath(formData.file_pdf_path)" target="_blank">{{ formData.file_pdf_path.split('/').pop() }}</a></p>
+            <div
+              :class="['file-drop-area', {'is-dragover': isPdfDragover}]"
+              @dragover.prevent="isPdfDragover = true"
+              @dragleave.prevent="isPdfDragover = false"
+              @drop="handleDropPdfFile"
+            >
+              <div class="file-drop-content">
+                <template v-if="!formData.file_pdf_file && !formData.file_pdf_path">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="feather feather-upload-cloud file-icon"
+                  >
+                    <polyline points="16 16 12 12 8 16"></polyline>
+                    <line x1="12" y1="12" x2="12" y2="21"></line>
+                    <path
+                      d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"
+                    ></path>
+                  </svg>
+                  <span class="file-message">
+                    Drag & drop file here or
+                    <label for="file_pdf_ppid" class="file-link">browse</label> to upload
+                  </span>
+                  <input
+                    type="file"
+                    id="file_pdf_ppid"
+                    @change="handlePdfUpload"
+                    class="file-input"
+                    accept="application/pdf"
+                    :required="!isEditing && !formData.file_pdf_path"
+                  />
+                </template>
+                <template v-else>
+                  <div class="file-preview-main">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="24"
+                      height="24"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      class="feather feather-file-text file-icon large-icon"
+                    >
+                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                      <polyline points="14 2 14 8 20 8"></polyline>
+                      <line x1="16" y1="13" x2="8" y2="13"></line>
+                      <line x1="16" y1="17" x2="8" y2="17"></line>
+                      <polyline points="10 9 9 9 8 9"></polyline>
+                    </svg>
+                    <span class="file-message file-name-display">{{
+                      formData.file_pdf_file ? formData.file_pdf_file.name : formData.file_pdf_path.split('/').pop()
+                    }}</span>
+                    <button
+                      type="button"
+                      @click="removePdfFile"
+                      class="cancel-image-btn"
+                      title="Batal"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="24"
+                        height="24"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        class="feather feather-x-square"
+                      >
+                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                        <line x1="9" y1="9" x2="15" y2="15"></line>
+                        <line x1="15" y1="9" x2="9" y2="15"></line>
+                      </svg>
+                      Batal
+                    </button>
+                  </div>
+                </template>
+              </div>
+            </div>
+            <p
+              v-if="isEditing && formData.file_pdf_path"
+              class="mt-2 text-sm text-gray-500"
+            >
+              File saat ini:
+              <a :href="getFilePath(formData.file_pdf_path)" target="_blank">{{
+                formData.file_pdf_path.split("/").pop()
+              }}</a>
+            </p>
           </div>
           <div class="form-group">
             <label for="gambar_sampul_ppid">Gambar Sampul <span class="required" v-if="!isEditing">*</span></label>
-            <input type="file" id="gambar_sampul_ppid" @change="handleSampulUpload" class="form-input-file" accept="image/*" :required="!isEditing && !formData.gambar_sampul">
-            <p v-if="isEditing && formData.gambar_sampul" class="mt-2 text-sm text-gray-500">Gambar saat ini: <a :href="getFilePath(formData.gambar_sampul)" target="_blank">{{ formData.gambar_sampul.split('/').pop() }}</a></p>
+            <div
+              :class="['file-drop-area', {'is-dragover': isSampulDragover}]"
+              @dragover.prevent="isSampulDragover = true"
+              @dragleave.prevent="isSampulDragover = false"
+              @drop="handleDropSampulFile"
+            >
+              <div class="file-drop-content">
+                <template v-if="!formData.gambar_sampul_file && !formData.gambar_sampul">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="feather feather-upload-cloud file-icon"
+                  >
+                    <polyline points="16 16 12 12 8 16"></polyline>
+                    <line x1="12" y1="12" x2="12" y2="21"></line>
+                    <path
+                      d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"
+                    ></path>
+                  </svg>
+                  <span class="file-message">
+                    Drag & drop file here or
+                    <label for="gambar_sampul_ppid" class="file-link">browse</label> to upload
+                  </span>
+                  <input
+                    type="file"
+                    id="gambar_sampul_ppid"
+                    @change="handleSampulUpload"
+                    class="file-input"
+                    accept="image/*"
+                    :required="!isEditing && !formData.gambar_sampul"
+                  />
+                </template>
+                <template v-else>
+                  <div class="image-preview-main">
+                    <img
+                      :src="formData.gambar_sampul_file ? getFileUrl(formData.gambar_sampul_file) : getFilePath(formData.gambar_sampul)"
+                      alt="Sampul Image Preview"
+                      class="hero-image-preview"
+                    />
+                    <button
+                      type="button"
+                      @click="removeSampulFile"
+                      class="cancel-image-btn"
+                      title="Batal"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="24"
+                        height="24"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        class="feather feather-x-square"
+                      >
+                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                        <line x1="9" y1="9" x2="15" y2="15"></line>
+                        <line x1="15" y1="9" x2="9" y2="15"></line>
+                      </svg>
+                      Batal
+                    </button>
+                  </div>
+                </template>
+              </div>
+            </div>
           </div>
         </div>
       </div>
-      
-      <hr class="form-divider">
-      
-      <div class="form-section">
-        <h4 class="section-title">
+
+      <div class="form-actions">
+        <button type="submit" class="action-button save-button">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             width="24"
@@ -86,57 +277,35 @@
             stroke-width="2"
             stroke-linecap="round"
             stroke-linejoin="round"
-            class="feather feather-camera">
-            <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
-            <circle cx="12" cy="13" r="4"></circle>
+            class="feather feather-save"
+          >
+            <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+            <polyline points="17 21 17 13 7 13 7 21"></polyline>
+            <polyline points="7 3 7 8 15 8"></polyline>
           </svg>
-          Media Galeri
-        </h4>
-        <div class="gallery-preview-container" v-if="isEditing && initialGalleryFiles.length > 0">
-          <div v-for="file in initialGalleryFiles" :key="file.id_media_galeri" class="media-card">
-            <img v-if="file.jenis_file === 'gambar'" :src="getMediaUrl(file.path_file)" class="media-thumbnail" alt="Galeri Media">
-            <video v-else-if="file.jenis_file === 'video'" :src="getMediaUrl(file.path_file)" class="media-thumbnail" controls></video>
-            <p class="media-description">{{ file.deskripsi_file }}</p>
-            <button class="delete-media-button" @click="removeExistingGalleryFile(file.id_media_galeri)">
-              <i class="fas fa-trash-alt"></i>
-            </button>
-          </div>
-        </div>
-        
-        <div class="form-group mt-4">
-          <label for="galeri-files">Unggah File Galeri Baru (Gambar/Video)</label>
-          <div class="file-drop-area" @dragover.prevent @drop="handleDropGalleryFiles">
-            <div class="file-drop-content">
-              <i class="fas fa-cloud-upload-alt file-icon"></i>
-              <span class="file-message">Drag & drop files here or <label for="galeri-files" class="file-link">browse</label> to upload</span>
-              <input type="file" id="galeri-files" @change="handleGalleryFileUpload" class="file-input" multiple accept="image/*,video/*">
-            </div>
-          </div>
-        </div>
-        
-        <div class="gallery-preview-container" v-if="galleryFiles.length > 0">
-          <div v-for="(file, index) in galleryFiles" :key="`new-${index}`" class="media-card">
-            <div class="thumbnail-wrapper">
-              <img v-if="file.previewUrl" :src="file.previewUrl" alt="Preview Thumbnail" class="media-thumbnail">
-              <i v-else class="fas fa-file-alt placeholder-icon"></i>
-              <div class="thumbnail-overlay">
-                <span class="file-name">{{ file.file.name }}</span>
-              </div>
-            </div>
-            <p class="media-description">{{ file.deskripsi }}</p>
-            <button class="delete-media-button" @click="removeGalleryFile(index)">
-              <i class="fas fa-trash-alt"></i>
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <div class="form-actions">
-        <button type="submit" class="action-button save-button">
-          <i class="fas fa-save"></i> {{ isEditing ? 'Simpan Perubahan' : 'Simpan Konten & Galeri' }}
+          {{ isEditing ? 'Simpan Perubahan' : 'Simpan Konten' }}
         </button>
-        <button type="button" class="action-button cancel-button" @click="$emit('close-form')">
-          <i class="fas fa-times"></i> Batal
+        <button
+          type="button"
+          class="action-button cancel-button"
+          @click="$emit('close-form')"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            class="feather feather-x"
+          >
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+          Batal
         </button>
       </div>
     </form>
@@ -144,8 +313,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted, nextTick, watch } from 'vue';
-import axios from 'axios';
+import { ref, watch, defineProps, defineEmits, onUnmounted } from 'vue';
 
 const props = defineProps({
   isEditing: Boolean,
@@ -154,125 +322,142 @@ const props = defineProps({
     type: Array,
     required: true,
   },
-  galleryList: {
-    type: Array,
-    default: () => [],
-  },
 });
 
 const emit = defineEmits(['close-form', 'save-konten', 'update-konten']);
 
 const formData = ref({});
-const galleryFiles = ref([]);
-const initialGalleryFiles = ref([]);
-const deletedGalleryIds = ref([]);
+const isPdfDragover = ref(false);
+const isSampulDragover = ref(false);
 
 watch(() => props.initialData, (newVal) => {
-  formData.value = { ...newVal };
-  initialGalleryFiles.value = props.galleryList ? [...props.galleryList] : [];
-  galleryFiles.value = [];
-  deletedGalleryIds.value = [];
-}, { immediate: true });
-
-const handlePdfUpload = (event) => {
-  formData.value.file_pdf_ppid = event.target.files[0];
-};
-
-// BARU: Fungsi untuk menangani upload gambar sampul
-const handleSampulUpload = (event) => {
-  formData.value.gambar_sampul_ppid = event.target.files[0];
-};
-
-const handleGalleryFileUpload = (event) => {
-  const files = event.target.files;
-  addGalleryFiles(files);
-  event.target.value = '';
-};
-
-const handleDropGalleryFiles = (event) => {
-  event.preventDefault();
-  const files = event.dataTransfer.files;
-  addGalleryFiles(files);
-};
-
-const addGalleryFiles = (files) => {
-  for (const file of files) {
-    if (file.type.startsWith('image/') || file.type.startsWith('video/')) {
-      let previewUrl = null;
-      if (file.type.startsWith('image/')) {
-        previewUrl = URL.createObjectURL(file);
-      }
-      galleryFiles.value.push({
-        file,
-        deskripsi: '',
-        urutan: galleryFiles.value.length + 1,
-        jenis_file: file.type.startsWith('image/') ? 'gambar' : 'video',
-        previewUrl
-      });
-    }
-  }
-};
-
-const removeGalleryFile = (index) => {
-  if (galleryFiles.value[index].previewUrl) {
-    URL.revokeObjectURL(galleryFiles.value[index].previewUrl);
-  }
-  galleryFiles.value.splice(index, 1);
-};
-
-const removeExistingGalleryFile = (id) => {
-  if (confirm('Apakah Anda yakin ingin menghapus file galeri ini? Perubahan akan disimpan saat Anda memperbarui konten.')) {
-    initialGalleryFiles.value = initialGalleryFiles.value.filter(file => file.id_media_galeri !== id);
-    deletedGalleryIds.value.push(id);
-  }
-};
+  formData.value = newVal ? { ...newVal } : {};
+}, { immediate: true, deep: true });
 
 const getFilePath = (path) => {
   return `http://localhost:5000${path}`;
 };
-
-const getMediaUrl = (path) => {
-  return `http://localhost:5000${path}`;
+const getFileUrl = (file) => {
+  return URL.createObjectURL(file);
 };
+
+// Logika untuk File PDF Utama
+const handlePdfUpload = (event) => {
+  const file = event.target.files[0];
+  if (file && file.type === 'application/pdf') {
+    formData.value.file_pdf_file = file;
+    if (formData.value.file_pdf_path) {
+      formData.value.file_pdf_path = null;
+    }
+  } else {
+    alert("Hanya file PDF yang diizinkan untuk File PDF Utama.");
+    event.target.value = null;
+  }
+};
+const handleDropPdfFile = (event) => {
+  event.preventDefault();
+  isPdfDragover.value = false;
+  const file = event.dataTransfer.files[0];
+  if (file && file.type === 'application/pdf') {
+    formData.value.file_pdf_file = file;
+    if (formData.value.file_pdf_path) {
+      formData.value.file_pdf_path = null;
+    }
+  } else {
+    alert("Hanya file PDF yang diizinkan untuk File PDF Utama.");
+  }
+};
+const removePdfFile = () => {
+  if (formData.value.file_pdf_file) {
+    URL.revokeObjectURL(getFileUrl(formData.value.file_pdf_file));
+  }
+  formData.value.file_pdf_file = null;
+  // Jika ini mode edit, kita biarkan file_pdf_path tetap ada sampai form di-submit
+};
+
+// Logika untuk Gambar Sampul
+const handleSampulUpload = (event) => {
+  const file = event.target.files[0];
+  if (file && file.type.startsWith('image/')) {
+    formData.value.gambar_sampul_file = file;
+    if (formData.value.gambar_sampul) {
+      formData.value.gambar_sampul = null;
+    }
+  } else {
+    alert("Hanya file gambar yang diizinkan untuk Gambar Sampul.");
+    event.target.value = null;
+  }
+};
+const handleDropSampulFile = (event) => {
+  event.preventDefault();
+  isSampulDragover.value = false;
+  const file = event.dataTransfer.files[0];
+  if (file && file.type.startsWith('image/')) {
+    formData.value.gambar_sampul_file = file;
+    if (formData.value.gambar_sampul) {
+      formData.value.gambar_sampul = null;
+    }
+  } else {
+    alert("Hanya file gambar yang diizinkan untuk Gambar Sampul.");
+  }
+};
+const removeSampulFile = () => {
+  if (formData.value.gambar_sampul_file) {
+    URL.revokeObjectURL(getFileUrl(formData.value.gambar_sampul_file));
+  }
+  formData.value.gambar_sampul_file = null;
+};
+
+onUnmounted(() => {
+  if (formData.value.file_pdf_file) {
+    URL.revokeObjectURL(getFileUrl(formData.value.file_pdf_file));
+  }
+  if (formData.value.gambar_sampul_file) {
+    URL.revokeObjectURL(getFileUrl(formData.value.gambar_sampul_file));
+  }
+});
 
 const submitForm = () => {
   const submitData = new FormData();
-  for (const key in formData.value) {
-    if (formData.value[key] !== null) {
-      submitData.append(key, formData.value[key]);
-    }
-  }
 
-  // Menambahkan file ke FormData
-  if (formData.value.file_pdf_ppid) {
-    submitData.append('file_pdf_ppid', formData.value.file_pdf_ppid);
+  // Tambahkan field teks secara eksplisit
+  if (formData.value.judul_konten) submitData.append('judul_konten', formData.value.judul_konten);
+  if (formData.value.deskripsi_konten) submitData.append('deskripsi_konten', formData.value.deskripsi_konten);
+  if (formData.value.id_kategori_ppid) submitData.append('id_kategori_ppid', formData.value.id_kategori_ppid);
+
+  // Tambahkan file hanya jika ada
+  if (formData.value.file_pdf_file) {
+    submitData.append('file_pdf_ppid', formData.value.file_pdf_file);
+  } else if (props.isEditing && formData.value.file_pdf_path) {
+    // Jika tidak ada file baru diunggah, kirim kembali path yang sudah ada
+    submitData.append('file_pdf_path', formData.value.file_pdf_path);
   }
-  if (formData.value.gambar_sampul_ppid) {
-    submitData.append('gambar_sampul_ppid', formData.value.gambar_sampul_ppid);
+  if (formData.value.gambar_sampul_file) {
+    submitData.append('gambar_sampul_ppid', formData.value.gambar_sampul_file);
+  } else if (props.isEditing && formData.value.gambar_sampul) {
+    // Jika tidak ada file baru diunggah, kirim kembali path yang sudah ada
+    submitData.append('gambar_sampul', formData.value.gambar_sampul);
   }
 
   if (props.isEditing) {
-    initialGalleryFiles.value.forEach(item => {
-        submitData.append('existing_gallery_updates', JSON.stringify({
-            id_media_galeri: item.id_media_galeri,
-            deskripsi_file: item.deskripsi_file,
-            urutan_tampil: item.urutan_tampil
-        }));
-    });
-    emit('update-konten', submitData, galleryFiles.value, deletedGalleryIds.value);
+    if (formData.value.id_konten_ppid) submitData.append('id_konten_ppid', formData.value.id_konten_ppid);
+    emit('update-konten', submitData);
   } else {
-    emit('save-konten', submitData, galleryFiles.value);
+    emit('save-konten', submitData);
   }
 };
 </script>
 
 <style scoped>
+/* =========== Gaya CSS yang diselaraskan dengan EventForm.vue =========== */
 /* Core Styling & Layout */
 .form-card {
   background-color: #ffffff;
   padding: 2.5rem;
   border-radius: 16px;
   box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
+  margin: 2rem auto;
+  max-width: 900px;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   border: 1px solid #f0f4f8;
 }
@@ -376,10 +561,6 @@ textarea.form-input {
   resize: vertical;
 }
 
-.required {
-  color: #dc3545;
-}
-
 /* File Drop Area */
 .file-drop-area {
   border: 2px dashed #ced4da;
@@ -441,7 +622,8 @@ textarea.form-input {
   z-index: 10;
 }
 
-.image-preview-main, .file-preview-main {
+.image-preview-main,
+.file-preview-main {
   width: 100%;
   position: relative;
   border-radius: 8px;
@@ -482,36 +664,17 @@ textarea.form-input {
   background-color: #c82333;
   transform: translateY(-2px);
 }
-
-.pdf-link {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.5rem;
-  color: #007bff;
-  text-decoration: none;
+.file-name-display {
   font-weight: 600;
-  transition: color 0.2s;
+  color: #343a40;
+  word-break: break-all;
+  text-align: center;
 }
 
-.pdf-link:hover {
-  color: #0056b3;
+.large-icon {
+  font-size: 4rem;
+  color: #007bff;
 }
-
-.pdf-icon {
-  font-size: 2.5rem;
-  color: #dc3545;
-}
-
-.pdf-file-name {
-  font-size: 0.95rem;
-  color: #495057;
-  font-weight: 500;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
 
 /* Action Buttons */
 .form-actions {
@@ -564,22 +727,23 @@ textarea.form-input {
   .form-card {
     padding: 1.5rem;
   }
+
   .form-grid {
     grid-template-columns: 1fr;
   }
+
   .form-group.span-2 {
     grid-column: 1;
   }
+
   .form-actions {
     flex-direction: column;
     gap: 0.75rem;
   }
+
   .action-button {
     width: 100%;
     justify-content: center;
-  }
-  .image-preview-main {
-    padding: 1rem;
   }
 }
 </style>

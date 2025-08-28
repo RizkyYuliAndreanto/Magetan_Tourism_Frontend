@@ -43,7 +43,7 @@
                 <button class="action-button edit-button" @click="openPengumumanForm(pengumuman)" title="Edit">
                   <i class="fas fa-edit"></i>
                 </button>
-                <button class="action-button delete-button" @click="handleDeletePengumuman(pengumuman.id_pengumuman)" title="Hapus">
+                <button class="action-button delete-button" @click="showDeleteConfirm(pengumuman.id_pengumuman)" title="Hapus">
                   <i class="fas fa-trash-alt"></i>
                 </button>
               </td>
@@ -52,18 +52,87 @@
         </table>
       </div>
     </div>
+
+    <BasePopUp
+      v-if="showPopUp"
+      :key="`${popUpStatus}-${popUpAction}`"
+      :status="popUpStatus"
+      :action="popUpAction"
+      :entity-name="popUpEntity"
+      :error-message="popUpMessage"
+      @close="closePopUp"
+      @confirmed="handleDeleteConfirmed"
+    />
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, nextTick } from 'vue';
 import axios from 'axios';
 import PengumumanForm from './PengumumanForm.vue';
+import BasePopUp from '../../../components/pop-up/BasePopUp.vue';
 
 const pengumumanList = ref([]);
 const formPengumumanOpen = ref(false);
 const isEditingPengumuman = ref(false);
 const formPengumuman = ref(null);
+
+// State untuk pop-up
+const showPopUp = ref(false);
+const popUpStatus = ref("");
+const popUpAction = ref("");
+const popUpEntity = ref("Pengumuman");
+const popUpMessage = ref("");
+const pengumumanToDeleteId = ref(null);
+
+// Fungsi yang memicu pop-up konfirmasi
+const showDeleteConfirm = (id) => {
+  pengumumanToDeleteId.value = id;
+  popUpStatus.value = "confirm";
+  popUpAction.value = "confirmDelete";
+  showPopUp.value = true;
+};
+
+// Fungsi yang dipanggil setelah konfirmasi hapus dari pop-up
+const handleDeleteConfirmed = async () => {
+  // Tutup popup konfirmasi agar komponen unmount
+  closePopUp();
+  await nextTick();
+
+  try {
+    const token = localStorage.getItem('access_token');
+    await axios.delete(`http://localhost:5000/api/pengumuman/${pengumumanToDeleteId.value}`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    openPopUp("success", "delete");
+    fetchPengumumanData();
+  } catch (err) {
+    console.error('Gagal menghapus pengumuman:', err.response?.data);
+    openPopUp("error", "delete", err.response?.data?.error || "Gagal menghapus pengumuman.");
+  } finally {
+    pengumumanToDeleteId.value = null;
+  }
+};
+
+// Fungsi utilitas untuk mengontrol pop-up
+const openPopUp = (status, action, message = "") => {
+  popUpStatus.value = status;
+  popUpAction.value = action;
+  popUpMessage.value = message;
+
+  if (showPopUp.value) {
+    showPopUp.value = false;
+    requestAnimationFrame(() => {
+      showPopUp.value = true;
+    });
+  } else {
+    showPopUp.value = true;
+  }
+};
+
+const closePopUp = () => {
+  showPopUp.value = false;
+};
 
 const fetchPengumumanData = async () => {
   try {
@@ -71,7 +140,7 @@ const fetchPengumumanData = async () => {
     pengumumanList.value = response.data;
   } catch (err) {
     console.error('Gagal memuat data pengumuman:', err);
-    alert('Gagal memuat data pengumuman.');
+    openPopUp("error", "fetch", "Gagal memuat data pengumuman.");
   }
 };
 
@@ -99,6 +168,7 @@ const closePengumumanForm = () => {
   formPengumumanOpen.value = false;
   formPengumuman.value = null;
   isEditingPengumuman.value = false;
+  fetchPengumumanData();
 };
 
 const handleSavePengumuman = async (formData) => {
@@ -110,12 +180,11 @@ const handleSavePengumuman = async (formData) => {
         Authorization: `Bearer ${token}`
       }
     });
-    alert('Pengumuman berhasil ditambahkan!');
+    openPopUp("success", "create");
     closePengumumanForm();
-    fetchPengumumanData();
   } catch (err) {
     console.error('Gagal menyimpan pengumuman:', err.response?.data);
-    alert(err.response?.data?.error || 'Gagal menyimpan pengumuman.');
+    openPopUp("error", "create", err.response?.data?.error || "Gagal menyimpan pengumuman.");
   }
 };
 
@@ -128,28 +197,11 @@ const handleUpdatePengumuman = async (formData) => {
         Authorization: `Bearer ${token}`
       }
     });
-    alert('Pengumuman berhasil diperbarui!');
+    openPopUp("success", "update");
     closePengumumanForm();
-    fetchPengumumanData();
   } catch (err) {
     console.error('Gagal memperbarui pengumuman:', err.response?.data);
-    alert(err.response?.data?.error || 'Gagal memperbarui pengumuman.');
-  }
-};
-
-const handleDeletePengumuman = async (id) => {
-  if (confirm('Apakah Anda yakin ingin menghapus pengumuman ini?')) {
-    try {
-      const token = localStorage.getItem('access_token');
-      await axios.delete(`http://localhost:5000/api/pengumuman/${id}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      alert('Pengumuman berhasil dihapus!');
-      fetchPengumumanData();
-    } catch (err) {
-      console.error('Gagal menghapus pengumuman:', err.response?.data);
-      alert(err.response?.data?.error || 'Gagal menghapus pengumuman.');
-    }
+    openPopUp("error", "update", err.response?.data?.error || "Gagal memperbarui pengumuman.");
   }
 };
 
@@ -171,7 +223,6 @@ onMounted(() => {
   justify-content: flex-end;
   margin-bottom: 1.5rem;
 }
-
 .action-button {
   padding: 0.75rem 1.5rem;
   border-radius: 8px;
@@ -186,16 +237,13 @@ onMounted(() => {
   font-size: 0.9rem;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
-
 .create-button {
   background-color: #007bff;
 }
-
 .create-button:hover {
   background-color: #0069d9;
   box-shadow: 0 6px 16px rgba(0, 123, 255, 0.2);
 }
-
 .form-card.card,
 .table-container.card {
   padding: 0;
@@ -204,28 +252,23 @@ onMounted(() => {
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
   overflow: hidden;
 }
-
 .form-card.card {
   padding: 2rem;
 }
-
 .table-container.card {
   padding: 0;
 }
-
 .data-table {
   width: 100%;
   border-collapse: collapse;
   min-width: 600px;
 }
-
 .data-table th,
 .data-table td {
   padding: 1rem 1.5rem;
   text-align: left;
   border-bottom: 1px solid #e9ecef;
 }
-
 .data-table th {
   background-color: #f8f9fa;
   color: #6c757d;
@@ -234,31 +277,25 @@ onMounted(() => {
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
-
 .data-table td {
   color: #212529;
 }
-
 .data-table tr:last-child td {
   border-bottom: none;
 }
-
 .data-table tr:hover {
   background-color: #f1f3f5;
 }
-
 .no-data-found {
   text-align: center;
   font-style: italic;
   color: #888;
   padding: 2rem;
 }
-
 .actions {
   display: flex;
   gap: 0.5rem;
 }
-
 .actions .action-button {
   padding: 0.6rem;
   width: 2.2rem;
@@ -269,24 +306,20 @@ onMounted(() => {
   justify-content: center;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
-
 .actions .edit-button {
   background-color: #ffc107;
   color: white;
   box-shadow: 0 2px 8px rgba(255, 193, 7, 0.2);
 }
-
 .actions .edit-button:hover {
   background-color: #e0a800;
   box-shadow: 0 4px 12px rgba(255, 193, 7, 0.3);
 }
-
 .actions .delete-button {
   background-color: #dc3545;
   color: white;
   box-shadow: 0 2px 8px rgba(220, 53, 69, 0.2);
 }
-
 .actions .delete-button:hover {
   background-color: #c82333;
   box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);

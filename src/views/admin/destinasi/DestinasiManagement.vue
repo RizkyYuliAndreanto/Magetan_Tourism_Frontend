@@ -31,6 +31,11 @@
             </tr>
           </thead>
           <tbody>
+            <tr v-if="destinasiList.length === 0">
+              <td colspan="5" class="no-data-found">
+                Tidak ada destinasi yang tersedia.
+              </td>
+            </tr>
             <tr v-for="destinasi in destinasiList" :key="destinasi.id_destinasi">
               <td>{{ destinasi.id_destinasi }}</td>
               <td>{{ destinasi.nama_destinasi }}</td>
@@ -40,7 +45,7 @@
                 <button class="action-button edit-button" @click="openDestinasiForm(destinasi)" title="Edit">
                   <i class="fas fa-edit"></i>
                 </button>
-                <button class="action-button delete-button" @click="handleDeleteDestinasi(destinasi.id_destinasi)" title="Hapus">
+                <button class="action-button delete-button" @click="showDeleteConfirm(destinasi.id_destinasi)" title="Hapus">
                   <i class="fas fa-trash-alt"></i>
                 </button>
               </td>
@@ -49,13 +54,25 @@
         </table>
       </div>
     </div>
+
+    <BasePopUp
+      v-if="showPopUp"
+      :key="`${popUpStatus}-${popUpAction}`"
+      :status="popUpStatus"
+      :action="popUpAction"
+      :entity-name="popUpEntity"
+      :error-message="popUpMessage"
+      @close="closePopUp"
+      @confirmed="handleDeleteConfirmed"
+    />
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, nextTick } from 'vue';
 import axios from 'axios';
 import DestinasiForm from './DestinasiForm.vue';
+import BasePopUp from '../../../components/pop-up/BasePopUp.vue';
 
 const destinasiList = ref([]);
 const kategoriDestinasiList = ref([]);
@@ -64,12 +81,70 @@ const isEditingDestinasi = ref(false);
 const formDestinasi = ref(null);
 const editingDestinasiGallery = ref([]);
 
+// State untuk pop-up
+const showPopUp = ref(false);
+const popUpStatus = ref("");
+const popUpAction = ref("");
+const popUpEntity = ref("Destinasi");
+const popUpMessage = ref("");
+const destinasiToDeleteId = ref(null);
+
+// Fungsi yang memicu pop-up konfirmasi
+const showDeleteConfirm = (id) => {
+  destinasiToDeleteId.value = id;
+  popUpStatus.value = "confirm";
+  popUpAction.value = "confirmDelete";
+  showPopUp.value = true;
+};
+
+// Fungsi yang dipanggil setelah konfirmasi hapus dari pop-up
+const handleDeleteConfirmed = async () => {
+  // Tutup popup konfirmasi agar komponen unmount
+  closePopUp();
+  await nextTick();
+
+  try {
+    const token = localStorage.getItem('access_token');
+    await axios.delete(`http://localhost:5000/api/destinasi/${destinasiToDeleteId.value}`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    openPopUp("success", "delete");
+    fetchDestinasiData();
+  } catch (err) {
+    console.error('Gagal menghapus destinasi:', err.response?.data);
+    openPopUp("error", "delete", err.response?.data?.error || "Gagal menghapus destinasi.");
+  } finally {
+    destinasiToDeleteId.value = null;
+  }
+};
+
+// Fungsi utilitas untuk mengontrol pop-up
+const openPopUp = (status, action, message = "") => {
+  popUpStatus.value = status;
+  popUpAction.value = action;
+  popUpMessage.value = message;
+
+  if (showPopUp.value) {
+    showPopUp.value = false;
+    requestAnimationFrame(() => {
+      showPopUp.value = true;
+    });
+  } else {
+    showPopUp.value = true;
+  }
+};
+
+const closePopUp = () => {
+  showPopUp.value = false;
+};
+
 const fetchDestinasiData = async () => {
   try {
     const response = await axios.get('http://localhost:5000/api/destinasi');
     destinasiList.value = response.data;
   } catch (err) {
     console.error('Gagal memuat data destinasi:', err);
+    openPopUp("error", "fetch", "Gagal memuat data destinasi.");
   }
 };
 
@@ -79,6 +154,7 @@ const fetchKategoriDestinasiData = async () => {
     kategoriDestinasiList.value = response.data;
   } catch (err) {
     console.error('Gagal memuat data kategori destinasi:', err);
+    openPopUp("error", "fetch", "Gagal memuat data kategori destinasi.");
   }
 };
 
@@ -95,7 +171,7 @@ const openDestinasiForm = async (destinasi = null) => {
       editingDestinasiGallery.value = fullDestinasiData.galeriDestinasi;
     } catch (error) {
       console.error('Gagal memuat detail destinasi:', error);
-      alert('Gagal memuat detail destinasi untuk diedit.');
+      openPopUp("error", "fetch", "Gagal memuat detail destinasi untuk diedit.");
       return;
     }
   } else {
@@ -114,6 +190,7 @@ const closeDestinasiForm = () => {
   formDestinasi.value = null;
   editingDestinasiGallery.value = [];
   isEditingDestinasi.value = false;
+  fetchDestinasiData();
 };
 
 const handleSaveDestinasi = async (formData, galleryFiles) => {
@@ -145,13 +222,11 @@ const handleSaveDestinasi = async (formData, galleryFiles) => {
         }
       });
     }
-
-    alert('Destinasi dan galeri berhasil ditambahkan!');
+    openPopUp("success", "create");
     closeDestinasiForm();
-    fetchDestinasiData();
   } catch (err) {
     console.error('Gagal menyimpan destinasi:', err.response?.data);
-    alert(err.response?.data?.error || 'Gagal menyimpan destinasi.');
+    openPopUp("error", "create", err.response?.data?.error || "Gagal menyimpan destinasi.");
   }
 };
 
@@ -186,35 +261,17 @@ const handleUpdateDestinasi = async (formData, galleryFiles, deletedGalleryIds) 
     }
 
     if (deletedGalleryIds && deletedGalleryIds.length > 0) {
-        await Promise.all(deletedGalleryIds.map(async (mediaId) => {
-            await axios.delete(`http://localhost:5000/api/media-galeri/${mediaId}`, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
-        }));
+      await Promise.all(deletedGalleryIds.map(async (mediaId) => {
+        await axios.delete(`http://localhost:5000/api/media-galeri/${mediaId}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+      }));
     }
-
-    alert('Destinasi berhasil diperbarui!');
+    openPopUp("success", "update");
     closeDestinasiForm();
-    fetchDestinasiData();
   } catch (err) {
     console.error('Gagal memperbarui destinasi:', err.response?.data);
-    alert(err.response?.data?.error || 'Gagal memperbarui destinasi.');
-  }
-};
-
-const handleDeleteDestinasi = async (id) => {
-  if (confirm('Apakah Anda yakin ingin menghapus destinasi ini?')) {
-    try {
-      const token = localStorage.getItem('access_token');
-      await axios.delete(`http://localhost:5000/api/destinasi/${id}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      alert('Destinasi berhasil dihapus!');
-      fetchDestinasiData();
-    } catch (err) {
-      console.error('Gagal menghapus destinasi:', err.response?.data);
-      alert(err.response?.data?.error || 'Gagal menghapus destinasi.');
-    }
+    openPopUp("error", "update", err.response?.data?.error || "Gagal memperbarui destinasi.");
   }
 };
 

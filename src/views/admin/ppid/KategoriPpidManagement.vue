@@ -44,7 +44,7 @@
                   <button class="action-button edit-button" @click="openKategoriForm(kategori)" title="Edit">
                     <i class="fas fa-edit"></i>
                   </button>
-                  <button class="action-button delete-button" @click="handleDeleteKategori(kategori.id_kategori_ppid)" title="Hapus">
+                  <button class="action-button delete-button" @click="showDeleteConfirm(kategori.id_kategori_ppid)" title="Hapus">
                     <i class="fas fa-trash-alt"></i>
                   </button>
                 </td>
@@ -76,7 +76,7 @@
                     <button class="action-button edit-button" @click="openKategoriForm(subKategori)" title="Edit">
                       <i class="fas fa-edit"></i>
                     </button>
-                    <button class="action-button delete-button" @click="handleDeleteKategori(subKategori.id_kategori_ppid)" title="Hapus">
+                    <button class="action-button delete-button" @click="showDeleteConfirm(subKategori.id_kategori_ppid)" title="Hapus">
                       <i class="fas fa-trash-alt"></i>
                     </button>
                   </td>
@@ -87,13 +87,25 @@
         </div>
       </div>
     </div>
+    
+    <BasePopUp
+      v-if="showPopUp"
+      :key="`${popUpStatus}-${popUpAction}`"
+      :status="popUpStatus"
+      :action="popUpAction"
+      :entity-name="popUpEntity"
+      :error-message="popUpMessage"
+      @close="closePopUp"
+      @confirmed="handleDeleteConfirmed"
+    />
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, nextTick } from 'vue';
 import axios from 'axios';
 import KategoriPpidForm from './KategoriPpidForm.vue';
+import BasePopUp from '../../../components/pop-up/BasePopUp.vue';
 
 const kategoriList = ref([]);
 const kategoriIndukList = ref([]);
@@ -102,16 +114,77 @@ const formKategoriOpen = ref(false);
 const isEditingKategori = ref(false);
 const formKategori = ref(null);
 
+const showPopUp = ref(false);
+const popUpStatus = ref("");
+const popUpAction = ref("");
+const popUpEntity = ref("Kategori PPID");
+const popUpMessage = ref("");
+const kategoriToDeleteId = ref(null);
+
+const showDeleteConfirm = (id) => {
+  kategoriToDeleteId.value = id;
+  popUpStatus.value = "confirm";
+  popUpAction.value = "confirmDelete";
+  showPopUp.value = true;
+};
+
+const handleDeleteConfirmed = async () => {
+  closePopUp();
+  await nextTick();
+
+  try {
+    const token = localStorage.getItem('access_token');
+    await axios.delete(`http://localhost:5000/api/kategori-ppid/${kategoriToDeleteId.value}`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    openPopUp("success", "delete");
+    fetchKategoriData();
+  } catch (err) {
+    console.error('Gagal menghapus kategori:', err.response?.data);
+    openPopUp("error", "delete", err.response?.data?.error || "Gagal menghapus kategori.");
+  } finally {
+    kategoriToDeleteId.value = null;
+  }
+};
+
+const openPopUp = (status, action, message = "") => {
+  popUpStatus.value = status;
+  popUpAction.value = action;
+  popUpMessage.value = message;
+
+  if (showPopUp.value) {
+    showPopUp.value = false;
+    requestAnimationFrame(() => {
+      showPopUp.value = true;
+    });
+  } else {
+    showPopUp.value = true;
+  }
+};
+
+const closePopUp = () => {
+  showPopUp.value = false;
+};
+
 const fetchKategoriData = async () => {
   try {
     const response = await axios.get('http://localhost:5000/api/kategori-ppid?includeSubKategori=true');
     kategoriList.value = response.data;
     
-    // Memfilter data menjadi kategori induk dan sub-kategori
-    kategoriIndukData.value = response.data.filter(k => k.id_kategori_induk === null);
-    kategoriIndukList.value = kategoriIndukData.value;
+    const allKategoris = response.data;
+
+    kategoriIndukData.value = allKategoris.filter(k => k.id_kategori_induk === null);
+    
+    kategoriIndukData.value = kategoriIndukData.value.map(induk => ({
+        ...induk,
+        subKategoris: allKategoris.filter(k => k.id_kategori_induk === induk.id_kategori_ppid)
+    }));
+
+    kategoriIndukList.value = kategoriIndukData.value.filter(k => k.id_kategori_induk === null);
+
   } catch (err) {
     console.error('Gagal memuat data kategori PPID:', err);
+    openPopUp("error", "fetch", "Gagal memuat data kategori PPID.");
   }
 };
 
@@ -143,12 +216,11 @@ const handleSaveKategori = async (kategoriData) => {
     await axios.post('http://localhost:5000/api/kategori-ppid', kategoriData, {
       headers: { Authorization: `Bearer ${token}` }
     });
-    alert('Kategori berhasil ditambahkan!');
+    openPopUp("success", "create");
     closeKategoriForm();
-    fetchKategoriData();
   } catch (err) {
     console.error('Gagal menyimpan kategori:', err.response?.data);
-    alert(err.response?.data?.error || 'Gagal menyimpan kategori.');
+    openPopUp("error", "create", err.response?.data?.error || 'Gagal menyimpan kategori.');
   }
 };
 
@@ -158,29 +230,16 @@ const handleUpdateKategori = async (kategoriData) => {
     await axios.put(`http://localhost:5000/api/kategori-ppid/${kategoriData.id_kategori_ppid}`, kategoriData, {
       headers: { Authorization: `Bearer ${token}` }
     });
-    alert('Kategori berhasil diperbarui!');
+    openPopUp("success", "update");
     closeKategoriForm();
-    fetchKategoriData();
   } catch (err) {
     console.error('Gagal memperbarui kategori:', err.response?.data);
-    alert(err.response?.data?.error || 'Gagal memperbarui kategori.');
+    openPopUp("error", "update", err.response?.data?.error || 'Gagal memperbarui kategori.');
   }
 };
 
 const handleDeleteKategori = async (id) => {
-  if (confirm('Apakah Anda yakin ingin menghapus kategori ini?')) {
-    try {
-      const token = localStorage.getItem('access_token');
-      await axios.delete(`http://localhost:5000/api/kategori-ppid/${id}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      alert('Kategori berhasil dihapus!');
-      fetchKategoriData();
-    } catch (err) {
-      console.error('Gagal menghapus kategori:', err.response?.data);
-      alert(err.response?.data?.error || 'Gagal menghapus kategori.');
-    }
-  }
+  showDeleteConfirm(id);
 };
 
 onMounted(() => {
@@ -189,7 +248,36 @@ onMounted(() => {
 </script>
 
 <style scoped>
-/* Perubahan kecil pada styling untuk judul tabel */
+/* =========== Gaya CSS yang diselaraskan dengan AkomodasiManagement.vue =========== */
+.action-bar {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 1.5rem;
+}
+.action-button {
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  border: none;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  color: white;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+.create-button {
+  background-color: #007bff;
+}
+.create-button:hover {
+  background-color: #0069d9;
+  box-shadow: 0 6px 16px rgba(0, 123, 255, 0.2);
+}
+.form-card.card {
+  padding: 2rem;
+}
 .table-container.card {
   padding: 0;
   border: 1px solid #e0e6ed;

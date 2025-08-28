@@ -16,6 +16,8 @@ import VisiMisiView from "../views/admin/visi-misi/VisiMisiView.vue";
 import StrukturOrganisasiView from "../views/admin/struktur-organisasi/StrukturOrganisasiView.vue";
 import AkomodasiView from "../views/admin/akomodasi/AkomodasiView.vue";
 import KontenPpidView from "../views/admin/ppid/KontenPpidView.vue";
+import BudayaView from "../views/admin/budaya/BudayaView.vue";
+
 
 //user
 import PengumumanUserView from "../views/PengumumanUserView.vue";
@@ -117,6 +119,11 @@ const routes = [
         path: "destinasi",
         name: "adminDestinasi",
         component: KategoriDestinasiView,
+      },
+      {
+        path: "budaya",
+        name: "adminBudaya",
+        component: BudayaView,
       },
       {
         path: "event",

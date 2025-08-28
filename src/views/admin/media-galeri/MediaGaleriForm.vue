@@ -30,6 +30,8 @@
             <option value="event">Event</option>
             <option value="umkm">UMKM</option>
             <option value="sejarah">Sejarah</option>
+            <option value="budaya">Budaya</option>
+            <option value="akomodasi">Akomodasi</option>
           </select>
         </div>
         <div class="form-group">
@@ -39,7 +41,8 @@
             id="id_konten"
             v-model="formData.id_konten"
             class="form-input"
-            :disabled="!formData.tipe_konten" />
+            :disabled="!formData.tipe_konten"
+            />
         </div>
         <div class="form-group">
           <label for="urutan_tampil">Urutan Tampil</label>
@@ -211,7 +214,7 @@ const mediaPreviews = ref([]);
 const isDragover = ref(false);
 
 watch(() => props.initialData, (newVal) => {
-  formData.value = { ...newVal };
+  formData.value = newVal ? { ...newVal } : {};
   selectedFiles.value = [];
   mediaPreviews.value = [];
   if (props.isEditing && newVal.path_file) {
@@ -221,10 +224,20 @@ watch(() => props.initialData, (newVal) => {
       file: null,
     });
   }
-}, { immediate: true });
+}, { immediate: true, deep: true });
 
 const handleFileSelection = (files) => {
-  if (files) {
+  if (props.isEditing) {
+    // Hanya izinkan 1 file saat mode edit
+    const fileArray = Array.from(files).slice(0, 1);
+    selectedFiles.value = fileArray;
+    mediaPreviews.value = fileArray.map(file => ({
+      url: URL.createObjectURL(file),
+      type: file.type,
+      file: file
+    }));
+  } else {
+    // Batasi 10 file saat mode create
     const fileArray = Array.from(files).slice(0, 10);
     selectedFiles.value = fileArray;
     mediaPreviews.value = fileArray.map(file => ({
@@ -269,11 +282,15 @@ const submitForm = () => {
   if (props.isEditing) {
     submitData.append('deskripsi_file', formData.value.deskripsi_file || '');
     submitData.append('urutan_tampil', formData.value.urutan_tampil || 0);
-    submitData.append('id_konten', formData.value.id_konten || null);
-    submitData.append('tipe_konten', formData.value.tipe_konten || null);
+    if (formData.value.id_konten) {
+      submitData.append('id_konten', formData.value.id_konten);
+    }
+    if (formData.value.tipe_konten) {
+      submitData.append('tipe_konten', formData.value.tipe_konten);
+    }
 
     if (selectedFiles.value.length > 0) {
-      submitData.append('media_galeri_file', selectedFiles.value[0].file);
+      submitData.append('media_galeri_file', selectedFiles.value[0]);
     }
     emit('update-media', submitData, formData.value.id_media_galeri);
   } else {
@@ -282,10 +299,11 @@ const submitForm = () => {
       return;
     }
     
-    submitData.append('id_konten', formData.value.id_konten || null);
-    submitData.append('tipe_konten', formData.value.tipe_konten || null);
+    // Kirim data metadata sebagai array untuk multiple files
+    submitData.append('id_konten', formData.value.id_konten || '');
+    submitData.append('tipe_konten', formData.value.tipe_konten || '');
     submitData.append('deskripsi_file', formData.value.deskripsi_file || '');
-    submitData.append('urutan_tampil', formData.value.urutan_tampil || 0);
+    submitData.append('urutan_tampil', formData.value.urutan_tampil || '');
 
     selectedFiles.value.forEach((file) => {
       submitData.append('media_galeri_files', file);

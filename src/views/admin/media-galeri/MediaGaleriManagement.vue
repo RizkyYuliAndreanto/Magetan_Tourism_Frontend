@@ -53,7 +53,7 @@
                 <button class="action-button edit-button" @click="openMediaForm(media)" title="Edit">
                   <i class="fas fa-edit"></i>
                 </button>
-                <button class="action-button delete-button" @click="handleDeleteMedia(media.id_media_galeri)" title="Hapus">
+                <button class="action-button delete-button" @click="showDeleteConfirm(media.id_media_galeri)" title="Hapus">
                   <i class="fas fa-trash-alt"></i>
                 </button>
               </td>
@@ -62,18 +62,87 @@
         </table>
       </div>
     </div>
+    
+    <BasePopUp
+      v-if="showPopUp"
+      :key="`${popUpStatus}-${popUpAction}`"
+      :status="popUpStatus"
+      :action="popUpAction"
+      :entity-name="popUpEntity"
+      :error-message="popUpMessage"
+      @close="closePopUp"
+      @confirmed="handleDeleteConfirmed"
+    />
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, nextTick } from 'vue';
 import axios from 'axios';
 import MediaGaleriForm from './MediaGaleriForm.vue';
+import BasePopUp from '../../../components/pop-up/BasePopUp.vue';
 
 const mediaGaleriList = ref([]);
 const formMediaOpen = ref(false);
 const isEditingMedia = ref(false);
 const formMedia = ref(null);
+
+// State untuk pop-up
+const showPopUp = ref(false);
+const popUpStatus = ref("");
+const popUpAction = ref("");
+const popUpEntity = ref("Media Galeri");
+const popUpMessage = ref("");
+const mediaToDeleteId = ref(null);
+
+// Fungsi yang memicu pop-up konfirmasi
+const showDeleteConfirm = (id) => {
+  mediaToDeleteId.value = id;
+  popUpStatus.value = "confirm";
+  popUpAction.value = "confirmDelete";
+  showPopUp.value = true;
+};
+
+// Fungsi yang dipanggil setelah konfirmasi hapus dari pop-up
+const handleDeleteConfirmed = async () => {
+  // Tutup popup konfirmasi agar komponen unmount
+  closePopUp();
+  await nextTick();
+
+  try {
+    const token = localStorage.getItem('access_token');
+    await axios.delete(`http://localhost:5000/api/media-galeri/${mediaToDeleteId.value}`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    openPopUp("success", "delete");
+    fetchMediaGaleriData();
+  } catch (err) {
+    console.error('Gagal menghapus media:', err.response?.data);
+    openPopUp("error", "delete", err.response?.data?.error || "Gagal menghapus media.");
+  } finally {
+    mediaToDeleteId.value = null;
+  }
+};
+
+// Fungsi utilitas untuk mengontrol pop-up
+const openPopUp = (status, action, message = "") => {
+  popUpStatus.value = status;
+  popUpAction.value = action;
+  popUpMessage.value = message;
+
+  if (showPopUp.value) {
+    showPopUp.value = false;
+    requestAnimationFrame(() => {
+      showPopUp.value = true;
+    });
+  } else {
+    showPopUp.value = true;
+  }
+};
+
+const closePopUp = () => {
+  showPopUp.value = false;
+};
 
 const fetchMediaGaleriData = async () => {
   try {
@@ -81,7 +150,7 @@ const fetchMediaGaleriData = async () => {
     mediaGaleriList.value = response.data;
   } catch (err) {
     console.error('Gagal memuat data media galeri:', err);
-    alert('Gagal memuat data media galeri.');
+    openPopUp("error", "fetch", "Gagal memuat data media galeri.");
   }
 };
 
@@ -117,11 +186,11 @@ const handleSaveMedia = async (formData) => {
         Authorization: `Bearer ${token}`
       }
     });
-    alert('Media galeri berhasil ditambahkan!');
+    openPopUp("success", "create");
     closeMediaForm();
   } catch (err) {
     console.error('Gagal menyimpan media galeri:', err.response?.data);
-    alert(err.response?.data?.error || 'Gagal menyimpan media galeri.');
+    openPopUp("error", "create", err.response?.data?.error || "Gagal menyimpan media galeri.");
   }
 };
 
@@ -134,32 +203,16 @@ const handleUpdateMedia = async (formData, mediaId) => {
         Authorization: `Bearer ${token}`
       }
     });
-    alert('Media galeri berhasil diperbarui!');
+    openPopUp("success", "update");
     closeMediaForm();
   } catch (err) {
     console.error('Gagal memperbarui media galeri:', err.response?.data);
-    alert(err.response?.data?.error || 'Gagal memperbarui media galeri.');
-  }
-};
-
-const handleDeleteMedia = async (id) => {
-  if (confirm('Apakah Anda yakin ingin menghapus media ini?')) {
-    try {
-      const token = localStorage.getItem('access_token');
-      await axios.delete(`http://localhost:5000/api/media-galeri/${id}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      alert('Media berhasil dihapus!');
-      fetchMediaGaleriData();
-    } catch (err) {
-      console.error('Gagal menghapus media:', err.response?.data);
-      alert(err.response?.data?.error || 'Gagal menghapus media.');
-    }
+    openPopUp("error", "update", err.response?.data?.error || "Gagal memperbarui media galeri.");
   }
 };
 
 const getMediaUrl = (path) => {
-    return `http://localhost:5000${path}`;
+  return `http://localhost:5000${path}`;
 };
 
 onMounted(() => {
@@ -190,11 +243,9 @@ onMounted(() => {
   font-size: 0.9rem;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
-
 .create-button {
   background-color: #007bff;
 }
-
 .create-button:hover {
   background-color: #0069d9;
   box-shadow: 0 6px 16px rgba(0, 123, 255, 0.2);
