@@ -2,6 +2,10 @@
   <div class="home-view">
     <main>
       <HeroSection />
+      <CarouselDestinasi />
+      <KebudayaanHero />
+      <EventSection />
+      <EkonimiKreatifSection />
       <FeaturedPrograms />
       <NewsGrid />
       <GallerySection />
@@ -19,7 +23,10 @@ import NewsGrid from "../components/home/NewsGrid.vue";
 import GallerySection from "../components/home/GallerySection.vue";
 import SocialMediaGrid from "../components/home/SocialMediaGrid.vue";
 import GisMapSection from "../components/home/GisMapSection.vue";
-
+import CarouselDestinasi from "../components/home/CarouselDestinasi.vue";
+import KebudayaanHero from "../components/home/KebudayaanHero.vue";
+import EventSection from "../components/home/EventSection.vue";
+import EkonimiKreatifSection from "../components/home/EkonimiKreatifSection.vue";
 // Catatan: Anda tidak perlu mengimpor TrendingNews dan InstagramCard lagi
 // karena keduanya sudah menjadi bagian dari NewsGrid.vue
 

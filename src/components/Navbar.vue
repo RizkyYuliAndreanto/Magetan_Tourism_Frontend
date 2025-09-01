@@ -28,14 +28,15 @@
           <router-link to="/" class="navbar-links" @click="closeMenu">Berita</router-link>
         </li>
         <li class="navbar-item">
+          <router-link to="/profil-dinas" class="navbar-links" @click="closeMenu">Profil Dinas</router-link>
+        </li>
+        <li class="navbar-item">
           <router-link to="/destinasi" class="navbar-links" @click="closeMenu">Destinasi</router-link>
         </li>
         <li class="navbar-item">
           <router-link to="/event" class="navbar-links" @click="closeMenu">Event</router-link>
         </li>
-        <li class="navbar-item">
-          <router-link to="/profil-dinas" class="navbar-links" @click="closeMenu">Profil Dinas</router-link>
-        </li>
+        
         <li class="navbar-item">
           <router-link to="/pengumuman" class="navbar-links" @click="closeMenu">pengumuman</router-link>
         </li>
