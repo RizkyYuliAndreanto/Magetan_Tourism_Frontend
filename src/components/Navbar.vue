@@ -38,7 +38,10 @@
         </li>
         
         <li class="navbar-item">
-          <router-link to="/pengumuman" class="navbar-links" @click="closeMenu">pengumuman</router-link>
+          <router-link to="/Budaya" class="navbar-links" @click="closeMenu">Budaya</router-link>
+        </li>
+         <li class="navbar-item">
+          <router-link to="/pengumuman" class="navbar-links" @click="closeMenu">Pengumuman</router-link>
         </li>
 
         <li class="navbar-item navbar-login">

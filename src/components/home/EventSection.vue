@@ -13,7 +13,14 @@
         <div
           v-for="(event, index) in comingSoonEvents.slice(0, 3)"
           :key="event.id_event"
-          class="event-card">
+          class="event-card"
+          :style="{
+            backgroundImage: `linear-gradient(180deg, rgba(255,255,255,0.7) 60%, rgba(0,123,255,0.08) 100%), url(${getEventImage(
+              event.gambar_event
+            )})`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+          }">
           <div class="card-date">
             <span class="day">{{
               formatDate(event.tanggal_mulai, "day")
@@ -27,8 +34,19 @@
               :src="getEventImage(event.gambar_event)"
               :alt="`Flyer ${event.nama_event}`"
               class="event-flyer" />
+            <div class="image-overlay"></div>
           </div>
-          <p class="event-title">{{ event.nama_event }}</p>
+          <div class="event-info">
+            <p class="event-title">{{ event.nama_event }}</p>
+            <p v-if="event.deskripsi_event" class="event-desc">
+              {{ event.deskripsi_event.slice(0, 80) }}...
+            </p>
+            <router-link
+              :to="`/event/${event.id_event}`"
+              class="event-detail-btn"
+              >Lihat Detail</router-link
+            >
+          </div>
         </div>
       </div>
       <p v-if="comingSoonEvents.length === 0" class="no-events-message">
@@ -42,7 +60,15 @@
         <span class="divider-line"></span>
       </div>
       <div v-if="pastEvents.length > 0" class="past-events-grid">
-        <div class="past-card-left">
+        <div
+          class="event-card past-card-left"
+          :style="{
+            backgroundImage: `linear-gradient(180deg, rgba(255,255,255,0.7) 60%, rgba(0,123,255,0.08) 100%), url(${getEventImage(
+              pastEvents[0].gambar_event
+            )})`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+          }">
           <div class="card-date">
             <span class="day">{{
               formatDate(pastEvents[0].tanggal_mulai, "day")
@@ -56,30 +82,44 @@
               :src="getEventImage(pastEvents[0].gambar_event)"
               :alt="`Flyer ${pastEvents[0].nama_event}`"
               class="event-flyer" />
+            <div class="image-overlay"></div>
           </div>
-          <p class="event-title">{{ pastEvents[0].nama_event }}</p>
+          <div class="event-info">
+            <p class="event-title">{{ pastEvents[0].nama_event }}</p>
+            <p v-if="pastEvents[0].deskripsi_event" class="event-desc">
+              {{ pastEvents[0].deskripsi_event.slice(0, 80) }}...
+            </p>
+            <router-link
+              :to="`/event/${pastEvents[0].id_event}`"
+              class="event-detail-btn"
+              >Lihat Detail</router-link
+            >
+          </div>
         </div>
         <div class="divider-vertical"></div>
         <div class="past-card-right">
           <div
             class="gallery-masonry"
-            :class="`gallery-count-${Math.min(
-              pastEvents[0].galeriEvent.length,
-              5
-            )}`">
-            <template
-              v-for="(media, idx) in pastEvents[0].galeriEvent.slice(0, 5)"
-              :key="idx">
+            :class="`gallery-count-${Math.min(pastGallery.length || 1, 5)}`">
+            <template v-if="pastGallery.length">
+              <div
+                v-for="(img, idx) in pastGallery.slice(0, 5)"
+                :key="`past-gallery-${idx}`"
+                class="gallery-item">
+                <img :src="img" alt="Media galeri" class="gallery-image" />
+                <div
+                  v-if="idx === 4 && pastGallery.length > 5"
+                  class="gallery-overlay">
+                  +{{ pastGallery.length - 5 }}
+                </div>
+              </div>
+            </template>
+            <template v-else>
               <div class="gallery-item">
                 <img
-                  :src="`${backendUrl}${media.path_file}`"
-                  :alt="media.deskripsi_file || 'Media Galeri'"
+                  src="https://via.placeholder.com/200x140.png?text=Tidak+ada+media"
+                  alt="Tidak ada media"
                   class="gallery-image" />
-                <div
-                  v-if="idx === 4 && pastEvents[0].galeriEvent.length > 5"
-                  class="gallery-overlay">
-                  +{{ pastEvents[0].galeriEvent.length - 5 }}
-                </div>
               </div>
             </template>
           </div>
@@ -93,7 +133,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, computed } from "vue";
 import axios from "axios";
 
 const comingSoonEvents = ref([]);
@@ -146,6 +186,20 @@ const fetchEvents = async () => {
 onMounted(() => {
   fetchEvents();
 });
+
+// Computed gallery for past event (first item)
+const pastGallery = computed(() => {
+  const ev = pastEvents.value?.[0] || {};
+  const list = ev.galeriEvent || ev.galeri || ev.media_galeri || ev.media || [];
+  if (!Array.isArray(list)) return [];
+  return list
+    .map((m) => {
+      const src = m?.path_file || m?.url || m?.gambar || m?.src;
+      if (!src) return null;
+      return src.startsWith("http") ? src : `${backendUrl}${src}`;
+    })
+    .filter(Boolean);
+});
 </script>
 
 <style scoped>
@@ -161,16 +215,24 @@ onMounted(() => {
   align-items: center;
   justify-content: center;
   padding: 32px 0 0 0;
+  
+  color: #fff;
+  border-radius: 0 0 32px 32px;
+  box-shadow: 0 4px 16px rgba(0, 123, 255, 0.09);
+  margin-bottom: 0;
 }
 
 .section-title {
   font-size: 2.2rem;
   font-weight: 700;
   text-align: center;
+  color: #060202;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.13);
+  padding: 18px 0 8px 0;
 }
 
 .coming-soon-section {
-  background: #cfcfcf;
+  background: linear-gradient(135deg, #e3f0fb 0%, #cfcfcf 100%);
   padding: 24px 0 32px 0;
 }
 
@@ -203,16 +265,25 @@ onMounted(() => {
 }
 
 .event-card {
-  background: #dedede;
+  background: linear-gradient(180deg, #dedede 80%, #e3f0fb 100%);
   border-radius: 24px;
   padding: 24px 12px 18px 12px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 2px 12px rgba(0, 123, 255, 0.08);
   text-align: center;
   min-height: 260px;
   position: relative;
+  border: 2px solid #e3eaf5;
+  overflow: hidden;
+  transition: box-shadow 0.3s, border-color 0.3s, transform 0.3s;
+}
+
+.event-card:hover {
+  box-shadow: 0 8px 32px rgba(0, 123, 255, 0.18);
+  border-color: #007bff;
+  transform: translateY(-6px) scale(1.03);
 }
 
 .card-date {
@@ -251,32 +322,98 @@ onMounted(() => {
   aspect-ratio: 1 / 1.2;
   overflow: hidden;
   border-radius: 12px;
-  margin-bottom: 10px;
+  margin-bottom: 0;
   margin-top: 32px;
   display: flex;
   justify-content: center;
   align-items: center;
-  background: #fff;
+  background: #e3f0fb;
+  position: relative;
+  min-height: 180px;
 }
 
 .event-flyer {
   width: 100%;
   height: 100%;
-  object-fit: contain;
-  background: #fff;
+  object-fit: cover;
+  background: transparent;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 123, 255, 0.08);
+}
+
+.image-overlay {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    0deg,
+    rgba(0, 123, 255, 0.08) 0%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  border-radius: 12px;
+  pointer-events: none;
+}
+
+.event-info {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.85);
+  border-radius: 0 0 18px 18px;
+  padding: 12px 8px 16px 8px;
+  margin-top: -8px;
+  box-sizing: border-box;
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .event-title {
   font-size: 1.15rem;
   font-weight: 700;
-  margin: 18px 0 0 0;
+  margin: 0 0 4px 0;
+  color: #007bff;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.event-desc {
+  font-size: 0.95rem;
   color: #222;
+  margin: 0 0 8px 0;
+  font-style: italic;
+  opacity: 0.85;
+  text-align: center;
+}
+
+.event-detail-btn {
+  margin-top: 0;
+  padding: 8px 22px;
+  background: linear-gradient(90deg, #007bff 0%, #009fe3 100%);
+  color: #fff;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 1rem;
+  box-shadow: 0 2px 8px rgba(0, 123, 255, 0.09);
+  border: none;
+  transition: background 0.2s, box-shadow 0.2s, transform 0.2s;
+  display: inline-block;
+}
+
+.event-detail-btn:hover {
+  background: linear-gradient(90deg, #009fe3 0%, #007bff 100%);
+  color: #fff;
+  transform: translateY(-2px) scale(1.05);
 }
 
 /* Past Events */
 .past-events-section {
   background: #fff;
   padding: 24px 0 32px 0;
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
 .past-events-grid {
@@ -285,29 +422,43 @@ onMounted(() => {
   gap: 0;
   padding: 0 32px;
   align-items: stretch;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .past-card-left {
-  background: #dedede;
-  border-radius: 24px 0 0 24px;
+  background: linear-gradient(180deg, #dedede 80%, #e3f0fb 100%);
+  border-radius: 24px;
   padding: 24px 12px 18px 12px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  min-height: 220px;
+  min-height: 260px;
   position: relative;
   justify-content: center;
+  box-shadow: 0 2px 12px rgba(0, 123, 255, 0.08);
+  border: 2px solid #e3eaf5;
+  overflow: hidden;
+  transition: box-shadow 0.3s, border-color 0.3s, transform 0.3s;
+}
+
+.past-card-left:hover {
+  box-shadow: 0 8px 32px rgba(0, 123, 255, 0.18);
+  border-color: #007bff;
+  transform: translateY(-6px) scale(1.03);
 }
 
 .past-card-right {
   background: #dedede;
-  border-radius: 0 24px 24px 0;
+  border-radius: 24px;
   padding: 24px 24px 18px 24px;
   display: flex;
-  align-items: center;
+  align-items: stretch; /* let child fill height */
   min-height: 220px;
-  justify-content: center;
-  text-align: center;
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden;
+  position: relative; /* anchor absolute gallery */
 }
 
 /* Grid media galeri */
@@ -315,7 +466,14 @@ onMounted(() => {
   display: grid;
   width: 100%;
   height: 100%;
+  min-height: 100%;
   gap: 12px;
+  max-width: 100%;
+  /* grid fills the card; remove explicit max height so it matches parent */
+  overflow: hidden;
+  box-sizing: border-box;
+  position: absolute; /* prevent parent growth by content */
+  inset: 0; /* fill past-card-right */
 }
 
 .gallery-count-1 {
@@ -335,8 +493,29 @@ onMounted(() => {
   grid-template-rows: 1fr 1fr;
 }
 .gallery-count-5 {
+  /* 5 item: tata letak 3 kolom x 2 baris, item ke-5 melebar 2 kolom */
   grid-template-columns: 1fr 1fr 1fr;
   grid-template-rows: 1fr 1fr;
+  grid-template-areas:
+    "a b c"
+    "d e e";
+}
+
+/* Pemetaan area untuk 5 item */
+.gallery-count-5 .gallery-item:nth-child(1) {
+  grid-area: a;
+}
+.gallery-count-5 .gallery-item:nth-child(2) {
+  grid-area: b;
+}
+.gallery-count-5 .gallery-item:nth-child(3) {
+  grid-area: c;
+}
+.gallery-count-5 .gallery-item:nth-child(4) {
+  grid-area: d;
+}
+.gallery-count-5 .gallery-item:nth-child(5) {
+  grid-area: e;
 }
 
 .gallery-item {
@@ -349,6 +528,8 @@ onMounted(() => {
   position: relative;
   width: 100%;
   height: 100%;
+  min-height: 60px;
+  min-width: 60px;
 }
 
 .gallery-image {
@@ -403,10 +584,33 @@ onMounted(() => {
     grid-template-columns: 1fr;
     grid-template-rows: repeat(auto-fit, minmax(80px, 1fr));
   }
-  .gallery-count-4,
-  .gallery-count-5 {
+  .gallery-count-4 {
     grid-template-columns: 1fr 1fr;
     grid-template-rows: 1fr 1fr;
+  }
+  .gallery-count-5 {
+    /* 5 item pada tablet: 2 kolom x 3 baris, item ke-5 melebar 2 kolom */
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr 1fr;
+    grid-template-areas:
+      "a b"
+      "c d"
+      "e e";
+  }
+  .gallery-count-5 .gallery-item:nth-child(1) {
+    grid-area: a;
+  }
+  .gallery-count-5 .gallery-item:nth-child(2) {
+    grid-area: b;
+  }
+  .gallery-count-5 .gallery-item:nth-child(3) {
+    grid-area: c;
+  }
+  .gallery-count-5 .gallery-item:nth-child(4) {
+    grid-area: d;
+  }
+  .gallery-count-5 .gallery-item:nth-child(5) {
+    grid-area: e;
   }
   .gallery-item {
     min-height: 80px;

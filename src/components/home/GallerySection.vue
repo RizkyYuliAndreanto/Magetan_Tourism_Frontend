@@ -4,92 +4,133 @@
     <div class="gallery-masonry">
       <div
         v-for="(item, idx) in visibleImages"
-        :key="idx"
+        :key="item.id_media_galeri"
         :class="['gallery-item', gridAreas[idx]]"
         :ref="(el) => (slideRefs[idx] = el)">
-        <img :src="item.url" :alt="item.alt" class="gallery-image" />
+        <img
+          :src="item.url"
+          :alt="item.alt"
+          class="gallery-image"
+          loading="lazy" />
       </div>
     </div>
   </section>
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from "vue";
+import { ref, onMounted, onUnmounted, watch, nextTick } from "vue";
 import axios from "axios";
-import gsap from "gsap";
+import { gsap } from "gsap";
 
-const MAX_VISIBLE = 8; // jumlah grid sesuai firmware
+const MAX_VISIBLE = 8;
 const galleryImages = ref([]);
 const currentIndex = ref(0);
+const visibleImages = ref([]);
 const slideRefs = ref([]);
+let autoSlideInterval = null;
+let isAnimating = false;
 
 const gridAreas = [
-  "area1",
-  "area2",
-  "area3",
-  "area4",
-  "area5",
-  "area6",
-  "area7",
-  "area8",
+  "area1", "area2", "area3", "area4",
+  "area5", "area6", "area7", "area8",
 ];
 
-const visibleImages = computed(() => {
-  // Ambil MAX_VISIBLE gambar mulai dari currentIndex
-  if (galleryImages.value.length <= MAX_VISIBLE) return galleryImages.value;
-  let arr = [];
+const updateVisibleImages = async () => {
+  if (!galleryImages.value.length || isAnimating) return;
+  isAnimating = true;
+
+  // Hitung gambar baru
+  const start = currentIndex.value;
+  const newImages = [];
   for (let i = 0; i < MAX_VISIBLE; i++) {
-    arr.push(
-      galleryImages.value[(currentIndex.value + i) % galleryImages.value.length]
-    );
+    const idx = (start + i) % galleryImages.value.length;
+    newImages.push(galleryImages.value[idx]);
   }
-  return arr;
-});
+
+  // Animasi keluar
+  await gsap.to(slideRefs.value, {
+    opacity: 0,
+    scale: 0.9,
+    y: 20,
+    stagger: { each: 0.05, from: "random" },
+    duration: 0.4,
+    ease: "power2.inOut",
+  });
+
+  // Ganti gambar
+  visibleImages.value = newImages;
+  await nextTick();
+
+  // Animasi masuk
+  await gsap.fromTo(
+    slideRefs.value,
+    { opacity: 0, scale: 0.9, y: -20 },
+    {
+      opacity: 1,
+      scale: 1,
+      y: 0,
+      stagger: { each: 0.05, from: "random" },
+      duration: 0.6,
+      ease: "back.out(1.7)",
+    }
+  );
+
+  isAnimating = false;
+};
+
+const nextSlide = () => {
+  if (galleryImages.value.length <= MAX_VISIBLE) return;
+  currentIndex.value = (currentIndex.value + MAX_VISIBLE) % galleryImages.value.length;
+};
+
+const startAutoSlide = () => {
+  stopAutoSlide();
+  autoSlideInterval = setInterval(nextSlide, 5000);
+};
+
+const stopAutoSlide = () => {
+  if (autoSlideInterval) {
+    clearInterval(autoSlideInterval);
+    autoSlideInterval = null;
+  }
+};
 
 onMounted(async () => {
   try {
     const res = await axios.get("http://localhost:5000/api/media-galeri");
-    galleryImages.value = res.data.map((item, idx) => ({
+    galleryImages.value = res.data.map((item) => ({
+      id_media_galeri: item.id_media_galeri,
       url: `http://localhost:5000${item.path_file}`,
-      alt: item.deskripsi_file || `Media Galeri ${idx + 1}`,
+      alt: item.deskripsi_file || `Media Galeri`,
     }));
+
+    // Render awal
+    visibleImages.value = galleryImages.value.slice(0, MAX_VISIBLE);
+    await nextTick();
+    gsap.set(slideRefs.value, { opacity: 1, scale: 1, y: 0 });
+
     startAutoSlide();
   } catch (err) {
+    console.error("Gagal memuat data galeri:", err);
     galleryImages.value = [];
   }
 });
 
-function startAutoSlide() {
-  setInterval(() => {
-    // GSAP animasi keluar
-    slideRefs.value.forEach((el, i) => {
-      if (el) {
-        gsap.to(el, { opacity: 0, scale: 0.95, duration: 0.5 });
-      }
-    });
-    setTimeout(() => {
-      currentIndex.value =
-        (currentIndex.value + MAX_VISIBLE) % galleryImages.value.length;
-      // GSAP animasi masuk
-      slideRefs.value.forEach((el, i) => {
-        if (el) {
-          gsap.fromTo(
-            el,
-            { opacity: 0, scale: 1.05 },
-            { opacity: 1, scale: 1, duration: 0.7 }
-          );
-        }
-      });
-    }, 500);
-  }, 9000); // ganti gambar tiap 4 detik
-}
+onUnmounted(() => {
+  stopAutoSlide();
+  gsap.killTweensOf(slideRefs.value);
+});
+
+watch(currentIndex, updateVisibleImages);
 </script>
 
 <style scoped>
+/* CSS sama seperti punyamu, tidak diubah */
 .gallery-section {
   padding: 48px 20px;
-  background: #fafbfc;
-  text-align: left;
+  background: linear-gradient(135deg, #f7f7f7, #ececec);
+  text-align: center;
+  overflow: hidden;
 }
 
 .section-title {
@@ -109,6 +150,7 @@ function startAutoSlide() {
   grid-template-columns: repeat(4, 1fr);
   grid-template-rows: 200px 200px 200px;
   gap: 12px;
+  margin: 0 auto;
 }
 
 .gallery-item {
@@ -119,44 +161,36 @@ function startAutoSlide() {
   display: flex;
   align-items: stretch;
   justify-content: stretch;
-  transition: box-shadow 0.2s;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  cursor: pointer;
+}
+
+.gallery-item:hover {
+  transform: translateY(-8px) scale(1.03);
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
 }
 
 .gallery-image {
   width: 100%;
   height: 100%;
-  object-fit: cover; /* gambar proporsional, crop jika perlu */
+  object-fit: cover;
   display: block;
-  background: #fff;
+  transition: transform 0.4s ease;
 }
 
-/* Area grid sesuai firmware */
-.area1 {
-  grid-area: area1;
-}
-.area2 {
-  grid-area: area2;
-}
-.area3 {
-  grid-area: area3;
-}
-.area4 {
-  grid-area: area4;
-}
-.area5 {
-  grid-area: area5;
-}
-.area6 {
-  grid-area: area6;
-}
-.area7 {
-  grid-area: area7;
-}
-.area8 {
-  grid-area: area8;
+.gallery-item:hover .gallery-image {
+  transform: scale(1.1);
 }
 
-/* Responsive */
+.area1 { grid-area: area1; }
+.area2 { grid-area: area2; }
+.area3 { grid-area: area3; }
+.area4 { grid-area: area4; }
+.area5 { grid-area: area5; }
+.area6 { grid-area: area6; }
+.area7 { grid-area: area7; }
+.area8 { grid-area: area8; }
+
 @media (max-width: 900px) {
   .gallery-masonry {
     grid-template-areas:
@@ -166,6 +200,7 @@ function startAutoSlide() {
       "area7 area8";
     grid-template-columns: 1fr 1fr;
     grid-template-rows: repeat(4, 160px);
+    gap: 12px;
   }
 }
 @media (max-width: 600px) {

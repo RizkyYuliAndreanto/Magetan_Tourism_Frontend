@@ -77,7 +77,7 @@
 
 <script setup>
 import { ref, onMounted, nextTick } from "vue";
-import axios from "axios";
+import axios from '@/api/axios'
 import CategoryForm from "./CategoryForm.vue";
 import BasePopUp from "../../../components/pop-up/BasePopUp.vue";
 

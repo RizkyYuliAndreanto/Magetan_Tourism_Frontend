@@ -23,12 +23,13 @@
               <th>ID</th>
               <th>Nama Kategori</th>
               <th>Deskripsi</th>
+              <th>Sampul</th>
               <th>Aksi</th>
             </tr>
           </thead>
           <tbody>
             <tr v-if="kategoriList.length === 0">
-              <td colspan="4" class="no-data-found">
+              <td colspan="5" class="no-data-found">
                 Tidak ada kategori destinasi yang tersedia.
               </td>
             </tr>
@@ -36,6 +37,15 @@
               <td>{{ kategori.id_kategori_destinasi }}</td>
               <td>{{ kategori.nama_kategori }}</td>
               <td>{{ kategori.deskripsi_kategori || '-' }}</td>
+              <td>
+                <img
+                  v-if="kategori.sampul_kategori"
+                  :src="`http://localhost:5000${kategori.sampul_kategori}`"
+                  alt="Sampul Kategori"
+                  class="table-image"
+                >
+                <span v-else>-</span>
+              </td>
               <td class="actions">
                 <button class="action-button edit-button" @click="openKategoriForm(kategori)" title="Edit">
                   <i class="fas fa-edit"></i>
@@ -74,7 +84,6 @@ const formKategoriOpen = ref(false);
 const isEditingKategori = ref(false);
 const formKategori = ref(null);
 
-// State untuk pop-up
 const showPopUp = ref(false);
 const popUpStatus = ref("");
 const popUpAction = ref("");
@@ -82,7 +91,6 @@ const popUpEntity = ref("Kategori Destinasi");
 const popUpMessage = ref("");
 const kategoriToDeleteId = ref(null);
 
-// Fungsi yang memicu pop-up konfirmasi
 const showDeleteConfirm = (id) => {
   kategoriToDeleteId.value = id;
   popUpStatus.value = "confirm";
@@ -90,9 +98,7 @@ const showDeleteConfirm = (id) => {
   showPopUp.value = true;
 };
 
-// Fungsi yang dipanggil setelah konfirmasi hapus dari pop-up
 const handleDeleteConfirmed = async () => {
-  // Tutup popup konfirmasi agar komponen unmount
   closePopUp();
   await nextTick();
 
@@ -111,7 +117,6 @@ const handleDeleteConfirmed = async () => {
   }
 };
 
-// Fungsi utilitas untuk mengontrol pop-up
 const openPopUp = (status, action, message = "") => {
   popUpStatus.value = status;
   popUpAction.value = action;
@@ -143,7 +148,7 @@ const fetchKategoriData = async () => {
 
 const openKategoriForm = (kategori = null) => {
   isEditingKategori.value = !!kategori;
-  formKategori.value = kategori ? { ...kategori } : { id_kategori_destinasi: null, nama_kategori: '', deskripsi_kategori: '' };
+  formKategori.value = kategori ? { ...kategori } : { id_kategori_destinasi: null, nama_kategori: '', deskripsi_kategori: '', sampul_kategori: null };
   formKategoriOpen.value = true;
 };
 
@@ -154,18 +159,18 @@ const closeKategoriForm = () => {
   fetchKategoriData();
 };
 
-const handleSaveKategori = async (kategoriData) => {
+const handleSaveKategori = async (formData) => {
   try {
     const token = localStorage.getItem('access_token');
+    const headers = {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'multipart/form-data',
+    };
     if (isEditingKategori.value) {
-      await axios.put(`http://localhost:5000/api/kategori-destinasi/${kategoriData.id_kategori_destinasi}`, kategoriData, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      await axios.put(`http://localhost:5000/api/kategori-destinasi/${formKategori.value.id_kategori_destinasi}`, formData, { headers });
       openPopUp("success", "update");
     } else {
-      await axios.post('http://localhost:5000/api/kategori-destinasi', kategoriData, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      await axios.post('http://localhost:5000/api/kategori-destinasi', formData, { headers });
       openPopUp("success", "create");
     }
     closeKategoriForm();
@@ -283,5 +288,16 @@ onMounted(() => {
   font-size: 0.8rem;
   font-weight: 500;
   white-space: nowrap;
+}
+.table-image {
+  width: 80px;
+  height: 60px;
+  object-fit: cover;
+  border-radius: 4px;
+}
+.no-data-found {
+  text-align: center;
+  font-style: italic;
+  color: #6c757d;
 }
 </style>
