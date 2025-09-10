@@ -4,8 +4,7 @@
       <button
         v-if="!formKategoriOpen"
         class="action-button create-button"
-        @click="openKategoriForm()"
-      >
+        @click="openKategoriForm()">
         <i class="fas fa-plus-circle"></i> Tambah Kategori Baru
       </button>
     </div>
@@ -15,8 +14,7 @@
         :is-editing="isEditingKategori"
         :initial-data="formKategori"
         @close-form="closeKategoriForm"
-        @save-kategori="handleSaveKategori"
-      />
+        @save-kategori="handleSaveKategori" />
     </div>
 
     <div v-else class="table-container card">
@@ -44,15 +42,13 @@
                 <button
                   class="action-button edit-button"
                   @click="openKategoriForm(kategori)"
-                  title="Edit"
-                >
+                  title="Edit">
                   <i class="fas fa-edit"></i>
                 </button>
                 <button
                   class="action-button delete-button"
                   @click="showDeleteConfirm(kategori.id_kategori)"
-                  title="Hapus"
-                >
+                  title="Hapus">
                   <i class="fas fa-trash-alt"></i>
                 </button>
               </td>
@@ -70,14 +66,13 @@
       :entity-name="popUpEntity"
       :error-message="popUpMessage"
       @close="closePopUp"
-      @confirmed="handleDeleteConfirmed"
-    />
+      @confirmed="handleDeleteConfirmed" />
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted, nextTick } from "vue";
-import axios from "axios";
+import axios from 'axios';
 import CategoryForm from "./CategoryForm.vue";
 import BasePopUp from "../../../components/pop-up/BasePopUp.vue";
 
@@ -180,7 +175,17 @@ const closeKategoriForm = () => {
 
 const handleSaveKategori = async (kategoriData) => {
   try {
-    const token = localStorage.getItem("access_token");
+    let token = localStorage.getItem("access_token");
+    if (!token || token === "null" || token === "undefined") {
+      openPopUp(
+        "error",
+        "create",
+        "Token tidak ditemukan. Silakan login ulang."
+      );
+      return;
+    }
+    token = token.trim();
+    console.log("Token dipakai:", token);
     if (isEditingKategori.value) {
       await axios.put(
         `http://localhost:5000/api/kategori-berita/${kategoriData.id_kategori}`,
@@ -203,11 +208,19 @@ const handleSaveKategori = async (kategoriData) => {
     closeKategoriForm();
   } catch (err) {
     console.error("Gagal menyimpan kategori:", err.response?.data);
-    openPopUp(
-      "error",
-      kategoriData.id_kategori ? "update" : "create",
-      err.response?.data?.error || "Gagal menyimpan kategori."
-    );
+    if (err.response?.data?.message === "Token is not valid") {
+      openPopUp(
+        "error",
+        kategoriData.id_kategori ? "update" : "create",
+        "Token tidak valid atau kadaluarsa. Silakan login ulang."
+      );
+    } else {
+      openPopUp(
+        "error",
+        kategoriData.id_kategori ? "update" : "create",
+        err.response?.data?.error || "Gagal menyimpan kategori."
+      );
+    }
   }
 };
 

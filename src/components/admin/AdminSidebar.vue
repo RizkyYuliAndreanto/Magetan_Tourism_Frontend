@@ -1,7 +1,9 @@
 <template>
   <aside :class="['admin-sidebar', { 'is-open': isOpen }]">
     <div class="sidebar-logo">
-      <img src="https://placehold.co/40x40/cccccc/ffffff?text=AD" alt="Admin Logo" />
+      <img
+        src="https://placehold.co/40x40/cccccc/ffffff?text=AD"
+        alt="Admin Logo" />
       <span>Admin Panel</span>
     </div>
     <nav class="sidebar-nav">
@@ -10,7 +12,10 @@
           <a
             href="#"
             @click.prevent="handleNavigation(item.route)"
-            :class="['nav-item', { 'active': activeRoute.startsWith(item.route) }]">
+            :class="[
+              'nav-item',
+              { active: activeRoute.startsWith(item.route) },
+            ]">
             <svg
               class="nav-icon"
               fill="none"
@@ -32,7 +37,10 @@
       <a
         href="#"
         @click.prevent="handleNavigation('/admin/pengaturan-akun')"
-        :class="['nav-item', { 'active': activeRoute.startsWith('/admin/pengaturan-akun') }]">
+        :class="[
+          'nav-item',
+          { active: activeRoute.startsWith('/admin/pengaturan-akun') },
+        ]">
         <svg
           class="nav-icon"
           fill="none"
@@ -76,17 +84,20 @@ import { ref, inject, watch } from "vue";
 import { useRouter, useRoute } from "vue-router";
 
 const props = defineProps({
-  isOpen: Boolean
+  isOpen: Boolean,
 });
-const toggleSidebar = inject('toggleSidebar');
+const toggleSidebar = inject("toggleSidebar");
 
 const router = useRouter();
 const route = useRoute();
 
 const activeRoute = ref(route.path);
-watch(() => route.path, (newPath) => {
-  activeRoute.value = newPath;
-});
+watch(
+  () => route.path,
+  (newPath) => {
+    activeRoute.value = newPath;
+  }
+);
 
 const menuItems = [
   {
@@ -171,6 +182,7 @@ const handleNavigation = (route) => {
 const handleLogout = () => {
   localStorage.removeItem("access_token");
   localStorage.removeItem("user");
+  window.dispatchEvent(new Event("storage"));
   router.push("/");
   toggleSidebar();
 };
@@ -364,5 +376,4 @@ const handleLogout = () => {
     justify-content: flex-start;
   }
 }
-
 </style>
