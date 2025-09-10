@@ -16,18 +16,21 @@ import VisiMisiView from "../views/admin/visi-misi/VisiMisiView.vue";
 import StrukturOrganisasiView from "../views/admin/struktur-organisasi/StrukturOrganisasiView.vue";
 import AkomodasiView from "../views/admin/akomodasi/AkomodasiView.vue";
 import KontenPpidView from "../views/admin/ppid/KontenPpidView.vue";
-import BudayaView from "../views/admin/budaya/BudayaView.vue";
+import AdminBudayaView from "../views/admin/budaya/BudayaView.vue";
 
 //user
-import PengumumanUserView from "../views/PengumumanUserView.vue";
-import EventUserView from "../views/EventUserView.vue";
-import DetailEventUserView from "../views/DetailEventUserView.vue";
-import ProfilDinasView from "../views/ProfilDinasView.vue";
-import DetailProfilDinasView from "../views/DetailProfilDinasView.vue";
-import VisiMisiUserView from "../views/VisiMisiUserView.vue";
-import StrukturOrganisasiUserView from "../views/StrukturOrganisasiUserView.vue";
-import StrukturAnggotaUserView from "../views/StrukturAnggotaUserView.vue";
-import PpidView from "../views/PpidView.vue";
+import PengumumanUserView from "../views/pengumuman/PengumumanUserView.vue";
+import EventUserView from "../views/event/EventUserView.vue";
+import DetailEventUserView from "../views/event/DetailEventUserView.vue";
+import ProfilDinasView from "../views/ProfilDinas/ProfilDinasView.vue";
+import DetailProfilDinasView from "../views/profilDinas/DetailProfilDinasView.vue";
+import VisiMisiUserView from "../views/visi-misi/VisiMisiUserView.vue";
+import StrukturOrganisasiUserView from "../views/struktur-organisasi/StrukturOrganisasiUserView.vue";
+import StrukturAnggotaUserView from "../views/struktur-anggota/StrukturAnggotaUserView.vue";
+import PpidView from "../views/ppid/PpidView.vue";
+import PariwisataView from "../views/Pariwisata/PariwisataView.vue";
+import DetailPariwisata from "../views/Pariwisata/DetailPariwisata.vue";
+import BudayaView from "../views/budaya/BudayaView.vue";
 
 const routes = [
   //User
@@ -92,6 +95,29 @@ const routes = [
     name: "register",
     component: RegisterView,
   },
+  {
+    path: "/destinasi",
+    name: "register",
+    component: PariwisataView,
+  },
+  {
+    path: "/destinasi/:id",
+    name: "DetailPariwisata",
+    component: DetailPariwisata,
+    props: true,
+  },
+  {
+    path: "/budaya",
+    name: "Budaya",
+    component: BudayaView,
+    props: true,
+  },
+  // {
+  //   path: "/budaya/:id",
+  //   name: "DetailBudaya",
+  //   component: BudayaView,
+  //   props: true,
+  // },
 
   //Admin
   {
@@ -121,7 +147,7 @@ const routes = [
       {
         path: "budaya",
         name: "adminBudaya",
-        component: BudayaView,
+        component: AdminBudayaView,
       },
       {
         path: "event",
