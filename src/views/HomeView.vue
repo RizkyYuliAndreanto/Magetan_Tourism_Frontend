@@ -6,7 +6,6 @@
       <KebudayaanHero />
       <EventSection />
       <EkonomiKreatifSection />
-      <FeaturedPrograms />
       <NewsGrid />
       <GallerySection />
       <SocialMediaGrid />
@@ -18,7 +17,6 @@
 <script setup>
 // Mengimpor semua komponen yang diperlukan secara langsung
 import HeroSection from "../components/home/HeroSection.vue";
-import FeaturedPrograms from "../components/home/FeaturedPrograms.vue";
 import NewsGrid from "../components/home/NewsGrid.vue";
 import GallerySection from "../components/home/GallerySection.vue";
 import SocialMediaGrid from "../components/home/SocialMediaGrid.vue";
