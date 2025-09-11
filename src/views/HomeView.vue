@@ -6,7 +6,7 @@
       <KebudayaanHero />
       <EventSection />
       <EkonomiKreatifSection />
-      <FeaturedPrograms />
+      
       <NewsGrid />
       <GallerySection />
       <SocialMediaGrid />

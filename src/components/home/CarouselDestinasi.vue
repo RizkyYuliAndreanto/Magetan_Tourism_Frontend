@@ -38,7 +38,7 @@
           class="premium-nav-button nav-previous"
           @click="navigateSlide('prev')"
           aria-label="Destinasi Sebelumnya"
-          :disabled="isTransitioning">
+          :disabled="isTransitioning || destinations.length <= 1">
           <div class="nav-icon">
             <svg viewBox="0 0 24 24" fill="none">
               <path
@@ -55,7 +55,7 @@
           class="premium-nav-button nav-next"
           @click="navigateSlide('next')"
           aria-label="Destinasi Selanjutnya"
-          :disabled="isTransitioning">
+          :disabled="isTransitioning || destinations.length <= 1">
           <div class="nav-icon">
             <svg viewBox="0 0 24 24" fill="none">
               <path
@@ -84,6 +84,7 @@
                 'is-center': isCenterCard(index),
                 'is-adjacent': isAdjacentCard(index),
                 'is-distant': isDistantCard(index),
+                'is-hidden': isHiddenCard(index),
               }">
               <div
                 class="premium-destination-card"
@@ -243,28 +244,34 @@ const defaultDestinations = [
 const extendedDestinations = computed(() => {
   if (destinations.value.length === 0) return [];
   return [
-    ...destinations.value.slice(-2), // Last 2 items at beginning
+    ...destinations.value.slice(-3), // Last 3 items at beginning
     ...destinations.value, // Original items
-    ...destinations.value.slice(0, 2), // First 2 items at end
+    ...destinations.value.slice(0, 3), // First 3 items at end
   ];
 });
 
 // Card position helpers
 const isCenterCard = (index) => {
-  const offset = 2; // Offset for prepended items
+  const offset = 3; // Offset for prepended items
   return index === currentIndex.value + offset;
 };
 
 const isAdjacentCard = (index) => {
-  const offset = 2;
+  const offset = 3;
   const centerIndex = currentIndex.value + offset;
   return index === centerIndex - 1 || index === centerIndex + 1;
 };
 
 const isDistantCard = (index) => {
-  const offset = 2;
+  const offset = 3;
   const centerIndex = currentIndex.value + offset;
-  return Math.abs(index - centerIndex) > 1;
+  return index === centerIndex - 2 || index === centerIndex + 2;
+};
+
+const isHiddenCard = (index) => {
+  const offset = 3;
+  const centerIndex = currentIndex.value + offset;
+  return Math.abs(index - centerIndex) > 2;
 };
 
 // Fetch destinations from API
@@ -293,6 +300,7 @@ const fetchDestinations = async () => {
 
     await nextTick();
     initializeAnimations();
+    initializeCarouselPosition();
     startAutoSlide();
   } catch (err) {
     console.error("Error fetching destinations:", err);
@@ -300,6 +308,7 @@ const fetchDestinations = async () => {
     destinations.value = defaultDestinations;
     await nextTick();
     initializeAnimations();
+    initializeCarouselPosition();
     startAutoSlide();
   } finally {
     loading.value = false;
@@ -422,12 +431,21 @@ const initializeAnimations = () => {
   });
 };
 
+// Initialize carousel position
+const initializeCarouselPosition = () => {
+  nextTick(() => {
+    animateSlideTransition();
+  });
+};
+
 // Navigation functions
 const navigateSlide = (direction) => {
   if (isTransitioning.value || destinations.value.length === 0) return;
 
   isTransitioning.value = true;
   pauseAutoSlide();
+
+  const prevIndex = currentIndex.value;
 
   if (direction === "next") {
     currentIndex.value = (currentIndex.value + 1) % destinations.value.length;
@@ -438,7 +456,10 @@ const navigateSlide = (direction) => {
         : currentIndex.value - 1;
   }
 
-  animateSlideTransition();
+  // Only animate if index actually changed
+  if (prevIndex !== currentIndex.value) {
+    animateSlideTransition();
+  }
 
   setTimeout(() => {
     isTransitioning.value = false;
@@ -447,7 +468,13 @@ const navigateSlide = (direction) => {
 };
 
 const goToSlide = (index) => {
-  if (isTransitioning.value || index === currentIndex.value) return;
+  if (
+    isTransitioning.value ||
+    index === currentIndex.value ||
+    index < 0 ||
+    index >= destinations.value.length
+  )
+    return;
 
   isTransitioning.value = true;
   pauseAutoSlide();
@@ -464,16 +491,48 @@ const goToSlide = (index) => {
 // Animate slide transition
 const animateSlideTransition = () => {
   const wrappers = document.querySelectorAll(".premium-destination-wrapper");
-  const activeIndex = currentIndex.value + 2; // Account for offset
+  const activeIndex = currentIndex.value + 3; // Account for offset
 
   wrappers.forEach((wrapper, index) => {
     const isCenterIndex = index === activeIndex;
     const isAdjacentIndex = Math.abs(index - activeIndex) === 1;
+    const isDistantIndex = Math.abs(index - activeIndex) === 2;
+    const isHiddenIndex = Math.abs(index - activeIndex) > 2;
+
+    let scale, opacity, zIndex, yOffset, rotationY;
+
+    if (isCenterIndex) {
+      scale = 1.15;
+      opacity = 1;
+      zIndex = 100;
+      yOffset = -20;
+      rotationY = 0;
+    } else if (isAdjacentIndex) {
+      scale = 0.95;
+      opacity = 0.85;
+      zIndex = 50;
+      yOffset = 0;
+      rotationY = index < activeIndex ? 5 : -5;
+    } else if (isDistantIndex) {
+      scale = 0.8;
+      opacity = 0.6;
+      zIndex = 25;
+      yOffset = 10;
+      rotationY = index < activeIndex ? 10 : -10;
+    } else {
+      scale = 0.7;
+      opacity = 0.3;
+      zIndex = 1;
+      yOffset = 20;
+      rotationY = index < activeIndex ? 15 : -15;
+    }
 
     gsap.to(wrapper, {
-      scale: isCenterIndex ? 1.05 : isAdjacentIndex ? 0.95 : 0.85,
-      opacity: isCenterIndex ? 1 : isAdjacentIndex ? 0.8 : 0.5,
-      z: isCenterIndex ? 0 : isAdjacentIndex ? -50 : -100,
+      scale: scale,
+      opacity: opacity,
+      z: zIndex,
+      y: yOffset,
+      rotationY: rotationY,
       duration: TRANSITION_DURATION,
       ease: "power2.inOut",
     });
@@ -481,13 +540,16 @@ const animateSlideTransition = () => {
     // Update wrapper classes for styling
     wrapper.classList.toggle("is-center", isCenterIndex);
     wrapper.classList.toggle("is-adjacent", isAdjacentIndex);
-    wrapper.classList.toggle("is-distant", !isCenterIndex && !isAdjacentIndex);
+    wrapper.classList.toggle("is-distant", isDistantIndex);
+    wrapper.classList.toggle("is-hidden", isHiddenIndex);
   });
 
   // Update track position for premium layout
   if (trackRef.value) {
-    const cardWidth = 350; // Premium card width + gap
-    const offset = -currentIndex.value * cardWidth;
+    const cardWidth = 300; // Adjusted card width + gap for 5-card display
+    const centerOffset =
+      Math.floor(wrappers.length / 2) - currentIndex.value - 3;
+    const offset = centerOffset * cardWidth;
 
     gsap.to(trackRef.value, {
       x: offset,
@@ -502,7 +564,7 @@ const startAutoSlide = () => {
   if (autoSlideInterval.value) clearInterval(autoSlideInterval.value);
 
   autoSlideInterval.value = setInterval(() => {
-    if (!isTransitioning.value) {
+    if (!isTransitioning.value && destinations.value.length > 1) {
       navigateSlide("next");
     }
   }, AUTO_SLIDE_DURATION);
@@ -614,6 +676,8 @@ const handleTouchMove = (event) => {
 };
 
 const handleTouchEnd = (event) => {
+  if (isTransitioning.value) return; // Prevent touch while transitioning
+
   const touchEndX = event.changedTouches[0].clientX;
   const touchEndY = event.changedTouches[0].clientY;
 
@@ -627,9 +691,9 @@ const handleTouchEnd = (event) => {
     } else {
       navigateSlide("next");
     }
+  } else {
+    resumeAutoSlide(); // Resume if no valid swipe
   }
-
-  resumeAutoSlide();
 };
 
 // Analytics tracking
@@ -640,9 +704,13 @@ const trackDestinationClick = (destination) => {
 
 // Keyboard navigation
 const handleKeydown = (event) => {
+  if (isTransitioning.value) return; // Prevent keyboard nav while transitioning
+
   if (event.key === "ArrowLeft") {
+    event.preventDefault();
     navigateSlide("prev");
   } else if (event.key === "ArrowRight") {
+    event.preventDefault();
     navigateSlide("next");
   }
 };
@@ -662,6 +730,16 @@ onUnmounted(() => {
 // Watch for destination changes
 watch(destinations, (newDestinations) => {
   if (newDestinations.length > 0) {
+    nextTick(() => {
+      initializeCarouselPosition();
+    });
+  }
+});
+
+// Watch for current index changes to prevent unwanted jumps
+watch(currentIndex, (newIndex, oldIndex) => {
+  if (Math.abs(newIndex - oldIndex) > 1 && !isTransitioning.value) {
+    // This might be an unwanted jump, let's animate it smoothly
     nextTick(() => {
       animateSlideTransition();
     });
@@ -697,8 +775,8 @@ watch(destinations, (newDestinations) => {
 /* ===== MAIN SECTION LAYOUT ===== */
 .premium-tourism-section {
   position: relative;
-  min-height: 100vh;
-  padding: 5rem 2rem;
+  min-height: 650px;
+  padding: 64px 32px;
   background: linear-gradient(
     135deg,
     #f8fafc 0%,
@@ -826,14 +904,14 @@ watch(destinations, (newDestinations) => {
   position: relative;
   z-index: 10;
   text-align: center;
-  margin-bottom: 5rem;
+  margin-bottom: 3rem;
 }
 
 .premium-title {
-  font-size: clamp(3.5rem, 7vw, 6rem);
+  font-size: clamp(2.5rem, 6vw, 4.5rem);
   font-weight: 900;
   color: #1e3a8a;
-  margin: 2rem 0;
+  margin: 1.5rem 0;
   letter-spacing: -2px;
   line-height: 1.1;
   text-shadow: 0 4px 8px rgba(30, 58, 138, 0.3), 0 2px 4px rgba(0, 0, 0, 0.1);
@@ -846,20 +924,20 @@ watch(destinations, (newDestinations) => {
 }
 
 .premium-subtitle {
-  font-size: 1.6rem;
+  font-size: 1.4rem;
   color: #1e293b;
   font-weight: 700;
   letter-spacing: 1px;
-  margin-top: 1.5rem;
+  margin-top: 1rem;
   text-shadow: 0 2px 4px rgba(30, 41, 59, 0.2);
   opacity: 0.9;
 }
 
 .premium-accent-line {
-  width: 120px;
-  height: 5px;
+  width: 100px;
+  height: 4px;
   background: linear-gradient(90deg, #2563eb, #3b82f6, #2563eb);
-  margin: 2.5rem auto;
+  margin: 2rem auto;
   border-radius: 3px;
   position: relative;
   box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
@@ -885,7 +963,7 @@ watch(destinations, (newDestinations) => {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 5rem 2rem;
+  padding: 3rem 2rem;
   z-index: 10;
   position: relative;
 }
@@ -991,9 +1069,12 @@ watch(destinations, (newDestinations) => {
 /* ===== PREMIUM CAROUSEL VIEWPORT ===== */
 .premium-carousel-viewport {
   overflow: hidden;
-  padding: 3rem 0;
+  padding: 2rem 0;
   cursor: grab;
   position: relative;
+  width: 100%;
+  max-width: 1600px;
+  margin: 0 auto;
 }
 
 .premium-carousel-viewport:active {
@@ -1002,17 +1083,18 @@ watch(destinations, (newDestinations) => {
 
 .premium-carousel-track {
   display: flex;
-  gap: 2.5rem;
+  gap: 2rem;
   padding: 0 2rem;
   will-change: transform;
-  align-items: flex-start;
+  align-items: center;
+  justify-content: center;
 }
 
 /* ===== PREMIUM DESTINATION CARDS ===== */
 .premium-destination-wrapper {
   position: relative;
   flex-shrink: 0;
-  width: 350px;
+  width: 280px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -1021,26 +1103,33 @@ watch(destinations, (newDestinations) => {
 }
 
 .premium-destination-wrapper.is-center {
-  transform: scale(1.05);
-  z-index: 10;
+  transform: scale(1.15) translateY(-20px);
+  z-index: 100;
+  opacity: 1;
 }
 
 .premium-destination-wrapper.is-adjacent {
-  opacity: 0.8;
+  opacity: 0.85;
   transform: scale(0.95);
-  z-index: 5;
+  z-index: 50;
 }
 
 .premium-destination-wrapper.is-distant {
-  opacity: 0.5;
-  transform: scale(0.85);
+  opacity: 0.6;
+  transform: scale(0.8) translateY(10px);
+  z-index: 25;
+}
+
+.premium-destination-wrapper.is-hidden {
+  opacity: 0.3;
+  transform: scale(0.7) translateY(20px);
   z-index: 1;
 }
 
 .premium-destination-card {
   position: relative;
   width: 100%;
-  height: 520px;
+  height: 480px;
   border-radius: 24px;
   overflow: hidden;
   background: var(--premium-white);
@@ -1050,29 +1139,34 @@ watch(destinations, (newDestinations) => {
   cursor: pointer;
 }
 
-.premium-destination-card::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: linear-gradient(
-    135deg,
-    var(--premium-royal),
-    var(--premium-azure)
-  );
-  z-index: -1;
-  border-radius: 24px;
-  padding: 2px;
-  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-  mask-composite: subtract;
-  opacity: 0;
-  transition: var(--transition-premium);
+/* Enhanced center card styling */
+.premium-destination-wrapper.is-center .premium-destination-card {
+  box-shadow: 0 25px 50px rgba(30, 58, 138, 0.25),
+    0 15px 30px rgba(0, 0, 0, 0.15), 0 0 40px rgba(37, 99, 235, 0.2);
+  border: 3px solid rgba(37, 99, 235, 0.3);
 }
 
-.premium-destination-wrapper.is-center .premium-destination-card::before {
-  opacity: 1;
+.premium-destination-wrapper.is-center .destination-title-external {
+  color: #2563eb;
+  font-size: 2rem;
+  font-weight: 800;
+  text-shadow: 0 4px 8px rgba(37, 99, 235, 0.3);
+  transform: translateY(-15px);
+}
+
+/* Adjacent cards styling */
+.premium-destination-wrapper.is-adjacent .premium-destination-card {
+  box-shadow: 0 15px 30px rgba(30, 58, 138, 0.15);
+}
+
+/* Distant cards styling */
+.premium-destination-wrapper.is-distant .premium-destination-card {
+  box-shadow: 0 10px 20px rgba(30, 58, 138, 0.1);
+}
+
+/* Hidden cards styling */
+.premium-destination-wrapper.is-hidden .premium-destination-card {
+  box-shadow: 0 5px 15px rgba(30, 58, 138, 0.05);
 }
 
 /* ===== FULL PORTRAIT IMAGE ===== */
@@ -1282,7 +1376,7 @@ watch(destinations, (newDestinations) => {
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-top: 4rem;
+  margin-top: 2.5rem;
   position: relative;
   z-index: 10;
 }
@@ -1356,7 +1450,7 @@ watch(destinations, (newDestinations) => {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 5rem 2rem;
+  padding: 3rem 2rem;
   text-align: center;
   z-index: 10;
   position: relative;
@@ -1505,11 +1599,11 @@ watch(destinations, (newDestinations) => {
   }
 
   .premium-destination-wrapper {
-    width: 320px;
+    width: 260px;
   }
 
   .premium-destination-card {
-    height: 480px;
+    height: 450px;
   }
 
   .destination-title-external {
@@ -1517,28 +1611,28 @@ watch(destinations, (newDestinations) => {
   }
 
   .premium-title {
-    font-size: clamp(3rem, 6vw, 5rem);
+    font-size: clamp(2rem, 5vw, 3.5rem);
   }
 }
 
 @media (max-width: 768px) {
   .premium-tourism-section {
-    padding: 3rem 1rem;
+    padding: 32px 16px;
     background: linear-gradient(135deg, #f8fafc 0%, #e0f2fe 40%, #bae6fd 100%);
   }
 
   .premium-title {
-    font-size: clamp(2.5rem, 8vw, 4rem);
+    font-size: clamp(1.8rem, 7vw, 3rem);
     letter-spacing: -1px;
   }
 
   .premium-subtitle {
-    font-size: 1.3rem;
-    margin-top: 1rem;
+    font-size: 1.1rem;
+    margin-top: 0.8rem;
   }
 
   .premium-header {
-    margin-bottom: 3rem;
+    margin-bottom: 2rem;
   }
 
   .premium-nav-button {
@@ -1546,16 +1640,16 @@ watch(destinations, (newDestinations) => {
   }
 
   .premium-carousel-track {
-    gap: 1.5rem;
+    gap: 1rem;
     padding: 0 1rem;
   }
 
   .premium-destination-wrapper {
-    width: 300px;
+    width: 220px;
   }
 
   .premium-destination-card {
-    height: 450px;
+    height: 380px;
   }
 
   .destination-title-external {
@@ -1622,28 +1716,29 @@ watch(destinations, (newDestinations) => {
 
 @media (max-width: 480px) {
   .premium-tourism-section {
-    padding: 2rem 0.5rem;
+    padding: 20px 10px;
+    min-height: 400px;
   }
 
   .premium-header {
-    margin-bottom: 2.5rem;
+    margin-bottom: 1.5rem;
   }
 
   .premium-title {
-    font-size: clamp(2rem, 7vw, 3rem);
-    margin: 1.5rem 0;
+    font-size: clamp(1.5rem, 6vw, 2.5rem);
+    margin: 1rem 0;
   }
 
   .premium-subtitle {
-    font-size: 1.1rem;
+    font-size: 1rem;
   }
 
   .premium-destination-wrapper {
-    width: 280px;
+    width: 220px;
   }
 
   .premium-destination-card {
-    height: 420px;
+    height: 380px;
   }
 
   .destination-title-external {
@@ -1652,8 +1747,8 @@ watch(destinations, (newDestinations) => {
   }
 
   .premium-accent-line {
-    width: 80px;
-    height: 4px;
+    width: 60px;
+    height: 3px;
   }
 
   .card-content-overlay {

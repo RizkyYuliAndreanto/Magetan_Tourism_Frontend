@@ -26,48 +26,57 @@
               <div
                 v-for="kategori in clonedKategoriListEnd"
                 :key="kategori.id_kategori_umkm + '_cloned_end'"
-                class="kategori-card portrait-card cloned"
-                :style="{
-                  backgroundImage: `url(${getImageUrl(kategori.gambar_sampul)})`,
-                  backgroundSize: 'contain',
-                  backgroundPosition: 'center',
-                  backgroundRepeat: 'no-repeat',
-                  border: '3px solid #bdbdbd',
-                }">
+                class="kategori-card portrait-card cloned">
+                <div class="card-image-container">
+                  <img
+                    :src="getImageUrl(kategori.gambar_sampul)"
+                    :alt="kategori.nama_kategori"
+                    class="card-image"
+                    @error="handleImageError" />
+                </div>
                 <div class="card-label portrait-label">
                   <p class="kategori-nama">{{ kategori.nama_kategori }}</p>
+                  <p class="kategori-deskripsi" v-if="kategori.deskripsi">
+                    {{ getShortDescription(kategori.deskripsi) }}
+                  </p>
                 </div>
               </div>
 
               <div
                 v-for="(kategori, index) in kategoriList"
                 :key="kategori.id_kategori_umkm"
-                class="kategori-card portrait-card"
-                :style="{
-                  backgroundImage: `url(${getImageUrl(kategori.gambar_sampul)})`,
-                  backgroundSize: 'contain',
-                  backgroundPosition: 'center',
-                  backgroundRepeat: 'no-repeat',
-                  border: '3px solid #bdbdbd',
-                }">
+                class="kategori-card portrait-card">
+                <div class="card-image-container">
+                  <img
+                    :src="getImageUrl(kategori.gambar_sampul)"
+                    :alt="kategori.nama_kategori"
+                    class="card-image"
+                    @error="handleImageError" />
+                </div>
                 <div class="card-label portrait-label">
                   <p class="kategori-nama">{{ kategori.nama_kategori }}</p>
+                  <p class="kategori-deskripsi" v-if="kategori.deskripsi">
+                    {{ getShortDescription(kategori.deskripsi) }}
+                  </p>
                 </div>
               </div>
 
               <div
                 v-for="kategori in clonedKategoriListStart"
                 :key="kategori.id_kategori_umkm + '_cloned_start'"
-                class="kategori-card portrait-card cloned"
-                :style="{
-                  backgroundImage: `url(${getImageUrl(kategori.gambar_sampul)})`,
-                  backgroundSize: 'contain',
-                  backgroundPosition: 'center',
-                  backgroundRepeat: 'no-repeat',
-                  border: '3px solid #bdbdbd',
-                }">
+                class="kategori-card portrait-card cloned">
+                <div class="card-image-container">
+                  <img
+                    :src="getImageUrl(kategori.gambar_sampul)"
+                    :alt="kategori.nama_kategori"
+                    class="card-image"
+                    @error="handleImageError" />
+                </div>
                 <div class="card-label portrait-label">
                   <p class="kategori-nama">{{ kategori.nama_kategori }}</p>
+                  <p class="kategori-deskripsi" v-if="kategori.deskripsi">
+                    {{ getShortDescription(kategori.deskripsi) }}
+                  </p>
                 </div>
               </div>
             </template>
@@ -93,6 +102,21 @@
             class="logo-ekraf" />
         </div>
         <h2 class="section-title">Ekonomi Kreatif</h2>
+        <router-link to="/ekonomi-kreatif" class="view-more-button">
+          <span class="button-text">View More</span>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            class="button-icon">
+            <path
+              d="M5 12h14M12 5l7 7-7 7"
+              stroke="currentColor"
+              stroke-width="2"
+              fill="none"
+              stroke-linecap="round"
+              stroke-linejoin="round" />
+          </svg>
+        </router-link>
       </div>
     </div>
   </section>
@@ -193,26 +217,42 @@ export default {
       // Logic to snap back to the start/end without transition
       track.ontransitionend = () => {
         if (index >= this.kategoriList.length) {
-          track.style.transition = 'none';
+          track.style.transition = "none";
           this.currentSlideIndex = 0;
-          const newTargetX = -(this.currentSlideIndex + this.slideCount) * cardWidth;
+          const newTargetX =
+            -(this.currentSlideIndex + this.slideCount) * cardWidth;
           track.style.transform = `translateX(${newTargetX}px)`;
         } else if (index < 0) {
-          track.style.transition = 'none';
+          track.style.transition = "none";
           this.currentSlideIndex = this.kategoriList.length - 1;
-          const newTargetX = -(this.currentSlideIndex + this.slideCount) * cardWidth;
+          const newTargetX =
+            -(this.currentSlideIndex + this.slideCount) * cardWidth;
           track.style.transform = `translateX(${newTargetX}px)`;
         }
         this.isSliding = false;
         track.ontransitionend = null;
       };
     },
+    handleImageError(event) {
+      // Set placeholder image jika gambar gagal dimuat
+      event.target.src =
+        "https://via.placeholder.com/220x360/f3f3f3/333333?text=No+Image";
+    },
+    getShortDescription(description) {
+      if (!description) return "";
+      // Potong deskripsi maksimal 60 karakter dan tambahkan "..."
+      return description.length > 60
+        ? description.substring(0, 60).trim() + "..."
+        : description;
+    },
     initializeCarousel() {
       // Geser ke posisi awal yang benar
       this.currentSlideIndex = 0;
       this.slideTo(this.currentSlideIndex);
-      this.$refs.carouselTrack.style.transition = 'none';
-      const cardWidth = this.$refs.carouselTrack.querySelector(".kategori-card:not(.cloned)").offsetWidth + 48;
+      this.$refs.carouselTrack.style.transition = "none";
+      const cardWidth =
+        this.$refs.carouselTrack.querySelector(".kategori-card:not(.cloned)")
+          .offsetWidth + 48;
       const initialX = -this.slideCount * cardWidth;
       this.$refs.carouselTrack.style.transform = `translateX(${initialX}px)`;
     },
@@ -235,7 +275,7 @@ text-xl
   background-size: cover;
   background-position: center;
   font-family: Arial, sans-serif;
-  min-height: 600px;
+  min-height: 650px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -276,14 +316,58 @@ text-xl
   overflow: hidden;
   border: 3px solid #bdbdbd;
 }
+
+.card-image-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  border-radius: 19px; /* Sedikit lebih kecil dari border card */
+}
+
+.card-image-container::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 80px;
+  background: linear-gradient(
+    to top,
+    rgba(0, 0, 0, 0.3) 0%,
+    rgba(0, 0, 0, 0.1) 50%,
+    transparent 100%
+  );
+  z-index: 1;
+  pointer-events: none;
+}
+
+.card-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  transition: transform 0.3s ease;
+}
 .kategori-card.portrait-card:hover {
   box-shadow: 0 12px 32px rgba(0, 0, 0, 0.16);
   transform: translateY(-6px) scale(1.05);
   border-color: #007bff;
 }
+
+.kategori-card.portrait-card:hover .card-image {
+  transform: scale(1.1);
+}
 .portrait-label {
   width: 100%;
-  background: rgba(255, 255, 255, 0.85);
+  background: linear-gradient(
+    to top,
+    rgba(255, 255, 255, 0.95) 0%,
+    rgba(255, 255, 255, 0.85) 100%
+  );
+  backdrop-filter: blur(10px);
   border-radius: 0 0 18px 18px;
   text-align: center;
   padding: 16px 8px 12px 8px;
@@ -292,13 +376,29 @@ text-xl
   bottom: 0;
   z-index: 2;
   box-sizing: border-box;
+  border-top: 1px solid rgba(255, 255, 255, 0.8);
+  min-height: 80px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 .portrait-label .kategori-nama {
   font-size: 1.15rem;
   font-weight: bold;
   color: #333;
+  margin: 0 0 8px 0;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  line-height: 1.2;
+}
+
+.kategori-deskripsi {
+  font-size: 0.85rem;
+  color: #555;
   margin: 0;
-  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  line-height: 1.3;
+  opacity: 0.9;
+  font-weight: 400;
+  text-align: center;
 }
 
 .kategori-nama {
@@ -339,7 +439,68 @@ text-xl
   color: #222;
   line-height: 1.1;
   text-align: center;
-  margin: 0;
+  margin: 0 0 20px 0;
+}
+
+.view-more-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;
+  background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+  color: white;
+  text-decoration: none;
+  border-radius: 25px;
+  font-weight: 600;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
+  position: relative;
+  overflow: hidden;
+}
+
+.view-more-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 123, 255, 0.4);
+  color: white;
+  text-decoration: none;
+}
+
+.view-more-button::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.2),
+    transparent
+  );
+  transition: left 0.5s;
+}
+
+.view-more-button:hover::before {
+  left: 100%;
+}
+
+.view-more-button .button-text {
+  position: relative;
+  z-index: 2;
+}
+
+.view-more-button .button-icon {
+  width: 18px;
+  height: 18px;
+  transition: transform 0.3s ease;
+  position: relative;
+  z-index: 2;
+}
+
+.view-more-button:hover .button-icon {
+  transform: translateX(4px);
 }
 
 .no-data-message {
@@ -400,10 +561,14 @@ text-xl
     min-width: 140px;
     padding: 14px;
   }
-  .card-image-wrapper {
-    width: 120px;
-    height: 120px;
-    margin-bottom: 10px;
+  .kategori-card.portrait-card {
+    min-width: 140px;
+    min-height: 240px;
+    max-width: 160px;
+    max-height: 280px;
+  }
+  .card-image-container::after {
+    height: 60px;
   }
   .kategori-nama {
     font-size: 1rem;
@@ -426,6 +591,21 @@ text-xl
   .kategori-card {
     min-width: 120px;
     padding: 8px;
+  }
+  .kategori-card.portrait-card {
+    min-width: 120px;
+    min-height: 200px;
+    max-width: 140px;
+    max-height: 240px;
+  }
+  .card-image-container::after {
+    height: 50px;
+  }
+  .portrait-label {
+    padding: 12px 6px 8px 6px;
+  }
+  .portrait-label .kategori-nama {
+    font-size: 0.9rem;
   }
   .section-title {
     font-size: 1.1rem;
