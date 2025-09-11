@@ -76,11 +76,10 @@
               </div>
             </div>
             <div class="instagram-card-wrapper">
-              <
               <blockquote
                 class="instagram-media"
                 data-instgrm-captioned
-                data-instgrm-permalink="https://www.instagram.com/p/DNPM5_zvp5w/?utm_source=ig_embed&amp;utm_campaign=loading"
+                data-instgrm-permalink="https://www.instagram.com/p/DN2bK3p3lv1/?utm_source=ig_embed&amp;utm_campaign=loading"
                 data-instgrm-version="14"
                 style="
                   background: #fff;
@@ -98,7 +97,7 @@
                 ">
                 <div style="padding: 16px">
                   <a
-                    href="https://www.instagram.com/p/DNPM5_zvp5w/?utm_source=ig_embed&amp;utm_campaign=loading"
+                    href="https://www.instagram.com/p/DN2bK3p3lv1/?utm_source=ig_embed&amp;utm_campaign=loading"
                     style="
                       background: #ffffff;
                       line-height: 0;
@@ -317,7 +316,7 @@
                       white-space: nowrap;
                     ">
                     <a
-                      href="https://www.instagram.com/p/DNPM5_zvp5w/?utm_source=ig_embed&amp;utm_campaign=loading"
+                      href="https://www.instagram.com/p/DN2bK3p3lv1/?utm_source=ig_embed&amp;utm_campaign=loading"
                       style="
                         color: #c9c8cd;
                         font-family: Arial, sans-serif;
@@ -368,6 +367,19 @@ function formatDate(dateString) {
   return d.toLocaleDateString("id-ID", options);
 }
 
+// Load Instagram embed script
+const loadInstagramEmbed = () => {
+  if (!window.instgrm) {
+    const script = document.createElement("script");
+    script.async = true;
+    script.src = "//www.instagram.com/embed.js";
+    document.head.appendChild(script);
+  } else {
+    // If already loaded, process embeds
+    window.instgrm.Embeds.process();
+  }
+};
+
 const fetchBerita = async () => {
   try {
     const response = await axios.get(`${API_BASE_URL}/api/berita`);
@@ -396,6 +408,8 @@ const fetchBerita = async () => {
     console.error("Kesalahan API:", err);
   } finally {
     loading.value = false;
+    // Load Instagram embed after component is loaded
+    setTimeout(loadInstagramEmbed, 100);
   }
 };
 
@@ -591,7 +605,7 @@ onMounted(() => {
   position: absolute;
   inset: 0;
   z-index: 0;
-  background-image: url('/src/assets/Logo Wonderful indonesia Final.png');
+  background-image: url("/src/assets/Logo Wonderful indonesia Final.png");
   background-repeat: no-repeat;
   background-size: contain;
   background-position: center;
