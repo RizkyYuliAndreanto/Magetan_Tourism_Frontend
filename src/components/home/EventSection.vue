@@ -412,7 +412,7 @@ const initPremiumAnimations = () => {
 /* ===== MAIN EVENT SECTION ===== */
 .event-section {
   position: relative;
-  min-height: 100vh;
+  min-height: 650px;
   font-family: "Playfair Display", "Georgia", serif;
   color: var(--charcoal);
   overflow: hidden;
@@ -522,7 +522,7 @@ const initPremiumAnimations = () => {
 
 /* ===== MODERN EVENT SECTION ===== */
 .modern-events-section {
-  max-width: 1400px;
+  max-width: 650px;
   margin: 0 auto;
   padding: 4rem 2rem;
   background: linear-gradient(
@@ -821,17 +821,18 @@ const initPremiumAnimations = () => {
 /* ===== PORTRAIT EVENT CARDS ===== */
 .portrait-events-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(280px, 320px));
   gap: 2rem;
   max-width: 1200px;
   margin: 0 auto;
   padding: 0 1rem;
+  justify-content: center;
 }
 
 .portrait-event-card {
   position: relative;
-  /* Hapus aspect-ratio */
-  height: 100%;
+  aspect-ratio: 3/4;
+  height: auto;
   border-radius: 20px;
   overflow: hidden;
   box-shadow: var(--premium-shadow);
@@ -1035,7 +1036,7 @@ const initPremiumAnimations = () => {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 3rem;
-  max-width: 1400px;
+  max-width: 650px;
   margin: 0 auto;
   padding: 0 1rem;
 }
@@ -1406,19 +1407,21 @@ const initPremiumAnimations = () => {
   }
 
   .portrait-events-grid {
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(250px, 300px));
     gap: 1.5rem;
+    justify-content: center;
   }
 }
 
 @media (max-width: 768px) {
   .portrait-events-grid {
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(200px, 280px));
     gap: 1rem;
+    justify-content: center;
   }
 
   .portrait-event-card {
-    aspect-ratio: 2 / 3;
+    aspect-ratio: 3/4;
   }
 
   .gallery-count-3,
@@ -1470,7 +1473,7 @@ const initPremiumAnimations = () => {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
   gap: 1.5rem;
-  max-width: 1200px;
+  max-width: 600px;
   margin: 0 auto;
   padding: 0 1rem;
 }
@@ -1600,7 +1603,7 @@ const initPremiumAnimations = () => {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 1.5rem;
-  max-width: 1200px;
+  max-width: 600px;
   margin: 0 auto;
   padding: 0 1rem;
 }

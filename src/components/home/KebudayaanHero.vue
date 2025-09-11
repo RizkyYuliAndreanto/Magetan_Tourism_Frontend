@@ -43,12 +43,23 @@
                 <div class="corner corner-br"></div>
               </div>
               <div class="image-placeholder objek-placeholder">
-                <div class="cultural-image-container">
-                  <img 
-                    :src="wayangKulit" 
-                    alt="Kebudayaan Wayang Kulit Magetan"
-                    class="cultural-image"
-                  />
+                <div
+                  class="cultural-image-container"
+                  @mouseenter="pauseObjekSlideshow"
+                  @mouseleave="resumeObjekSlideshow">
+                  <img
+                    :src="currentObjekImage"
+                    alt="Objek Pemajuan Kebudayaan Magetan"
+                    class="cultural-image slideshow-image"
+                    key="objek-image" />
+                  <!-- Slideshow Indicators -->
+                  <div class="slideshow-indicators">
+                    <div
+                      v-for="(image, index) in objekImages"
+                      :key="`objek-indicator-${index}`"
+                      class="indicator"
+                      :class="{ active: index === currentObjekIndex }"></div>
+                  </div>
                   <div class="image-overlay">
                     <div class="cultural-icon-large">
                       <svg viewBox="0 0 80 80" class="heritage-symbol">
@@ -72,7 +83,9 @@
                           opacity="0.5" />
                       </svg>
                     </div>
-                    <p class="image-caption">Galeri Objek Pemajuan Kebudayaan</p>
+                    <p class="image-caption">
+                      Galeri Objek Pemajuan Kebudayaan
+                    </p>
                   </div>
                 </div>
               </div>
@@ -102,7 +115,7 @@
               </p>
             </div>
 
-            <router-link to="/budaya/objek" class="premium-button objek-button">
+            <router-link to="/budaya" class="premium-button objek-button">
               <span class="button-text">Jelajahi Tradisi</span>
               <div class="button-glow"></div>
               <svg viewBox="0 0 24 24" class="button-icon">
@@ -134,12 +147,23 @@
                 <div class="corner corner-br"></div>
               </div>
               <div class="image-placeholder cagar-placeholder">
-                <div class="cultural-image-container">
-                  <img 
-                    :src="img2" 
+                <div
+                  class="cultural-image-container"
+                  @mouseenter="pauseCagarSlideshow"
+                  @mouseleave="resumeCagarSlideshow">
+                  <img
+                    :src="currentCagarImage"
                     alt="Cagar Budaya Magetan"
-                    class="cultural-image"
-                  />
+                    class="cultural-image slideshow-image"
+                    key="cagar-image" />
+                  <!-- Slideshow Indicators -->
+                  <div class="slideshow-indicators">
+                    <div
+                      v-for="(image, index) in cagarImages"
+                      :key="`cagar-indicator-${index}`"
+                      class="indicator"
+                      :class="{ active: index === currentCagarIndex }"></div>
+                  </div>
                   <div class="image-overlay">
                     <div class="cultural-icon-large">
                       <svg viewBox="0 0 80 80" class="heritage-symbol">
@@ -206,7 +230,7 @@
               </p>
             </div>
 
-            <router-link to="/budaya/cagar" class="premium-button cagar-button">
+            <router-link to="/budaya" class="premium-button cagar-button">
               <span class="button-text">Telusuri Sejarah</span>
               <div class="button-glow"></div>
               <svg viewBox="0 0 24 24" class="button-icon">
@@ -227,16 +251,23 @@
 </template>
 
 <script setup>
-import { onMounted, ref } from "vue";
+import { onMounted, onUnmounted, ref } from "vue";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
-// Import cultural images from assets
-import wayangKulit from "@/assets/siluetWayangKulit.jpg";
-import wayang2 from "@/assets/wayang2.jpg";
-import img2 from "@/assets/img2.jpg";
-import wayang4 from "@/assets/wayang4.jpg";
-import ekraf from "@/assets/ekraf.jpg";
+// Import cultural images from assets - Objek Pemajuan Kebudayaan
+import labuansarangan1 from "@/assets/labuansarangan1.jpg";
+import labuansarangan2 from "@/assets/labuansarangan2.jpg";
+import labuansarangan3 from "@/assets/labuansarangan3.jpg";
+import labuansarangan4 from "@/assets/labuansarangan4.jpg";
+
+// Import cultural images from assets - Cagar Budaya
+import dewisri1 from "@/assets/dewisri1.jpg";
+import dewisri2 from "@/assets/dewisri2.jpg";
+import dewisri3 from "@/assets/dewisri3.jpg";
+import dewisri4 from "@/assets/dewisri4.jpg";
+
+
 
 // Register GSAP plugins
 gsap.registerPlugin(ScrollTrigger);
@@ -245,7 +276,87 @@ const headerRef = ref(null);
 const objekCardRef = ref(null);
 const cagarCardRef = ref(null);
 
+// Slideshow arrays
+const objekImages = [
+  labuansarangan1,
+  labuansarangan2,
+  labuansarangan3,
+  labuansarangan4,
+];
+const cagarImages = [dewisri1, dewisri2, dewisri3, dewisri4];
+
+// Current image indexes
+const currentObjekIndex = ref(0);
+const currentCagarIndex = ref(0);
+
+// Slideshow intervals
+let objekInterval = null;
+let cagarInterval = null;
+
+// Computed properties for current images
+const currentObjekImage = ref(objekImages[0]);
+const currentCagarImage = ref(cagarImages[0]);
+
+// Slideshow functions
+const startObjekSlideshow = () => {
+  objekInterval = setInterval(() => {
+    currentObjekIndex.value =
+      (currentObjekIndex.value + 1) % objekImages.length;
+    currentObjekImage.value = objekImages[currentObjekIndex.value];
+  }, 2000);
+};
+
+const startCagarSlideshow = () => {
+  cagarInterval = setInterval(() => {
+    currentCagarIndex.value =
+      (currentCagarIndex.value + 1) % cagarImages.length;
+    currentCagarImage.value = cagarImages[currentCagarIndex.value];
+  }, 2000);
+};
+
+const stopSlideshows = () => {
+  if (objekInterval) {
+    clearInterval(objekInterval);
+    objekInterval = null;
+  }
+  if (cagarInterval) {
+    clearInterval(cagarInterval);
+    cagarInterval = null;
+  }
+};
+
+// Pause and resume functions
+const pauseObjekSlideshow = () => {
+  if (objekInterval) {
+    clearInterval(objekInterval);
+    objekInterval = null;
+  }
+};
+
+const resumeObjekSlideshow = () => {
+  if (!objekInterval) {
+    startObjekSlideshow();
+  }
+};
+
+const pauseCagarSlideshow = () => {
+  if (cagarInterval) {
+    clearInterval(cagarInterval);
+    cagarInterval = null;
+  }
+};
+
+const resumeCagarSlideshow = () => {
+  if (!cagarInterval) {
+    startCagarSlideshow();
+  }
+};
+
 onMounted(() => {
+  // Start slideshows
+  startObjekSlideshow();
+  startCagarSlideshow();
+
   // Premium header animation with cultural elegance
   const tl = gsap.timeline();
 
@@ -387,6 +498,10 @@ onMounted(() => {
     repeat: -1,
     stagger: 0.5,
   });
+});
+
+onUnmounted(() => {
+  stopSlideshows();
 });
 </script>
 
@@ -866,6 +981,31 @@ onMounted(() => {
   display: flex;
   align-items: center;
   justify-content: center;
+  overflow: hidden;
+}
+
+.cultural-image-container::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    45deg,
+    rgba(30, 58, 138, 0.1) 0%,
+    transparent 30%,
+    transparent 70%,
+    rgba(212, 175, 55, 0.1) 100%
+  );
+  z-index: 2;
+  pointer-events: none;
+  opacity: 0;
+  transition: var(--premium-transition);
+}
+
+.cultural-image-container:hover::before {
+  opacity: 1;
 }
 
 .cultural-image {
@@ -874,6 +1014,82 @@ onMounted(() => {
   object-fit: cover;
   border-radius: 12px;
   transition: var(--premium-transition);
+}
+
+.slideshow-image {
+  animation: fadeInImage 0.5s ease-in-out;
+  position: relative;
+  z-index: 1;
+}
+
+.slideshow-image::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.3),
+    transparent
+  );
+  animation: shimmer 2s infinite;
+  z-index: 2;
+}
+
+@keyframes shimmer {
+  0% {
+    left: -100%;
+  }
+  100% {
+    left: 100%;
+  }
+}
+
+@keyframes fadeInImage {
+  from {
+    opacity: 0;
+    transform: scale(1.05);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* ===== SLIDESHOW INDICATORS ===== */
+.slideshow-indicators {
+  position: absolute;
+  bottom: 15px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 8px;
+  z-index: 3;
+}
+
+.indicator {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.5);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.indicator.active {
+  background: var(--gold-accent);
+  transform: scale(1.2);
+  box-shadow: 0 0 10px rgba(212, 175, 55, 0.6);
+}
+
+.indicator:hover {
+  background: rgba(255, 255, 255, 0.8);
+  transform: scale(1.1);
 }
 
 .image-overlay {
