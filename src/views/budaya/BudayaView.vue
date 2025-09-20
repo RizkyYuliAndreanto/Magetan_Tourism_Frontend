@@ -177,7 +177,7 @@
         v-if="budayaItems.length > 0">
         <div class="section-header">
           <h2 class="luxury-section-title">
-            <span class="title-shimmer">Budaya Magetan</span>
+            <span class="title-shimmer">Objek Pemajuan Kebudayaan</span>
           </h2>
           <div class="section-subtitle">
             Kekayaan tradisi dan seni budaya lokal
@@ -263,7 +263,7 @@
         v-if="nonCagarItems.length > 0">
         <div class="section-header">
           <h2 class="luxury-section-title">
-            <span class="title-shimmer">Non-Cagar Budaya</span>
+            <span class="title-shimmer">Tradisi dan Budaya</span>
           </h2>
           <div class="section-subtitle">
             Ekspresi budaya kontemporer dan modern
