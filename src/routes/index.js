@@ -8,7 +8,7 @@ import EventView from "../views/admin/event/EventView.vue";
 import MediaGaleriView from "../views/admin/media-galeri/MediaGaleriView.vue";
 import BeritaKategoriView from "../views/admin/berita/BeritaKategoriView.vue";
 import KategoriDestinasiView from "../views/admin/destinasi/KategoriDestinasiView.vue";
-import SejarahView from "../views/admin/sejarah/SejarahView.vue";
+
 import UMKMView from "../views/admin/UMKM/UMKMView.vue";
 import StrukturAnggotaView from "../views/admin/struktur-anggota/StrukturAnggotaView.vue";
 import PengumumanView from "../views/admin/penggumuman/PengumumanView.vue";
@@ -31,6 +31,8 @@ import PpidView from "../views/ppid/PpidView.vue";
 import PariwisataView from "../views/Pariwisata/PariwisataView.vue";
 import DetailPariwisata from "../views/Pariwisata/DetailPariwisata.vue";
 import BudayaView from "../views/budaya/BudayaView.vue";
+import DetailBudayaView from "../views/budaya/DetailBudayaView.vue";
+import Ekrafview from "../views/ekraf/ekrafview.vue";
 
 const routes = [
   //User
@@ -97,7 +99,7 @@ const routes = [
   },
   {
     path: "/destinasi",
-    name: "register",
+    name: "Destinasi",
     component: PariwisataView,
   },
   {
@@ -110,6 +112,18 @@ const routes = [
     path: "/budaya",
     name: "Budaya",
     component: BudayaView,
+    props: true,
+  },
+  {
+    path: "/budaya/:id",
+    name: "DetailBudaya",
+    component: DetailBudayaView,
+    props: true,
+  },
+  {
+    path: "/ekonomi-kreatif",
+    name: "Ekraf",
+    component: Ekrafview,
     props: true,
   },
   // {
@@ -159,11 +173,7 @@ const routes = [
         name: "adminMediaGaleri",
         component: MediaGaleriView,
       },
-      {
-        path: "sejarah",
-        name: "adminSejarah",
-        component: SejarahView,
-      },
+
       {
         path: "umkm",
         name: "adminUMKM",
@@ -206,6 +216,24 @@ const routes = [
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes,
+  scrollBehavior(to, from, savedPosition) {
+    // If there's a saved position (back/forward navigation), use it
+    if (savedPosition) {
+      return savedPosition;
+    }
+    // If navigating to a hash anchor
+    if (to.hash) {
+      return {
+        el: to.hash,
+        behavior: "smooth",
+      };
+    }
+    // For all other navigations, scroll to top
+    return {
+      top: 0,
+      behavior: "smooth",
+    };
+  },
 });
 
 router.beforeEach((to, from, next) => {
@@ -228,6 +256,19 @@ router.beforeEach((to, from, next) => {
   } else {
     next();
   }
+});
+
+// Force scroll to top after each route navigation with enhanced timing
+router.afterEach((to, from) => {
+  // Enhanced scroll management for all route transitions
+  setTimeout(() => {
+    if (typeof window !== "undefined") {
+      window.scrollTo({
+        top: 0,
+        behavior: "smooth",
+      });
+    }
+  }, 50); // Reduced timeout for faster response
 });
 
 export default router;

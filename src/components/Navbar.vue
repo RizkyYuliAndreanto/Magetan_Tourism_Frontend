@@ -58,8 +58,8 @@
           >
         </li>
         <li :class="['navbar-item', { active: isActive('/pengumuman') }]">
-          <router-link to="/pengumuman" class="navbar-links" @click="closeMenu"
-            >Pengumuman</router-link
+          <router-link to="/ekonomi-kreatif" class="navbar-links" @click="closeMenu"
+            >Ekraf</router-link
           >
         </li>
 

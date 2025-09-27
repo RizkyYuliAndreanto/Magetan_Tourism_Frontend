@@ -1,7 +1,10 @@
 <template>
   <div>
     <div class="action-bar">
-      <button v-if="!formUMKMOpen" class="action-button create-button" @click="openUMKMForm()">
+      <button
+        v-if="!formUMKMOpen"
+        class="action-button create-button"
+        @click="openUMKMForm()">
         <i class="fas fa-plus-circle"></i> Tambah UMKM Baru
       </button>
     </div>
@@ -14,8 +17,7 @@
         :kategori-list="kategoriList"
         @close-form="closeUMKMForm"
         @save-umkm="handleSaveUMKM"
-        @update-umkm="handleUpdateUMKM"
-      />
+        @update-umkm="handleUpdateUMKM" />
     </div>
 
     <div v-else class="table-container card">
@@ -25,7 +27,6 @@
             <tr>
               <th>ID</th>
               <th>Nama UMKM</th>
-              <th>Jenis Usaha</th>
               <th>Kategori</th>
               <th>Admin</th>
               <th>Aksi</th>
@@ -33,21 +34,26 @@
           </thead>
           <tbody>
             <tr v-if="umkmList.length === 0">
-              <td colspan="6" class="no-data-found">
+              <td colspan="5" class="no-data-found">
                 Tidak ada data UMKM yang tersedia.
               </td>
             </tr>
             <tr v-for="umkm in umkmList" :key="umkm.id_umkm">
               <td>{{ umkm.id_umkm }}</td>
               <td>{{ umkm.nama_umkm }}</td>
-              <td><span class="category-badge">{{ umkm.jenis_usaha }}</span></td>
-              <td>{{ umkm.kategoriUMKM?.nama_kategori || '-' }}</td>
+              <td>{{ umkm.kategoriUMKM?.nama_kategori || "-" }}</td>
               <td>{{ umkm.adminPembuat.username }}</td>
               <td class="actions">
-                <button class="action-button edit-button" @click="openUMKMForm(umkm)" title="Edit">
+                <button
+                  class="action-button edit-button"
+                  @click="openUMKMForm(umkm)"
+                  title="Edit">
                   <i class="fas fa-edit"></i>
                 </button>
-                <button class="action-button delete-button" @click="showDeleteConfirm(umkm.id_umkm)" title="Hapus">
+                <button
+                  class="action-button delete-button"
+                  @click="showDeleteConfirm(umkm.id_umkm)"
+                  title="Hapus">
                   <i class="fas fa-trash-alt"></i>
                 </button>
               </td>
@@ -65,16 +71,15 @@
       :entity-name="popUpEntity"
       :error-message="popUpMessage"
       @close="closePopUp"
-      @confirmed="handleDeleteConfirmed"
-    />
+      @confirmed="handleDeleteConfirmed" />
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, nextTick } from 'vue';
-import axios from 'axios';
-import UMKMForm from './UMKMForm.vue';
-import BasePopUp from '../../../components/pop-up/BasePopUp.vue';
+import { ref, onMounted, nextTick } from "vue";
+import axios from "axios";
+import UMKMForm from "./UMKMForm.vue";
+import BasePopUp from "../../../components/pop-up/BasePopUp.vue";
 
 const umkmList = ref([]);
 const kategoriList = ref([]);
@@ -106,15 +111,22 @@ const handleDeleteConfirmed = async () => {
   await nextTick();
 
   try {
-    const token = localStorage.getItem('access_token');
-    await axios.delete(`http://localhost:5000/api/umkm/${umkmToDeleteId.value}`, {
-      headers: { Authorization: `Bearer ${token}` }
-    });
+    const token = localStorage.getItem("access_token");
+    await axios.delete(
+      `http://localhost:5000/api/umkm/${umkmToDeleteId.value}`,
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    );
     openPopUp("success", "delete");
     fetchUMKMData();
   } catch (err) {
-    console.error('Gagal menghapus UMKM:', err.response?.data);
-    openPopUp("error", "delete", err.response?.data?.error || "Gagal menghapus UMKM.");
+    console.error("Gagal menghapus UMKM:", err.response?.data);
+    openPopUp(
+      "error",
+      "delete",
+      err.response?.data?.error || "Gagal menghapus UMKM."
+    );
   } finally {
     umkmToDeleteId.value = null;
   }
@@ -142,20 +154,20 @@ const closePopUp = () => {
 
 const fetchUMKMData = async () => {
   try {
-    const response = await axios.get('http://localhost:5000/api/umkm');
+    const response = await axios.get("http://localhost:5000/api/umkm");
     umkmList.value = response.data;
   } catch (err) {
-    console.error('Gagal memuat data UMKM:', err);
+    console.error("Gagal memuat data UMKM:", err);
     openPopUp("error", "fetch", "Gagal memuat data UMKM.");
   }
 };
 
 const fetchKategoriData = async () => {
   try {
-    const response = await axios.get('http://localhost:5000/api/kategori-umkm');
+    const response = await axios.get("http://localhost:5000/api/kategori-umkm");
     kategoriList.value = response.data;
   } catch (err) {
-    console.error('Gagal memuat data kategori:', err);
+    console.error("Gagal memuat data kategori:", err);
     openPopUp("error", "fetch", "Gagal memuat data kategori.");
   }
 };
@@ -164,29 +176,33 @@ const openUMKMForm = async (umkm = null) => {
   isEditingUMKM.value = !!umkm;
   if (umkm) {
     try {
-      const response = await axios.get(`http://localhost:5000/api/umkm/${umkm.id_umkm}`);
+      const response = await axios.get(
+        `http://localhost:5000/api/umkm/${umkm.id_umkm}`
+      );
       const fullUMKMData = response.data;
       formUMKM.value = {
         ...fullUMKMData,
-        gambar_produk_utama: null,
       };
       editingUMKMGallery.value = fullUMKMData.galeriUMKM;
     } catch (error) {
-      console.error('Gagal memuat detail UMKM:', error);
+      console.error("Gagal memuat detail UMKM:", error);
       openPopUp("error", "fetch", "Gagal memuat detail UMKM untuk diedit.");
       return;
     }
   } else {
     formUMKM.value = {
       id_umkm: null,
-      nama_umkm: '',
-      deskripsi_umkm: '',
-      jenis_usaha: '',
-      id_kategori_umkm: '',
-      alamat_umkm: '',
-      kontak_umkm: '',
-      website_umkm: '',
+      nama_umkm: "",
+      deskripsi_umkm: "",
+      hastag_umkm: "",
+      alamat_umkm: "",
+      kontak_umkm: "",
+      jam_operasional: "",
+      hari_operasional: "",
+      website_umkm: "",
       gambar_produk_utama: null,
+      gambar_sampul: null,
+      id_kategori_umkm: "",
     };
     editingUMKMGallery.value = [];
   }
@@ -203,85 +219,111 @@ const closeUMKMForm = () => {
 
 const handleSaveUMKM = async (formData, galleryFiles) => {
   try {
-    const token = localStorage.getItem('access_token');
-    
-    const umkmResponse = await axios.post('http://localhost:5000/api/umkm', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-        Authorization: `Bearer ${token}`
+    const token = localStorage.getItem("access_token");
+
+    const umkmResponse = await axios.post(
+      "http://localhost:5000/api/umkm",
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+          Authorization: `Bearer ${token}`,
+        },
       }
-    });
+    );
 
     const id_umkm = umkmResponse.data.umkm.id_umkm;
 
     if (galleryFiles && galleryFiles.length > 0) {
       const galleryFormData = new FormData();
-      galleryFormData.append('id_konten', id_umkm);
-      galleryFormData.append('tipe_konten', 'umkm');
-      
+      galleryFormData.append("id_konten", id_umkm);
+      galleryFormData.append("tipe_konten", "umkm");
+
       galleryFiles.forEach((galleryItem) => {
         galleryFormData.append(`media_galeri_files`, galleryItem.file);
-        galleryFormData.append('deskripsi_file', galleryItem.deskripsi || '');
-        galleryFormData.append('jenis_file', galleryItem.jenis_file);
-        galleryFormData.append('urutan_tampil', galleryItem.urutan);
+        galleryFormData.append("deskripsi_file", galleryItem.deskripsi || "");
+        galleryFormData.append("jenis_file", galleryItem.jenis_file);
+        galleryFormData.append("urutan_tampil", galleryItem.urutan);
       });
-      await axios.post('http://localhost:5000/api/media-galeri', galleryFormData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-          Authorization: `Bearer ${token}`
+      await axios.post(
+        "http://localhost:5000/api/media-galeri",
+        galleryFormData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+            Authorization: `Bearer ${token}`,
+          },
         }
-      });
+      );
     }
     openPopUp("success", "create");
     closeUMKMForm();
   } catch (err) {
-    console.error('Gagal menyimpan UMKM:', err.response?.data);
-    openPopUp("error", "create", err.response?.data?.error || "Gagal menyimpan UMKM. Periksa kembali input Anda.");
+    console.error("Gagal menyimpan UMKM:", err.response?.data);
+    openPopUp(
+      "error",
+      "create",
+      err.response?.data?.error ||
+        "Gagal menyimpan UMKM. Periksa kembali input Anda."
+    );
   }
 };
 
 const handleUpdateUMKM = async (formData, galleryFiles, deletedGalleryIds) => {
   try {
-    const token = localStorage.getItem('access_token');
-    const id = formData.get('id_umkm');
-    
+    const token = localStorage.getItem("access_token");
+    const id = formData.get("id_umkm");
+
     await axios.put(`http://localhost:5000/api/umkm/${id}`, formData, {
       headers: {
-        'Content-Type': 'multipart/form-data',
-        Authorization: `Bearer ${token}`
-      }
+        "Content-Type": "multipart/form-data",
+        Authorization: `Bearer ${token}`,
+      },
     });
 
     if (galleryFiles && galleryFiles.length > 0) {
       const galleryFormData = new FormData();
-      galleryFormData.append('id_konten', id);
-      galleryFormData.append('tipe_konten', 'umkm');
+      galleryFormData.append("id_konten", id);
+      galleryFormData.append("tipe_konten", "umkm");
       galleryFiles.forEach((galleryItem) => {
         galleryFormData.append(`media_galeri_files`, galleryItem.file);
-        galleryFormData.append('deskripsi_file', galleryItem.deskripsi || '');
-        galleryFormData.append('jenis_file', galleryItem.jenis_file);
-        galleryFormData.append('urutan_tampil', galleryItem.urutan);
+        galleryFormData.append("deskripsi_file", galleryItem.deskripsi || "");
+        galleryFormData.append("jenis_file", galleryItem.jenis_file);
+        galleryFormData.append("urutan_tampil", galleryItem.urutan);
       });
-      await axios.post('http://localhost:5000/api/media-galeri', galleryFormData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-          Authorization: `Bearer ${token}`
+      await axios.post(
+        "http://localhost:5000/api/media-galeri",
+        galleryFormData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+            Authorization: `Bearer ${token}`,
+          },
         }
-      });
+      );
     }
 
     if (deletedGalleryIds && deletedGalleryIds.length > 0) {
-      await Promise.all(deletedGalleryIds.map(async (mediaId) => {
-        await axios.delete(`http://localhost:5000/api/media-galeri/${mediaId}`, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-      }));
+      await Promise.all(
+        deletedGalleryIds.map(async (mediaId) => {
+          await axios.delete(
+            `http://localhost:5000/api/media-galeri/${mediaId}`,
+            {
+              headers: { Authorization: `Bearer ${token}` },
+            }
+          );
+        })
+      );
     }
     openPopUp("success", "update");
     closeUMKMForm();
   } catch (err) {
-    console.error('Gagal memperbarui UMKM:', err.response?.data);
-    openPopUp("error", "update", err.response?.data?.error || "Gagal memperbarui UMKM.");
+    console.error("Gagal memperbarui UMKM:", err.response?.data);
+    openPopUp(
+      "error",
+      "update",
+      err.response?.data?.error || "Gagal memperbarui UMKM."
+    );
   }
 };
 

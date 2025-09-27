@@ -2,7 +2,7 @@
   <div class="form-card">
     <div class="form-header">
       <h3 class="form-title">
-        {{ isEditing ? 'Edit UMKM' : 'Tambah UMKM Baru & Galeri' }}
+        {{ isEditing ? "Edit UMKM" : "Tambah UMKM Baru & Galeri" }}
       </h3>
       <button class="close-form-btn" @click="$emit('close-form')">
         <svg
@@ -36,13 +36,16 @@
             stroke-linejoin="round"
             class="feather feather-store">
             <path d="M22 12l-2-2L12 2l-8 8l-2 2"></path>
-            <path d="M5 22h14c1.1 0 2-.9 2-2V9.5L12 4L2 9.5V20c0 1.1.9 2 2 2z"></path>
+            <path
+              d="M5 22h14c1.1 0 2-.9 2-2V9.5L12 4L2 9.5V20c0 1.1.9 2 2 2z"></path>
           </svg>
           DETAIL UMKM
         </h4>
         <div class="form-grid">
           <div class="form-group">
-            <label for="nama_umkm">Nama UMKM <span class="required">*</span></label>
+            <label for="nama_umkm"
+              >Nama UMKM <span class="required">*</span></label
+            >
             <input
               type="text"
               id="nama_umkm"
@@ -52,27 +55,28 @@
           </div>
 
           <div class="form-group">
-            <label for="jenis_usaha">Jenis Usaha <span class="required">*</span></label>
-            <input
-              type="text"
-              id="jenis_usaha"
-              v-model="formData.jenis_usaha"
+            <label for="id_kategori_umkm"
+              >Kategori UMKM <span class="required">*</span></label
+            >
+            <select
+              id="id_kategori_umkm"
+              v-model="formData.id_kategori_umkm"
               class="form-input"
-              required />
-          </div>
-
-          <div class="form-group">
-            <label for="id_kategori_umkm">Kategori Utama <span class="required">*</span></label>
-            <select id="id_kategori_umkm" v-model="formData.id_kategori_umkm" class="form-input" required>
+              required>
               <option value="" disabled>Pilih Kategori</option>
-              <option v-for="kategori in kategoriList" :key="kategori.id_kategori_umkm" :value="kategori.id_kategori_umkm">
+              <option
+                v-for="kategori in kategoriList"
+                :key="kategori.id_kategori_umkm"
+                :value="kategori.id_kategori_umkm">
                 {{ kategori.nama_kategori }}
               </option>
             </select>
           </div>
 
           <div class="form-group span-2">
-            <label for="deskripsi_umkm">Deskripsi UMKM <span class="required">*</span></label>
+            <label for="deskripsi_umkm"
+              >Deskripsi UMKM <span class="required">*</span></label
+            >
             <textarea
               id="deskripsi_umkm"
               v-model="formData.deskripsi_umkm"
@@ -80,8 +84,40 @@
               rows="5"
               required></textarea>
           </div>
+
           <div class="form-group">
-            <label for="alamat_umkm">Alamat UMKM <span class="required">*</span></label>
+            <label for="hastag_umkm">Hashtag UMKM</label>
+            <input
+              type="text"
+              id="hastag_umkm"
+              v-model="formData.hastag_umkm"
+              class="form-input"
+              placeholder="Contoh: #kuliner #makanan #tradisional" />
+          </div>
+
+          <div class="form-group">
+            <label for="jam_operasional">Jam Operasional</label>
+            <input
+              type="text"
+              id="jam_operasional"
+              v-model="formData.jam_operasional"
+              class="form-input"
+              placeholder="Contoh: 08:00 - 22:00" />
+          </div>
+
+          <div class="form-group">
+            <label for="hari_operasional">Hari Operasional</label>
+            <input
+              type="text"
+              id="hari_operasional"
+              v-model="formData.hari_operasional"
+              class="form-input"
+              placeholder="Contoh: Senin - Minggu" />
+          </div>
+          <div class="form-group">
+            <label for="alamat_umkm"
+              >Alamat UMKM <span class="required">*</span></label
+            >
             <textarea
               id="alamat_umkm"
               v-model="formData.alamat_umkm"
@@ -107,10 +143,14 @@
           </div>
           <div class="form-group span-2">
             <label for="gambar_produk_utama"
-              >Gambar Produk Utama <span class="required" v-if="!isEditing">*</span></label
+              >Gambar Produk Utama
+              <span class="required" v-if="!isEditing">*</span></label
             >
             <div
-              :class="['file-drop-area', {'is-dragover': isGambarProdukUtamaDragover}]"
+              :class="[
+                'file-drop-area',
+                { 'is-dragover': isGambarProdukUtamaDragover },
+              ]"
               @dragover.prevent="isGambarProdukUtamaDragover = true"
               @dragleave.prevent="isGambarProdukUtamaDragover = false"
               @drop="handleDropGambarProdukUtama">
@@ -134,7 +174,9 @@
                   </svg>
                   <span class="file-message">
                     Drag files to upload or
-                    <label for="gambar_produk_utama" class="file-link">browse</label>
+                    <label for="gambar_produk_utama" class="file-link"
+                      >browse</label
+                    >
                   </span>
                   <input
                     type="file"
@@ -153,6 +195,85 @@
                     <button
                       type="button"
                       @click="removeGambarProdukUtama"
+                      class="cancel-image-btn"
+                      title="Batal">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="24"
+                        height="24"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        class="feather feather-x-square">
+                        <rect
+                          x="3"
+                          y="3"
+                          width="18"
+                          height="18"
+                          rx="2"
+                          ry="2"></rect>
+                        <line x1="9" y1="9" x2="15" y2="15"></line>
+                        <line x1="15" y1="9" x2="9" y2="15"></line>
+                      </svg>
+                      Batal
+                    </button>
+                  </div>
+                </template>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group span-2">
+            <label for="gambar_sampul">Gambar Sampul</label>
+            <div
+              :class="[
+                'file-drop-area',
+                { 'is-dragover': isGambarSampulDragover },
+              ]"
+              @dragover.prevent="isGambarSampulDragover = true"
+              @dragleave.prevent="isGambarSampulDragover = false"
+              @drop="handleDropGambarSampul">
+              <div class="file-drop-content">
+                <template v-if="!formData.preview_gambar_sampul">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="feather feather-upload-cloud file-icon">
+                    <polyline points="16 16 12 12 8 16"></polyline>
+                    <line x1="12" y1="12" x2="12" y2="21"></line>
+                    <path
+                      d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"></path>
+                  </svg>
+                  <span class="file-message">
+                    Drag files to upload or
+                    <label for="gambar_sampul" class="file-link">browse</label>
+                  </span>
+                  <input
+                    type="file"
+                    id="gambar_sampul"
+                    @change="handleGambarSampulUpload"
+                    class="file-input"
+                    accept="image/*" />
+                </template>
+                <template v-else>
+                  <div class="image-preview-main">
+                    <img
+                      :src="formData.preview_gambar_sampul"
+                      alt="Gambar Sampul Preview"
+                      class="hero-image-preview" />
+                    <button
+                      type="button"
+                      @click="removeGambarSampul"
                       class="cancel-image-btn"
                       title="Batal">
                       <svg
@@ -212,7 +333,7 @@
             >Unggah File Galeri Baru (Gambar/Video)</label
           >
           <div
-            :class="['file-drop-area', {'is-dragover': isGalleryDragover}]"
+            :class="['file-drop-area', { 'is-dragover': isGalleryDragover }]"
             @dragover.prevent="isGalleryDragover = true"
             @dragleave.prevent="isGalleryDragover = false"
             @drop="handleDropGalleryFiles">
@@ -442,7 +563,7 @@
             <polyline points="17 21 17 13 7 13 7 21"></polyline>
             <polyline points="7 3 7 8 15 8"></polyline>
           </svg>
-          {{ isEditing ? 'Simpan Perubahan' : 'Simpan UMKM & Galeri' }}
+          {{ isEditing ? "Simpan Perubahan" : "Simpan UMKM & Galeri" }}
         </button>
       </div>
     </form>
@@ -450,10 +571,10 @@
 </template>
 
 <script setup>
-import { ref, onUnmounted, nextTick, watch } from 'vue';
-import 'leaflet/dist/leaflet.css';
-import L from 'leaflet';
-import axios from 'axios';
+import { ref, onUnmounted, nextTick, watch } from "vue";
+import "leaflet/dist/leaflet.css";
+import L from "leaflet";
+import axios from "axios";
 
 const props = defineProps({
   isEditing: Boolean,
@@ -465,29 +586,44 @@ const props = defineProps({
   },
 });
 
-const emit = defineEmits(['close-form', 'save-umkm', 'update-umkm']);
+const emit = defineEmits(["close-form", "save-umkm", "update-umkm"]);
 
 const formData = ref({});
 const galleryFiles = ref([]);
 const initialGalleryFiles = ref([]);
 const deletedGalleryIds = ref([]);
 const isGambarProdukUtamaDragover = ref(false);
+const isGambarSampulDragover = ref(false);
 const isGalleryDragover = ref(false);
 
-watch(() => props.initialData, (newVal) => {
-  formData.value = { ...newVal };
-  if (
-    formData.value.gambar_produk_utama &&
-    typeof formData.value.gambar_produk_utama === 'string'
-  ) {
-    formData.value.preview_gambar_produk_utama = `http://localhost:5000${formData.value.gambar_produk_utama}`;
-  } else {
-    formData.value.preview_gambar_produk_utama = null;
-  }
-  initialGalleryFiles.value = props.galleryList ? [...props.galleryList] : [];
-  galleryFiles.value = [];
-  deletedGalleryIds.value = [];
-}, { immediate: true });
+watch(
+  () => props.initialData,
+  (newVal) => {
+    formData.value = { ...newVal };
+    if (
+      formData.value.gambar_produk_utama &&
+      typeof formData.value.gambar_produk_utama === "string"
+    ) {
+      formData.value.preview_gambar_produk_utama = `http://localhost:5000${formData.value.gambar_produk_utama}`;
+    } else {
+      formData.value.preview_gambar_produk_utama = null;
+    }
+
+    if (
+      formData.value.gambar_sampul &&
+      typeof formData.value.gambar_sampul === "string"
+    ) {
+      formData.value.preview_gambar_sampul = `http://localhost:5000${formData.value.gambar_sampul}`;
+    } else {
+      formData.value.preview_gambar_sampul = null;
+    }
+
+    initialGalleryFiles.value = props.galleryList ? [...props.galleryList] : [];
+    galleryFiles.value = [];
+    deletedGalleryIds.value = [];
+  },
+  { immediate: true }
+);
 
 // Fungsi untuk Gambar Produk Utama
 const handleGambarProdukUtamaUpload = (event) => {
@@ -501,7 +637,7 @@ const handleDropGambarProdukUtama = (event) => {
   event.preventDefault();
   isGambarProdukUtamaDragover.value = false;
   const file = event.dataTransfer.files[0];
-  if (file && file.type.startsWith('image/')) {
+  if (file && file.type.startsWith("image/")) {
     formData.value.gambar_produk_utama = file;
     formData.value.preview_gambar_produk_utama = URL.createObjectURL(file);
   }
@@ -514,6 +650,31 @@ const removeGambarProdukUtama = () => {
   formData.value.preview_gambar_produk_utama = null;
 };
 
+// Fungsi untuk Gambar Sampul
+const handleGambarSampulUpload = (event) => {
+  const file = event.target.files[0];
+  if (file) {
+    formData.value.gambar_sampul = file;
+    formData.value.preview_gambar_sampul = URL.createObjectURL(file);
+  }
+};
+const handleDropGambarSampul = (event) => {
+  event.preventDefault();
+  isGambarSampulDragover.value = false;
+  const file = event.dataTransfer.files[0];
+  if (file && file.type.startsWith("image/")) {
+    formData.value.gambar_sampul = file;
+    formData.value.preview_gambar_sampul = URL.createObjectURL(file);
+  }
+};
+const removeGambarSampul = () => {
+  if (formData.value.preview_gambar_sampul) {
+    URL.revokeObjectURL(formData.value.preview_gambar_sampul);
+  }
+  formData.value.gambar_sampul = null;
+  formData.value.preview_gambar_sampul = null;
+};
+
 // Fungsi untuk Galeri
 const getMediaUrl = (path) => {
   return `http://localhost:5000${path}`;
@@ -521,7 +682,7 @@ const getMediaUrl = (path) => {
 const handleGalleryFileUpload = (event) => {
   const files = event.target.files;
   addGalleryFiles(files);
-  event.target.value = '';
+  event.target.value = "";
 };
 const handleDropGalleryFiles = (event) => {
   event.preventDefault();
@@ -531,17 +692,17 @@ const handleDropGalleryFiles = (event) => {
 };
 const addGalleryFiles = (files) => {
   for (const file of files) {
-    if (file.type.startsWith('image/') || file.type.startsWith('video/')) {
+    if (file.type.startsWith("image/") || file.type.startsWith("video/")) {
       let previewUrl = null;
-      if (file.type.startsWith('image/')) {
+      if (file.type.startsWith("image/")) {
         previewUrl = URL.createObjectURL(file);
       }
       galleryFiles.value.push({
         file,
-        deskripsi: '',
+        deskripsi: "",
         urutan: galleryFiles.value.length + 1,
-        jenis_file: file.type.startsWith('image/') ? 'gambar' : 'video',
-        previewUrl
+        jenis_file: file.type.startsWith("image/") ? "gambar" : "video",
+        previewUrl,
       });
     }
   }
@@ -553,8 +714,14 @@ const removeGalleryFile = (index) => {
   galleryFiles.value.splice(index, 1);
 };
 const removeExistingGalleryFile = (id) => {
-  if (confirm('Apakah Anda yakin ingin menghapus file galeri ini? Perubahan akan disimpan saat Anda memperbarui UMKM.')) {
-    initialGalleryFiles.value = initialGalleryFiles.value.filter(file => file.id_media_galeri !== id);
+  if (
+    confirm(
+      "Apakah Anda yakin ingin menghapus file galeri ini? Perubahan akan disimpan saat Anda memperbarui UMKM."
+    )
+  ) {
+    initialGalleryFiles.value = initialGalleryFiles.value.filter(
+      (file) => file.id_media_galeri !== id
+    );
     deletedGalleryIds.value.push(id);
   }
 };
@@ -563,8 +730,11 @@ const submitForm = () => {
   const submitData = new FormData();
   for (const key in formData.value) {
     if (
-      key !== 'preview_gambar_produk_utama' &&
-      formData.value[key] !== null
+      key !== "preview_gambar_produk_utama" &&
+      key !== "preview_gambar_sampul" &&
+      formData.value[key] !== null &&
+      formData.value[key] !== undefined &&
+      formData.value[key] !== ""
     ) {
       submitData.append(key, formData.value[key]);
     }
@@ -572,20 +742,31 @@ const submitForm = () => {
 
   // Penting: Memastikan id_kategori_umkm dikirim sebagai angka
   if (formData.value.id_kategori_umkm) {
-    submitData.set('id_kategori_umkm', parseInt(formData.value.id_kategori_umkm));
+    submitData.set(
+      "id_kategori_umkm",
+      parseInt(formData.value.id_kategori_umkm)
+    );
   }
 
   if (props.isEditing) {
-    initialGalleryFiles.value.forEach(item => {
-      submitData.append('existing_gallery_updates', JSON.stringify({
-        id_media_galeri: item.id_media_galeri,
-        deskripsi_file: item.deskripsi_file,
-        urutan_tampil: item.urutan_tampil
-      }));
+    initialGalleryFiles.value.forEach((item) => {
+      submitData.append(
+        "existing_gallery_updates",
+        JSON.stringify({
+          id_media_galeri: item.id_media_galeri,
+          deskripsi_file: item.deskripsi_file,
+          urutan_tampil: item.urutan_tampil,
+        })
+      );
     });
-    emit('update-umkm', submitData, galleryFiles.value, deletedGalleryIds.value);
+    emit(
+      "update-umkm",
+      submitData,
+      galleryFiles.value,
+      deletedGalleryIds.value
+    );
   } else {
-    emit('save-umkm', submitData, galleryFiles.value);
+    emit("save-umkm", submitData, galleryFiles.value);
   }
 };
 
@@ -593,7 +774,10 @@ onUnmounted(() => {
   if (formData.value.preview_gambar_produk_utama) {
     URL.revokeObjectURL(formData.value.preview_gambar_produk_utama);
   }
-  galleryFiles.value.forEach(file => {
+  if (formData.value.preview_gambar_sampul) {
+    URL.revokeObjectURL(formData.value.preview_gambar_sampul);
+  }
+  galleryFiles.value.forEach((file) => {
     if (file.previewUrl) URL.revokeObjectURL(file.previewUrl);
   });
 });
@@ -608,7 +792,8 @@ onUnmounted(() => {
   box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
   margin: 2rem auto;
   max-width: 900px;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
   border: 1px solid #f0f4f8;
 }
 

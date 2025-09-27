@@ -2,34 +2,51 @@
   <div class="pengumuman-view-user">
     <div class="container">
       <h1 class="page-title">Pengumuman Terbaru</h1>
-      <p class="page-subtitle">Informasi penting seputar kegiatan Dinas Kebudayaan dan Pariwisata Kabupaten Magetan.</p>
-      
+      <p class="page-subtitle">
+        Informasi penting seputar kegiatan Dinas Kebudayaan dan Pariwisata
+        Kabupaten Magetan.
+      </p>
+
       <div v-if="loading" class="state-message">
         <div class="spinner"></div>
         <p>Memuat daftar pengumuman...</p>
       </div>
 
       <div v-if="error" class="state-message error-message">
-        <p>❌ Maaf, terjadi kesalahan saat memuat data. Silakan coba kembali.</p>
+        <p>
+          ❌ Maaf, terjadi kesalahan saat memuat data. Silakan coba kembali.
+        </p>
       </div>
 
-      <div v-if="!loading && !error && pengumumanList.length === 0" class="state-message empty-message">
+      <div
+        v-if="!loading && !error && pengumumanList.length === 0"
+        class="state-message empty-message">
         <p>📋 Belum ada pengumuman yang tersedia saat ini.</p>
       </div>
 
       <ul class="pengumuman-list" v-if="pengumumanList.length > 0">
-        <li v-for="pengumuman in pengumumanList" :key="pengumuman.id_pengumuman" class="pengumuman-card">
+        <li
+          v-for="pengumuman in pengumumanList"
+          :key="pengumuman.id_pengumuman"
+          class="pengumuman-card">
           <div class="pengumuman-cover" v-if="pengumuman.sampul_pengumuman">
-            <img :src="baseUrl + pengumuman.sampul_pengumuman" :alt="`Sampul ${pengumuman.judul_pengumuman}`" class="cover-image">
+            <img
+              :src="baseUrl + pengumuman.sampul_pengumuman"
+              :alt="`Sampul ${pengumuman.judul_pengumuman}`"
+              class="cover-image" />
           </div>
           <div class="card-content">
             <h2 class="pengumuman-title">{{ pengumuman.judul_pengumuman }}</h2>
-            <p class="pengumuman-meta">Dipublikasi pada: {{ formatDate(pengumuman.tanggal_publikasi) }}</p>
+            <p class="pengumuman-meta">
+              Dipublikasi pada: {{ formatDate(pengumuman.tanggal_publikasi) }}
+            </p>
             <div v-if="pengumuman.isi_pengumuman" class="pengumuman-excerpt">
               <p>{{ truncateText(pengumuman.isi_pengumuman) }}</p>
             </div>
             <div class="card-actions">
-              <button @click="openPdfModal(pengumuman.file_pdf_path)" class="view-link full-width-button">
+              <button
+                @click="openPdfModal(pengumuman.file_pdf_path)"
+                class="view-link full-width-button">
                 <i class="fas fa-eye"></i> Baca PDF
               </button>
             </div>
@@ -37,8 +54,11 @@
         </li>
       </ul>
     </div>
-    
-    <div v-if="showPdfModal" class="pdf-modal-overlay" @click.self="closePdfModal">
+
+    <div
+      v-if="showPdfModal"
+      class="pdf-modal-overlay"
+      @click.self="closePdfModal">
       <button class="close-button" @click="closePdfModal">×</button>
       <div class="pdf-modal-content">
         <iframe :src="currentPdfUrl" class="pdf-iframe"></iframe>
@@ -48,16 +68,16 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
-import axios from 'axios';
+import { ref, onMounted } from "vue";
+import axios from "axios";
 
 const pengumumanList = ref([]);
 const loading = ref(true);
 const error = ref(false);
-const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
+const baseUrl = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
 
 const showPdfModal = ref(false);
-const currentPdfUrl = ref('');
+const currentPdfUrl = ref("");
 
 const fetchPengumuman = async () => {
   loading.value = true;
@@ -74,15 +94,15 @@ const fetchPengumuman = async () => {
 };
 
 const formatDate = (dateString) => {
-  const options = { year: 'numeric', month: 'long', day: 'numeric' };
-  return new Date(dateString).toLocaleDateString('id-ID', options);
+  const options = { year: "numeric", month: "long", day: "numeric" };
+  return new Date(dateString).toLocaleDateString("id-ID", options);
 };
 
 const truncateText = (text, length = 200) => {
   if (!text || text.length <= length) {
     return text;
   }
-  return text.substring(0, length) + '...';
+  return text.substring(0, length) + "...";
 };
 
 const openPdfModal = (pdfPath) => {
@@ -92,10 +112,15 @@ const openPdfModal = (pdfPath) => {
 
 const closePdfModal = () => {
   showPdfModal.value = false;
-  currentPdfUrl.value = '';
+  currentPdfUrl.value = "";
 };
 
 onMounted(() => {
+  // Scroll ke atas halaman
+  window.scrollTo({
+    top: 0,
+    behavior: "smooth",
+  });
   fetchPengumuman();
 });
 </script>
@@ -202,7 +227,8 @@ onMounted(() => {
   width: 100%;
 }
 
-.download-link, .view-link {
+.download-link,
+.view-link {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -320,15 +346,19 @@ onMounted(() => {
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 @media (max-width: 768px) {
   .pengumuman-card {
     flex-direction: column;
   }
-  
+
   .pengumuman-cover {
     width: 100%;
     height: 200px;

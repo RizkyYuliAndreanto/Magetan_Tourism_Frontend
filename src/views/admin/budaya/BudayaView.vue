@@ -21,26 +21,14 @@
     <main class="content-area">
       <div class="content-wrapper">
         <div class="header-container">
-          <h2 class="page-title">Manajemen Budaya & Kategori</h2>
-          <p class="page-subtitle">Kelola semua data budaya dan kategorinya yang ada di website Anda.</p>
-        </div>
-
-        <div class="tab-navigation">
-          <button
-            :class="['tab-button', { 'active': currentTab === 'budaya' }]"
-            @click="changeTab('budaya')">
-            <i class="fas fa-book-reader tab-icon"></i> Budaya
-          </button>
-          <button
-            :class="['tab-button', { 'active': currentTab === 'kategori' }]"
-            @click="changeTab('kategori')">
-            <i class="fas fa-tags tab-icon"></i> Kategori
-          </button>
+          <h2 class="page-title">Manajemen Budaya</h2>
+          <p class="page-subtitle">
+            Kelola semua data budaya yang ada di website Anda.
+          </p>
         </div>
 
         <div class="tab-content">
-          <BudayaManagement v-if="currentTab === 'budaya'" />
-          <KategoriBudayaManagement v-else-if="currentTab === 'kategori'" />
+          <BudayaManagement />
         </div>
       </div>
     </main>
@@ -48,18 +36,12 @@
 </template>
 
 <script setup>
-import { ref, computed, inject } from 'vue';
-import BudayaManagement from './BudayaManagement.vue';
-import KategoriBudayaManagement from './KategoriBudayaManagement.vue';
+import { ref, computed, inject } from "vue";
+import BudayaManagement from "./BudayaManagement.vue";
 
-const toggleSidebar = inject('toggleSidebar');
-const currentTab = ref('budaya');
+const toggleSidebar = inject("toggleSidebar");
 
-const pageTitle = computed(() => 'Manajemen Budaya');
-
-const changeTab = (tab) => {
-  currentTab.value = tab;
-};
+const pageTitle = computed(() => "Manajemen Budaya");
 </script>
 
 <style scoped>
@@ -80,7 +62,7 @@ const changeTab = (tab) => {
   flex-grow: 1;
   display: flex;
   flex-direction: column;
-  background-color: var(--background-light); 
+  background-color: var(--background-light);
   padding-top: calc(var(--navbar-height) + 2rem);
   margin-top: 80px;
 }

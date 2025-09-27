@@ -479,6 +479,11 @@ const cardLeave = (event) => {
 };
 
 onMounted(async () => {
+  // Scroll ke atas halaman
+  window.scrollTo({
+    top: 0,
+    behavior: "smooth",
+  });
   loading.value = true;
   await Promise.all([fetchPariwisata(), fetchKategori()]);
   loading.value = false;

@@ -12,33 +12,55 @@
         <p>Memuat Struktur Organisasi...</p>
       </div>
       <div v-if="error" class="state-message error-message">
-        <p>❌ Maaf, terjadi kesalahan saat memuat data. Silakan coba kembali.</p>
+        <p>
+          ❌ Maaf, terjadi kesalahan saat memuat data. Silakan coba kembali.
+        </p>
       </div>
-      <div v-if="!loading && !error && !strukturOrganisasiData" class="state-message empty-message">
-        <p>📋 Belum ada informasi Struktur Organisasi yang tersedia saat ini.</p>
+      <div
+        v-if="!loading && !error && !strukturOrganisasiData"
+        class="state-message empty-message">
+        <p>
+          📋 Belum ada informasi Struktur Organisasi yang tersedia saat ini.
+        </p>
       </div>
 
       <!-- Main Content -->
-      <div v-if="strukturOrganisasiData && !loading" class="struktur-organisasi-content">
-        <p class="last-updated">Terakhir diperbarui: {{ formatDate(strukturOrganisasiData.tanggal_pembaruan) }}</p>
-        
-        <h2 class="section-sub-title">{{ strukturOrganisasiData.judul_struktur || 'Struktur Organisasi Dinas' }}</h2>
-        
-        <div v-if="strukturOrganisasiData.gambar_struktur_path" class="struktur-image-container">
-          <img 
-            :src="baseUrl + strukturOrganisasiData.gambar_struktur_path" 
-            :alt="strukturOrganisasiData.judul_struktur || 'Struktur Organisasi'" 
-            class="struktur-organisasi-image"
-          >
+      <div
+        v-if="strukturOrganisasiData && !loading"
+        class="struktur-organisasi-content">
+        <p class="last-updated">
+          Terakhir diperbarui:
+          {{ formatDate(strukturOrganisasiData.tanggal_pembaruan) }}
+        </p>
+
+        <h2 class="section-sub-title">
+          {{
+            strukturOrganisasiData.judul_struktur || "Struktur Organisasi Dinas"
+          }}
+        </h2>
+
+        <div
+          v-if="strukturOrganisasiData.gambar_struktur_path"
+          class="struktur-image-container">
+          <img
+            :src="baseUrl + strukturOrganisasiData.gambar_struktur_path"
+            :alt="
+              strukturOrganisasiData.judul_struktur || 'Struktur Organisasi'
+            "
+            class="struktur-organisasi-image" />
         </div>
         <div v-else class="struktur-image-placeholder">
           <i class="fas fa-sitemap fa-3x"></i>
           <span>Gambar Struktur Organisasi Tidak Tersedia</span>
         </div>
 
-        <div v-if="strukturOrganisasiData.deskripsi_struktur" class="struktur-description">
+        <div
+          v-if="strukturOrganisasiData.deskripsi_struktur"
+          class="struktur-description">
           <h3 class="section-heading-small">Deskripsi</h3>
-          <p class="page-description">{{ strukturOrganisasiData.deskripsi_struktur }}</p>
+          <p class="page-description">
+            {{ strukturOrganisasiData.deskripsi_struktur }}
+          </p>
         </div>
       </div>
     </div>
@@ -46,16 +68,16 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
-import { useRouter } from 'vue-router';
-import axios from 'axios';
+import { ref, onMounted } from "vue";
+import { useRouter } from "vue-router";
+import axios from "axios";
 
 const router = useRouter();
 
 const strukturOrganisasiData = ref(null);
 const loading = ref(true);
 const error = ref(false);
-const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
+const baseUrl = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
 
 const fetchStrukturOrganisasiData = async () => {
   loading.value = true;
@@ -76,9 +98,15 @@ const fetchStrukturOrganisasiData = async () => {
 };
 
 const formatDate = (dateString) => {
-  if (!dateString) return '';
-  const options = { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' };
-  return new Date(dateString).toLocaleDateString('id-ID', options);
+  if (!dateString) return "";
+  const options = {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  };
+  return new Date(dateString).toLocaleDateString("id-ID", options);
 };
 
 const goBack = () => {
@@ -86,6 +114,11 @@ const goBack = () => {
 };
 
 onMounted(() => {
+  // Scroll ke atas halaman
+  window.scrollTo({
+    top: 0,
+    behavior: "smooth",
+  });
   fetchStrukturOrganisasiData();
 });
 </script>
@@ -208,8 +241,12 @@ onMounted(() => {
   color: #6c757d;
   margin: 50px 0;
 }
-.state-message.error-message { color: #dc3545; }
-.state-message.empty-message { color: #ffc107; }
+.state-message.error-message {
+  color: #dc3545;
+}
+.state-message.empty-message {
+  color: #ffc107;
+}
 .spinner {
   border: 4px solid rgba(0, 0, 0, 0.1);
   width: 36px;
@@ -220,7 +257,11 @@ onMounted(() => {
   margin: 0 auto 15px;
 }
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 </style>

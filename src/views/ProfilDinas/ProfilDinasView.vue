@@ -35,15 +35,23 @@
           class="official-menu-card"
           :style="{ animationDelay: `${index * 0.15}s` }"
           @mouseenter="cardHover"
-          @mouseleave="cardLeave">
+          @mouseleave="cardLeave"
+          @click="handleCardClick">
           <!-- Professional Card Header -->
           <div class="card-header">
             <div class="official-icon-container">
               <div class="icon-glow"></div>
               <img
+                v-if="logoPemkab"
                 :src="logoPemkab"
                 alt="Logo Pemerintah Kabupaten Magetan"
-                class="official-logo" />
+                class="official-logo"
+                @error="handleImageError" />
+              <div v-else class="logo-fallback">
+                <i
+                  class="fas fa-building"
+                  style="font-size: 2rem; color: #475569"></i>
+              </div>
               <div class="icon-badge">
                 <i :class="item.icon" class="badge-icon"></i>
               </div>
@@ -85,8 +93,19 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
 import logoPemkab from "@/assets/LOGO PEMKAB.png";
+
+// Debug logging
+onMounted(() => {
+  // Scroll ke atas halaman
+  window.scrollTo({
+    top: 0,
+    behavior: "smooth",
+  });
+  console.log("ProfilDinasView mounted successfully");
+  console.log("Logo path:", logoPemkab);
+});
 
 const menuItems = ref([
   {
@@ -118,6 +137,13 @@ const menuItems = ref([
     link: { name: "StrukturAnggota" },
   },
   {
+    title: "Pengumuman",
+    description:
+      "Informasi terkini, pengumuman resmi, dan pemberitahuan penting dari Dinas Kebudayaan dan Pariwisata Kabupaten Magetan.",
+    icon: "fas fa-bullhorn",
+    link: { name: "pengumuman" },
+  },
+  {
     title: "PPID",
     description:
       "Pejabat Pengelola Informasi dan Dokumentasi - akses informasi publik dan layanan dokumentasi resmi.",
@@ -133,6 +159,18 @@ const cardHover = (event) => {
 const cardLeave = (event) => {
   event.currentTarget.classList.remove("hovered");
 };
+
+const handleImageError = () => {
+  console.error("Failed to load logo image");
+};
+
+const handleCardClick = () => {
+  // Force scroll to top when card is clicked
+  window.scrollTo({
+    top: 0,
+    behavior: "smooth",
+  });
+};
 </script>
 
 <style scoped>
@@ -142,7 +180,7 @@ const cardLeave = (event) => {
   position: relative;
   min-height: 100vh;
   font-family: "Inter", "Segoe UI", sans-serif;
-  overflow: hidden;
+  overflow-x: hidden; /* Changed from overflow: hidden */
   background: linear-gradient(
     135deg,
     #f8fafc 0%,
@@ -151,6 +189,7 @@ const cardLeave = (event) => {
     #94a3b8 75%,
     #64748b 100%
   );
+  padding-top: 80px; /* Add padding to account for navbar */
 }
 
 /* Official Cultural Background */
@@ -311,12 +350,13 @@ const cardLeave = (event) => {
   max-width: 1400px;
   margin: 0 auto;
   padding: 0 20px;
+  min-height: calc(100vh - 160px); /* Ensure minimum height */
 }
 
 /* ========== OFFICIAL HEADER ========== */
 
 .official-header {
-  padding: 120px 0 100px;
+  padding: 60px 0 60px; /* Reduced from 120px to account for navbar padding */
   text-align: center;
   position: relative;
 }
@@ -557,8 +597,21 @@ const cardLeave = (event) => {
   filter: opacity(0.8);
 }
 
+.logo-fallback {
+  width: 70px;
+  height: 70px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.4s ease;
+}
+
 .official-menu-card.hovered .official-logo {
   filter: opacity(1) drop-shadow(0 0 8px rgba(255, 255, 255, 0.3));
+  transform: scale(1.1);
+}
+
+.official-menu-card.hovered .logo-fallback {
   transform: scale(1.1);
 }
 
