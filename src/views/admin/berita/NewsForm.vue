@@ -45,15 +45,16 @@
           Detail Berita
         </h4>
         <div class="form-grid">
-          <div class="form-group">
-            <label for="judul_berita"
+          <div class="form-group span-2">
+            <label for="judul"
               >Judul Berita <span class="required">*</span></label
             >
             <input
               type="text"
-              id="judul_berita"
+              id="judul"
               v-model="formData.judul"
               class="form-input"
+              placeholder="Masukkan judul berita"
               required />
           </div>
           <div class="form-group">
@@ -68,41 +69,11 @@
               <option value="">Pilih Kategori</option>
               <option
                 v-for="kategori in kategoriList"
-                :key="kategori.id_kategori"
-                :value="kategori.id_kategori">
+                :key="kategori.id_kategori_berita || kategori.id_kategori"
+                :value="kategori.id_kategori_berita || kategori.id_kategori">
                 {{ kategori.nama_kategori }}
               </option>
             </select>
-          </div>
-          <div class="form-group span-2">
-            <label for="teras_berita"
-              >Teras Berita <span class="required">*</span></label
-            >
-            <textarea
-              id="teras_berita"
-              v-model="formData.teras_berita"
-              class="form-input"
-              rows="3"
-              required></textarea>
-          </div>
-          <div class="form-group span-2">
-            <label for="isi_berita"
-              >Isi Berita <span class="required">*</span></label
-            >
-            <textarea
-              id="isi_berita"
-              v-model="formData.isi_berita"
-              class="form-input"
-              rows="5"
-              required></textarea>
-          </div>
-          <div class="form-group">
-            <label for="penutup_berita">Penutup Berita</label>
-            <textarea
-              id="penutup_berita"
-              v-model="formData.penutup_berita"
-              class="form-input"
-              rows="3"></textarea>
           </div>
           <div class="form-group">
             <label for="tanggal_publikasi"
@@ -115,30 +86,20 @@
               class="form-input"
               required />
           </div>
-          <div class="form-group">
-            <label for="koordinat_lokasi">Koordinat Lokasi</label>
-            <input
-              type="text"
-              id="koordinat_lokasi"
-              v-model="formData.koordinat_lokasi"
-              class="form-input"
-              readonly />
-          </div>
           <div class="form-group span-2">
-            <label>Pilih Lokasi di Peta</label>
-            <div
-              id="map"
-              style="
-                height: 400px;
-                border-radius: 8px;
-                border: 1px solid #ddd;
-              "></div>
-          </div>
-          <div class="form-group span-2">
-            <label for="gambar_hero_berita"
-              >Gambar Hero Berita
-              <span class="required" v-if="!isEditing">*</span></label
+            <label for="isi_berita"
+              >Isi Berita <span class="required">*</span></label
             >
+            <textarea
+              id="isi_berita"
+              v-model="formData.isi_berita"
+              class="form-input"
+              placeholder="Masukkan isi berita"
+              rows="8"
+              required></textarea>
+          </div>
+          <div class="form-group span-2">
+            <label for="gambar_hero_berita">Gambar Hero Berita</label>
             <div
               class="file-drop-area"
               @dragover.prevent
@@ -146,97 +107,66 @@
               <div class="file-drop-content">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  width="24"
-                  height="24"
+                  width="48"
+                  height="48"
                   viewBox="0 0 24 24"
                   fill="none"
                   stroke="currentColor"
                   stroke-width="2"
                   stroke-linecap="round"
                   stroke-linejoin="round"
-                  class="feather feather-upload-cloud file-icon">
-                  <polyline points="16 16 12 12 8 16"></polyline>
-                  <line x1="12" y1="12" x2="12" y2="21"></line>
-                  <path
-                    d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"></path>
-                  <polyline points="16 16 12 12 8 16"></polyline>
+                  class="file-icon">
+                  <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                  <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                  <polyline points="21,15 16,10 5,21"></polyline>
                 </svg>
-                <span class="file-message" v-if="!formData.preview_gambar_hero">
-                  Drag files to upload or
-                  <label for="gambar_hero_berita" class="file-link"
-                    >browse</label
+                <p class="file-message">
+                  Drag & drop gambar di sini, atau
+                  <span class="file-link" @click="$refs.heroFileInput.click()"
+                    >pilih file</span
                   >
-                </span>
-                <input
-                  type="file"
-                  id="gambar_hero_berita"
-                  @change="handleHeroFileUpload"
-                  class="file-input"
-                  accept="image/*"
-                  :required="!isEditing" />
+                </p>
               </div>
-              <div
-                v-if="formData.preview_gambar_hero"
-                class="image-preview-container">
-                <div class="image-preview-inner">
-                  <img
-                    :src="formData.preview_gambar_hero"
-                    alt="Hero Image Preview"
-                    class="hero-image-preview" />
-                  <div class="image-preview-actions">
-                    <button
-                      type="button"
-                      @click="removeHeroImage"
-                      class="remove-image-btn"
-                      title="Hapus Gambar">
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="24"
-                        height="24"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        stroke-width="2"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        class="feather feather-trash-2">
-                        <polyline points="3 6 5 6 21 6"></polyline>
-                        <path
-                          d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                        <line x1="10" y1="11" x2="10" y2="17"></line>
-                        <line x1="14" y1="11" x2="14" y2="17"></line>
-                      </svg>
-                      Hapus
-                    </button>
-                    <button
-                      type="button"
-                      @click="removeHeroImage"
-                      class="cancel-image-btn"
-                      title="Batal">
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="24"
-                        height="24"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        stroke-width="2"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        class="feather feather-x-square">
-                        <rect
-                          x="3"
-                          y="3"
-                          width="18"
-                          height="18"
-                          rx="2"
-                          ry="2"></rect>
-                        <line x1="9" y1="9" x2="15" y2="15"></line>
-                        <line x1="15" y1="9" x2="9" y2="15"></line>
-                      </svg>
-                      Batal
-                    </button>
-                  </div>
+              <input
+                ref="heroFileInput"
+                type="file"
+                accept="image/*"
+                @change="handleHeroFileUpload"
+                class="file-input"
+                style="display: none" />
+            </div>
+            <div
+              v-if="formData.preview_gambar_hero"
+              class="image-preview-container">
+              <div class="image-preview-inner">
+                <img
+                  :src="formData.preview_gambar_hero"
+                  alt="Preview"
+                  class="hero-image-preview" />
+                <div class="image-preview-actions">
+                  <button
+                    type="button"
+                    class="remove-image-btn"
+                    @click="removeHeroImage">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="16"
+                      height="16"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      class="feather">
+                      <polyline points="3,6 5,6 21,6"></polyline>
+                      <path
+                        d="M19,6V20A2,2,0,0,1,17,22H7A2,2,0,0,1,5,20V6M8,6V4A2,2,0,0,1,10,2H14A2,2,0,0,1,16,4V6"></path>
+                      <line x1="10" y1="11" x2="10" y2="17"></line>
+                      <line x1="14" y1="11" x2="14" y2="17"></line>
+                    </svg>
+                    Hapus
+                  </button>
                 </div>
               </div>
             </div>
@@ -269,7 +199,7 @@
             <span class="required" v-if="!isEditing">*</span></label
           >
           <div
-            :class="['file-drop-area', { 'has-file': galleryFiles.length > 0 }]"
+            class="file-drop-area"
             @dragover.prevent
             @drop="handleDropGalleryFiles">
             <div class="file-drop-content">
@@ -290,16 +220,20 @@
               </svg>
               <span class="file-message"
                 >Drag & drop files here or
-                <label for="galeri-files" class="file-link">browse</label> to
-                upload</span
+                <span class="file-link" @click="$refs.galleryFileInput.click()"
+                  >browse</span
+                >
+                to upload</span
               >
               <input
+                ref="galleryFileInput"
                 type="file"
                 id="galeri-files"
                 @change="handleGalleryFileUpload"
                 class="file-input"
                 multiple
-                accept="image/*,video/*" />
+                accept="image/*,video/*"
+                style="display: none" />
             </div>
           </div>
         </div>
@@ -489,10 +423,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted, watch, nextTick } from "vue";
-import "leaflet/dist/leaflet.css";
-import L from "leaflet";
-import axios from "axios";
+import { ref, watch, nextTick } from "vue";
 
 const props = defineProps({
   isEditing: {
@@ -519,8 +450,6 @@ const formData = ref({});
 const galleryFiles = ref([]);
 const initialGalleryFiles = ref([]);
 const deletedGalleryIds = ref([]);
-const mapInstance = ref(null);
-const markerInstance = ref(null);
 
 watch(
   () => props.initialData,
@@ -529,60 +458,9 @@ watch(
     initialGalleryFiles.value = props.galleryList ? [...props.galleryList] : [];
     galleryFiles.value = [];
     deletedGalleryIds.value = [];
-    nextTick(() => {
-      initializeMap();
-    });
   },
   { immediate: true }
 );
-
-const initializeMap = () => {
-  if (mapInstance.value) {
-    destroyMap();
-  }
-  const mapCenter = formData.value.koordinat_lokasi
-    ? formData.value.koordinat_lokasi.split(",").map(Number)
-    : [-7.6534, 111.4116];
-
-  mapInstance.value = L.map("map").setView(
-    mapCenter,
-    formData.value.zoom_level_peta || 13
-  );
-  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-    attribution:
-      '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-  }).addTo(mapInstance.value);
-
-  if (formData.value.koordinat_lokasi) {
-    markerInstance.value = L.marker(mapCenter).addTo(mapInstance.value);
-  }
-  mapInstance.value.on("click", (e) => {
-    const lat = e.latlng.lat;
-    const lng = e.latlng.lng;
-    formData.value.koordinat_lokasi = `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
-    formData.value.zoom_level_peta = mapInstance.value.getZoom();
-    if (markerInstance.value) {
-      markerInstance.value.setLatLng(e.latlng);
-    } else {
-      markerInstance.value = L.marker(e.latlng).addTo(mapInstance.value);
-    }
-  });
-  mapInstance.value.on("zoomend", () => {
-    formData.value.zoom_level_peta = mapInstance.value.getZoom();
-  });
-};
-
-const destroyMap = () => {
-  if (mapInstance.value) {
-    mapInstance.value.remove();
-    mapInstance.value = null;
-    markerInstance.value = null;
-  }
-};
-
-onUnmounted(() => {
-  destroyMap();
-});
 
 const handleHeroFileUpload = (event) => {
   const file = event.target.files[0];
@@ -591,6 +469,7 @@ const handleHeroFileUpload = (event) => {
     formData.value.preview_gambar_hero = URL.createObjectURL(file);
   }
 };
+
 const handleDropHeroFile = (event) => {
   event.preventDefault();
   const file = event.dataTransfer.files[0];
@@ -599,43 +478,53 @@ const handleDropHeroFile = (event) => {
     formData.value.preview_gambar_hero = URL.createObjectURL(file);
   }
 };
+
 const removeHeroImage = () => {
   formData.value.gambar_hero_berita = null;
   formData.value.preview_gambar_hero = null;
 };
+
 const handleGalleryFileUpload = (event) => {
   const files = event.target.files;
   addGalleryFiles(files);
   event.target.value = "";
 };
+
 const handleDropGalleryFiles = (event) => {
   event.preventDefault();
   const files = event.dataTransfer.files;
   addGalleryFiles(files);
 };
+
 const addGalleryFiles = (files) => {
   for (const file of files) {
     if (file.type.startsWith("image/") || file.type.startsWith("video/")) {
       let previewUrl = null;
       if (file.type.startsWith("image/")) {
         previewUrl = URL.createObjectURL(file);
+      } else if (file.type.startsWith("video/")) {
+        previewUrl = URL.createObjectURL(file);
       }
+
       galleryFiles.value.push({
         file,
         deskripsi: "",
-        urutan: galleryFiles.value.length + 1,
+        urutan:
+          galleryFiles.value.length + initialGalleryFiles.value.length + 1,
         jenis_file: file.type.startsWith("image/") ? "gambar" : "video",
         previewUrl,
       });
     }
   }
 };
+
 const removeGalleryFile = (index) => {
   if (galleryFiles.value[index].previewUrl) {
     URL.revokeObjectURL(galleryFiles.value[index].previewUrl);
   }
   galleryFiles.value.splice(index, 1);
 };
+
 const removeExistingGalleryFile = (id) => {
   if (
     confirm(
@@ -648,16 +537,48 @@ const removeExistingGalleryFile = (id) => {
     deletedGalleryIds.value.push(id);
   }
 };
+
 const submitForm = () => {
+  // Validate required fields
+  if (
+    !formData.value.judul ||
+    !formData.value.isi_berita ||
+    !formData.value.id_kategori ||
+    !formData.value.tanggal_publikasi
+  ) {
+    alert("Semua field yang required harus diisi!");
+    return;
+  }
+
+  // Debug logging
+  console.log("Form data before submit:", formData.value);
+  console.log(
+    "id_kategori value:",
+    formData.value.id_kategori,
+    typeof formData.value.id_kategori
+  );
+
   const submitData = new FormData();
-  for (const key in formData.value) {
-    if (
-      key !== "preview_gambar_hero" &&
-      key !== "galeriBerita" &&
-      formData.value[key] !== null
-    ) {
-      submitData.append(key, formData.value[key]);
-    }
+
+  // Add only the fields that exist in the backend model
+  submitData.append("judul", formData.value.judul);
+  submitData.append("isi_berita", formData.value.isi_berita);
+  submitData.append("tanggal_publikasi", formData.value.tanggal_publikasi);
+  submitData.append("id_kategori", parseInt(formData.value.id_kategori));
+
+  // Debug FormData
+  for (let [key, value] of submitData.entries()) {
+    console.log(key, value);
+  }
+
+  // Add hero image if exists
+  if (formData.value.gambar_hero_berita instanceof File) {
+    submitData.append("gambar_hero_berita", formData.value.gambar_hero_berita);
+  }
+
+  // Add id_berita for updates
+  if (props.isEditing && formData.value.id_berita) {
+    submitData.append("id_berita", formData.value.id_berita);
   }
 
   if (props.isEditing) {
@@ -765,14 +686,6 @@ const submitForm = () => {
   }
 }
 
-#map {
-  margin-bottom: 1.5rem;
-}
-
-.file-drop-area {
-  margin-bottom: 1.5rem;
-}
-
 .form-group label {
   display: block;
   font-size: 0.875rem;
@@ -848,14 +761,14 @@ textarea.form-input {
 }
 
 .file-input {
-  opacity: 0;
+  display: none !important;
   position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  cursor: pointer;
-  z-index: 10;
+  top: -9999px;
+  left: -9999px;
+  width: 0;
+  height: 0;
+  opacity: 0;
+  pointer-events: none;
 }
 
 .image-preview-container {

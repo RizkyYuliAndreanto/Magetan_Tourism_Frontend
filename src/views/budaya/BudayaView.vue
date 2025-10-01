@@ -40,25 +40,25 @@
         v-if="
           !loading &&
           !error &&
-          cagarBudayaItems.length === 0 &&
-          budayaItems.length === 0 &&
-          nonCagarItems.length === 0
+          objekPengembanganItems.length === 0 &&
+          situsKebudayaanItems.length === 0 &&
+          sejarahItems.length === 0
         "
         class="luxury-empty">
         <div class="empty-icon">🏛️</div>
         <p>Belum ada data budaya yang tersedia saat ini.</p>
       </div>
 
-      <!-- Cagar Budaya Section -->
+      <!-- Objek Pengembangan Budaya Section -->
       <section
-        class="luxury-budaya-section cagar-budaya"
-        v-if="cagarBudayaItems.length > 0">
+        class="luxury-budaya-section objek-pengembangan-budaya"
+        v-if="objekPengembanganItems.length > 0">
         <div class="section-header">
           <h2 class="luxury-section-title">
-            <span class="title-shimmer">Cagar Budaya</span>
+            <span class="title-shimmer">Objek Pengembangan Budaya</span>
           </h2>
           <div class="section-subtitle">
-            Warisan bersejarah yang dilindungi negara
+            Budaya yang dikembangkan untuk generasi mendatang
           </div>
           <div class="animated-divider">
             <div class="glow-line"></div>
@@ -72,16 +72,16 @@
           <div class="carousel-header">
             <div class="carousel-navigation">
               <button
-                @click="scrollCarousel('cagar', 'left')"
+                @click="scrollCarousel('objek-pengembangan', 'left')"
                 class="nav-button prev-button"
-                :disabled="cagarScrollPosition === 0">
+                :disabled="objekPengembanganScrollPosition === 0">
                 <svg viewBox="0 0 24 24" fill="currentColor">
                   <path
                     d="M15.41 16.59L10.83 12L15.41 7.41L14 6L8 12L14 18L15.41 16.59Z" />
                 </svg>
               </button>
               <button
-                @click="scrollCarousel('cagar', 'right')"
+                @click="scrollCarousel('objek-pengembangan', 'right')"
                 class="nav-button next-button">
                 <svg viewBox="0 0 24 24" fill="currentColor">
                   <path
@@ -91,19 +91,21 @@
             </div>
           </div>
 
-          <div class="cultural-carousel" ref="cagarCarousel">
+          <div
+            class="cultural-carousel objek-pengembangan-carousel"
+            ref="objekPengembanganCarousel">
             <div class="carousel-track">
               <div
-                v-for="(item, index) in cagarBudayaItems"
-                :key="item.id"
-                class="carousel-card cagar-card"
+                v-for="(item, index) in objekPengembanganItems"
+                :key="item.id_budaya"
+                class="carousel-card objek-pengembangan-card"
                 :style="{ animationDelay: `${index * 0.15}s` }"
                 @mouseenter="cardHover"
                 @mouseleave="cardLeave">
-                <!-- Heritage Badge -->
+                <!-- Cultural Badge -->
                 <div class="heritage-badge">
-                  <div class="badge-crown">👑</div>
-                  <span class="badge-text">CAGAR BUDAYA</span>
+                  <div class="badge-crown">🏛️</div>
+                  <span class="badge-text">OBJEK PENGEMBANGAN</span>
                 </div>
 
                 <!-- Cultural Frame -->
@@ -118,13 +120,13 @@
                   <div class="cultural-image-container">
                     <div class="image-overlay cagar-overlay"></div>
                     <img
-                      v-if="item.image"
-                      :src="item.image"
-                      :alt="item.title"
+                      v-if="item.gambar_budaya"
+                      :src="`http://localhost:5000${item.gambar_budaya}`"
+                      :alt="item.judul_budaya"
                       class="cultural-image" />
                     <div v-else class="cultural-no-image">
                       <div class="temple-icon">🏛️</div>
-                      <span>Warisan Bersejarah</span>
+                      <span>Objek Pengembangan</span>
                     </div>
                     <div class="heritage-shine"></div>
                   </div>
@@ -133,28 +135,31 @@
                 <!-- Cultural Content -->
                 <div class="cultural-content">
                   <div class="cultural-header">
-                    <h3 class="cultural-title">{{ item.title }}</h3>
+                    <h3 class="cultural-title">{{ item.judul_budaya }}</h3>
                     <div class="heritage-seal">🏛️</div>
                   </div>
 
                   <div class="cultural-meta">
                     <span class="era-info"
-                      >Era: {{ item.era || "Klasik" }}</span
+                      >Kategori: {{ item.kategori_budaya }}</span
                     >
                     <span class="location-info"
-                      >📍 {{ item.location || "Magetan" }}</span
+                      >�
+                      {{
+                        new Date(item.createdAt).toLocaleDateString("id-ID")
+                      }}</span
                     >
                   </div>
 
                   <p class="cultural-description">
-                    {{ truncateText(item.description, 100) }}
+                    {{ truncateText(item.deskripsi_budaya, 100) }}
                   </p>
 
                   <div class="cultural-actions">
                     <button
-                      @click="exploreHeritage(item.id)"
+                      @click="exploreObjekPengembangan(item.id_budaya)"
                       class="heritage-button">
-                      <span>Jelajahi Warisan</span>
+                      <span>Jelajahi Budaya</span>
                       <div class="button-ornament"></div>
                     </button>
                   </div>
@@ -171,358 +176,301 @@
         </div>
       </section>
 
-      <!-- Budaya Umum Section -->
-      <section
-        class="luxury-budaya-section budaya-umum"
-        v-if="budayaItems.length > 0">
-        <div class="section-header">
-          <h2 class="luxury-section-title">
-            <span class="title-shimmer">Budaya Magetan</span>
-          </h2>
-          <div class="section-subtitle">
-            Kekayaan tradisi dan seni budaya lokal
-          </div>
-          <div class="animated-divider">
-            <div class="glow-line"></div>
-            <div class="cultural-icon">🎭</div>
-            <div class="glow-line"></div>
-          </div>
-        </div>
+      <!-- Situs Kebudayaan Section -->
 
-        <!-- Artistic Grid Layout -->
-        <div class="artistic-grid">
+      class="luxury-budaya-section situs-kebudayaan"
+      v-if="situsKebudayaanItems.length > 0">
+      <div class="section-header">
+        <h2 class="luxury-section-title">
+          <span class="title-shimmer">Situs Kebudayaan</span>
+        </h2>
+        <div class="section-subtitle">
+          Tempat bersejarah dengan nilai budaya tinggi
+        </div>
+        <div class="animated-divider">
+          <div class="glow-line"></div>
+          <div class="cultural-icon">�️</div>
+          <div class="glow-line"></div>
+        </div>
+      </div>
+
+      <!-- Cultural Carousel -->
+      <div class="cultural-navigation">
+        <div class="nav-controls">
+          <button
+            @click="scrollCarousel('situs-kebudayaan', 'left')"
+            class="nav-button prev-button">
+            <svg viewBox="0 0 24 24" fill="currentColor">
+              <path
+                d="M15.41 16.59L10.83 12L15.41 7.41L14 6L8 12L14 18L15.41 16.59Z" />
+            </svg>
+          </button>
+          <button
+            @click="scrollCarousel('situs-kebudayaan', 'right')"
+            class="nav-button next-button">
+            <svg viewBox="0 0 24 24" fill="currentColor">
+              <path
+                d="M8.59 16.59L13.17 12L8.59 7.41L10 6L16 12L10 18L8.59 16.59Z" />
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="cultural-carousel situs-kebudayaan-carousel">
+        <div class="carousel-track">
           <div
-            v-for="(item, index) in budayaItems"
-            :key="item.id"
-            class="artistic-card budaya-card"
-            :class="getCardClass(index)"
-            :style="{ animationDelay: `${index * 0.2}s` }"
+            v-for="(item, index) in situsKebudayaanItems"
+            :key="item.id_budaya"
+            class="carousel-card situs-kebudayaan-card"
+            :style="{ animationDelay: `${index * 0.15}s` }"
             @mouseenter="cardHover"
             @mouseleave="cardLeave">
             <!-- Cultural Badge -->
-            <div class="cultural-badge">
-              <div class="badge-pattern"></div>
-              <span class="badge-text">BUDAYA LOKAL</span>
-              <div class="badge-accent">🎨</div>
+            <div class="heritage-badge">
+              <div class="badge-crown">🏛️</div>
+              <span class="badge-text">SITUS KEBUDAYAAN</span>
+              <div class="badge-accent">�️</div>
             </div>
 
-            <!-- Artistic Image Container -->
-            <div class="artistic-image-container">
-              <div class="artistic-overlay"></div>
-              <img
-                v-if="item.image"
-                :src="item.image"
-                :alt="item.title"
-                class="artistic-image" />
-              <div v-else class="artistic-no-image">
-                <div class="culture-icon">🎭</div>
-                <span>Budaya Tradisional</span>
-              </div>
-              <div class="artistic-glow"></div>
-            </div>
-
-            <!-- Cultural Details -->
-            <div class="artistic-content">
-              <div class="content-header">
-                <h3 class="artistic-title">{{ item.title }}</h3>
-                <div class="culture-type">{{ item.type || "Tradisional" }}</div>
+            <!-- Cultural Frame -->
+            <div class="cultural-frame">
+              <div class="frame-corners">
+                <div class="corner top-left"></div>
+                <div class="corner top-right"></div>
+                <div class="corner bottom-left"></div>
+                <div class="corner bottom-right"></div>
               </div>
 
-              <div class="cultural-info">
-                <span class="origin-info"
-                  >🏘️ {{ item.origin || "Magetan" }}</span
-                >
-                <span class="category-info"
-                  >📝 {{ item.category || "Seni & Budaya" }}</span
-                >
+              <div class="cultural-image-container">
+                <div class="image-overlay cagar-overlay"></div>
+                <img
+                  v-if="item.gambar_budaya"
+                  :src="`http://localhost:5000${item.gambar_budaya}`"
+                  :alt="item.judul_budaya"
+                  class="cultural-image" />
+                <div v-else class="artistic-no-image">
+                  <div class="culture-icon">�️</div>
+                  <span>Situs Kebudayaan</span>
+                </div>
+                <div class="heritage-shine"></div>
               </div>
 
-              <p class="artistic-description">
-                {{ truncateText(item.description, 90) }}
-              </p>
+              <!-- Cultural Details -->
+              <div class="cultural-content">
+                <div class="cultural-header">
+                  <h3 class="cultural-title">{{ item.judul_budaya }}</h3>
+                  <div class="heritage-seal">🏛️</div>
+                </div>
 
-              <div class="artistic-actions">
-                <button @click="exploreCulture(item.id)" class="culture-button">
-                  <span>Pelajari Budaya</span>
-                  <div class="button-wave"></div>
-                </button>
+                <div class="cultural-meta">
+                  <span class="origin-info"
+                    >📅
+                    {{
+                      new Date(item.createdAt).toLocaleDateString("id-ID")
+                    }}</span
+                  >
+                  <span class="category-info"
+                    >� {{ item.adminPengelola?.username || "Admin" }}</span
+                  >
+                </div>
+
+                <p class="cultural-description">
+                  {{ truncateText(item.deskripsi_budaya, 100) }}
+                </p>
+
+                <div class="cultural-actions">
+                  <button
+                    @click="exploreSitusKebudayaan(item.id_budaya)"
+                    class="heritage-button">
+                    <span>Pelajari Situs</span>
+                    <div class="button-ornament"></div>
+                  </button>
+                </div>
               </div>
-            </div>
 
-            <!-- Batik Pattern Overlay -->
-            <div class="batik-overlay">
-              <div class="batik-pattern"></div>
+              <!-- Traditional Ornaments -->
+              <div class="traditional-ornaments">
+                <div class="ornament-pattern top"></div>
+                <div class="ornament-pattern bottom"></div>
+              </div>
             </div>
           </div>
         </div>
-      </section>
+      </div>
+    </div>
 
-      <!-- Non-Cagar Budaya Section -->
-      <section
-        class="luxury-budaya-section non-cagar"
-        v-if="nonCagarItems.length > 0">
-        <div class="section-header">
-          <h2 class="luxury-section-title">
-            <span class="title-shimmer">Non-Cagar Budaya</span>
-          </h2>
-          <div class="section-subtitle">
-            Ekspresi budaya kontemporer dan modern
-          </div>
-          <div class="animated-divider">
-            <div class="glow-line"></div>
-            <div class="cultural-icon">🎪</div>
-            <div class="glow-line"></div>
-          </div>
+    <!-- Sejarah Section -->
+    <section
+      class="luxury-budaya-section sejarah"
+      v-if="sejarahItems.length > 0">
+      <div class="section-header">
+        <h2 class="luxury-section-title">
+          <span class="title-shimmer">Sejarah</span>
+        </h2>
+        <div class="section-subtitle">
+          Warisan sejarah dan kisah masa lampau
         </div>
+        <div class="animated-divider">
+          <div class="glow-line"></div>
+          <div class="cultural-icon">📜</div>
+          <div class="glow-line"></div>
+        </div>
+      </div>
 
-        <!-- Modern Cultural Showcase -->
-        <div class="modern-showcase">
+      <!-- Cultural Carousel -->
+      <div class="cultural-navigation">
+        <div class="nav-controls">
+          <button
+            @click="scrollCarousel('sejarah', 'left')"
+            class="nav-button prev-button">
+            <svg viewBox="0 0 24 24" fill="currentColor">
+              <path
+                d="M15.41 16.59L10.83 12L15.41 7.41L14 6L8 12L14 18L15.41 16.59Z" />
+            </svg>
+          </button>
+          <button
+            @click="scrollCarousel('sejarah', 'right')"
+            class="nav-button next-button">
+            <svg viewBox="0 0 24 24" fill="currentColor">
+              <path
+                d="M8.59 16.59L13.17 12L8.59 7.41L10 6L16 12L10 18L8.59 16.59Z" />
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="cultural-carousel sejarah-carousel">
+        <div class="carousel-track">
           <div
-            v-for="(item, index) in nonCagarItems"
-            :key="item.id"
-            class="modern-card"
-            :style="{ animationDelay: `${index * 0.18}s` }"
+            v-for="(item, index) in sejarahItems"
+            :key="item.id_budaya"
+            class="carousel-card sejarah-card"
+            :style="{ animationDelay: `${index * 0.15}s` }"
             @mouseenter="cardHover"
             @mouseleave="cardLeave">
-            <!-- Modern Badge -->
-            <div class="modern-badge">
-              <div class="badge-pulse"></div>
-              <span class="badge-text">KONTEMPORER</span>
-              <div class="badge-sparkle">✨</div>
+            <!-- Cultural Badge -->
+            <div class="heritage-badge">
+              <div class="badge-crown">📜</div>
+              <span class="badge-text">SEJARAH</span>
             </div>
 
-            <!-- Dynamic Image Layout -->
-            <div class="dynamic-image-container">
-              <div class="dynamic-overlay"></div>
-              <img
-                v-if="item.image"
-                :src="item.image"
-                :alt="item.title"
-                class="dynamic-image" />
-              <div v-else class="dynamic-no-image">
-                <div class="modern-icon">🎪</div>
-                <span>Budaya Modern</span>
+            <!-- Cultural Frame -->
+            <div class="cultural-frame">
+              <div class="frame-corners">
+                <div class="corner top-left"></div>
+                <div class="corner top-right"></div>
+                <div class="corner bottom-left"></div>
+                <div class="corner bottom-right"></div>
               </div>
-              <div class="dynamic-effects">
-                <div class="effect-ring"></div>
-                <div class="effect-particles"></div>
+
+              <div class="cultural-image-container">
+                <div class="image-overlay cagar-overlay"></div>
+                <img
+                  v-if="item.gambar_budaya"
+                  :src="`http://localhost:5000${item.gambar_budaya}`"
+                  :alt="item.judul_budaya"
+                  class="cultural-image" />
+                <div v-else class="cultural-no-image">
+                  <div class="temple-icon">🏛️</div>
+                  <span>Sejarah Budaya</span>
+                </div>
+                <div class="heritage-shine"></div>
               </div>
             </div>
 
-            <!-- Modern Content -->
-            <div class="modern-content">
-              <div class="modern-header">
-                <h3 class="modern-title">{{ item.title }}</h3>
-                <div class="innovation-badge">🚀</div>
+            <!-- Cultural Content -->
+            <div class="cultural-content">
+              <div class="cultural-header">
+                <h3 class="cultural-title">{{ item.judul_budaya }}</h3>
+                <div class="innovation-badge">�</div>
               </div>
 
-              <div class="modern-meta">
+              <div class="cultural-meta">
                 <span class="period-info"
-                  >⏰ {{ item.period || "Kontemporer" }}</span
+                  >📅
+                  {{
+                    new Date(item.createdAt).toLocaleDateString("id-ID")
+                  }}</span
                 >
                 <span class="creator-info"
-                  >👥 {{ item.creator || "Komunitas Lokal" }}</span
+                  >� {{ item.adminPengelola?.username || "Admin" }}</span
                 >
               </div>
 
-              <p class="modern-description">
-                {{ truncateText(item.description, 95) }}
+              <p class="cultural-description">
+                {{ truncateText(item.deskripsi_budaya, 100) }}
               </p>
 
-              <div class="modern-actions">
-                <button @click="exploreModern(item.id)" class="modern-button">
-                  <span>Jelajahi Inovasi</span>
-                  <div class="button-glow-modern"></div>
+              <div class="cultural-actions">
+                <button
+                  @click="exploreSejarah(item.id_budaya)"
+                  class="heritage-button">
+                  <span>Pelajari Sejarah</span>
+                  <div class="button-ornament"></div>
                 </button>
               </div>
             </div>
 
-            <!-- Modern Geometric Pattern -->
-            <div class="geometric-overlay">
-              <div class="geometric-pattern"></div>
+            <!-- Traditional Ornaments -->
+            <div class="traditional-ornaments">
+              <div class="ornament-pattern top"></div>
+              <div class="ornament-pattern bottom"></div>
             </div>
           </div>
         </div>
-      </section>
-    </div>
+      </div>
+    </section>
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted } from "vue";
+import { useRouter } from "vue-router";
 import axios from "@/api/axios";
 
+// Router instance
+const router = useRouter();
+
 // Reactive data
-const cagarBudayaItems = ref([]);
-const budayaItems = ref([]);
-const nonCagarItems = ref([]);
+const objekPengembanganItems = ref([]);
+const situsKebudayaanItems = ref([]);
+const sejarahItems = ref([]);
 const loading = ref(true);
 const error = ref(false);
 
 // Carousel scroll positions
-const cagarScrollPosition = ref(0);
+const objekPengembanganScrollPosition = ref(0);
 
 // Methods
 const fetchBudayaData = async () => {
   loading.value = true;
   error.value = false;
   try {
-    // Fetch Cagar Budaya
-    const cagarResponse = await axios.get("/api/cagar-budaya");
-    cagarBudayaItems.value = cagarResponse.data || [];
+    // Fetch all budaya data from backend
+    const response = await axios.get("/budaya");
+    const allBudaya = response.data || [];
 
-    // Fetch Budaya Tradisional
-    const budayaResponse = await axios.get("/api/budaya");
-    budayaItems.value = budayaResponse.data || [];
+    // Filter budaya based on kategori_budaya
+    objekPengembanganItems.value = allBudaya.filter(
+      (item) => item.kategori_budaya === "Objek Pengembangan Budaya"
+    );
 
-    // Fetch Non-Cagar Budaya
-    const nonCagarResponse = await axios.get("/api/non-cagar-budaya");
-    nonCagarItems.value = nonCagarResponse.data || [];
+    situsKebudayaanItems.value = allBudaya.filter(
+      (item) => item.kategori_budaya === "Situs Kebudayaan"
+    );
+
+    sejarahItems.value = allBudaya.filter(
+      (item) => item.kategori_budaya === "Sejarah"
+    );
+
+    console.log("Budaya data loaded:", {
+      objekPengembangan: objekPengembanganItems.value.length,
+      situsKebudayaan: situsKebudayaanItems.value.length,
+      sejarah: sejarahItems.value.length,
+    });
   } catch (err) {
     console.error("Error fetching budaya data:", err);
     error.value = true;
-
-    // Mock data untuk development
-    cagarBudayaItems.value = [
-      {
-        id: 1,
-        title: "Candi Sukuh",
-        description:
-          "Candi Hindu unik dengan arsitektur piramid yang menawan dan relief-relief simbolis yang mengandung filosofi kehidupan",
-        location: "Berjo, Ngargoyoso",
-        era: "Abad ke-15",
-        image: "/assets/candi-sukuh.jpg",
-      },
-      {
-        id: 2,
-        title: "Candi Cetho",
-        description:
-          "Candi indah di lereng Gunung Lawu dengan pemandangan spektakuler dan nilai sejarah tinggi",
-        location: "Gumeng, Jenawi",
-        era: "Abad ke-14",
-        image: "/assets/candi-cetho.jpg",
-      },
-      {
-        id: 3,
-        title: "Situs Megalitikum Tawangmangu",
-        description:
-          "Peninggalan zaman prasejarah berupa batu-batu besar dengan fungsi ritual dan astronomis",
-        location: "Tawangmangu",
-        era: "Prasejarah",
-        image: "/assets/megalitikum.jpg",
-      },
-      {
-        id: 4,
-        title: "Petilasan Eyang Mangkunegara",
-        description:
-          "Tempat bersejarah yang terkait dengan sejarah Kerajaan Mangkunegaran dan perjuangan kemerdekaan",
-        location: "Magetan Kota",
-        era: "Abad ke-18",
-        image: "/assets/petilasan.jpg",
-      },
-    ];
-
-    budayaItems.value = [
-      {
-        id: 5,
-        title: "Tari Kuda Lumping Magetan",
-        description:
-          "Tarian tradisional dengan kuda kepang yang energik dan mistis, mencerminkan semangat perjuangan",
-        origin: "Magetan",
-        category: "Seni Tari",
-        type: "Ritual & Hiburan",
-        image: "/assets/kuda-lumping.jpg",
-      },
-      {
-        id: 6,
-        title: "Batik Motif Sarung Magetan",
-        description:
-          "Motif batik khas dengan corak alam dan filosofi Jawa yang telah diwariskan turun temurun",
-        origin: "Magetan",
-        category: "Seni Kriya",
-        type: "Tekstil Tradisional",
-        image: "/assets/batik-magetan.jpg",
-      },
-      {
-        id: 7,
-        title: "Gamelan Jawa Timuran",
-        description:
-          "Ansambel musik tradisional dengan karakteristik khas Jawa Timur yang mengiringi berbagai acara adat",
-        origin: "Magetan",
-        category: "Seni Musik",
-        type: "Musik Tradisional",
-        image: "/assets/gamelan.jpg",
-      },
-      {
-        id: 8,
-        title: "Kerajinan Bambu Tradisional",
-        description:
-          "Seni kerajinan bambu turun temurun dengan nilai ekonomi tinggi dan teknik yang unik",
-        origin: "Magetan",
-        category: "Seni Kriya",
-        type: "Kerajinan Tradisional",
-        image: "/assets/kerajinan-bambu.jpg",
-      },
-      {
-        id: 9,
-        title: "Wayang Kulit Gagrag Jawa Timuran",
-        description:
-          "Pertunjukan wayang kulit dengan gaya khas Jawa Timur yang sarat akan nilai moral dan filosofi",
-        origin: "Magetan",
-        category: "Seni Pertunjukan",
-        type: "Teater Tradisional",
-        image: "/assets/wayang-kulit.jpg",
-      },
-      {
-        id: 10,
-        title: "Seni Ukir Kayu Jati",
-        description:
-          "Tradisi mengukir kayu jati dengan motif-motif khas yang mencerminkan kearifan lokal",
-        origin: "Magetan",
-        category: "Seni Kriya",
-        type: "Ukiran Tradisional",
-        image: "/assets/ukir-kayu.jpg",
-      },
-    ];
-
-    nonCagarItems.value = [
-      {
-        id: 11,
-        title: "Festival Budaya Magetan Modern",
-        description:
-          "Event budaya kontemporer yang memadukan tradisi dengan inovasi modern dalam bentuk festival tahunan",
-        creator: "Dinas Kebudayaan Magetan",
-        period: "2010 - Sekarang",
-        image: "/assets/festival-modern.jpg",
-      },
-      {
-        id: 12,
-        title: "Seni Mural Kontemporer",
-        description:
-          "Karya seni mural yang menggabungkan elemen tradisional dengan gaya kontemporer di ruang publik",
-        creator: "Komunitas Seniman Muda",
-        period: "2015 - Sekarang",
-        image: "/assets/mural-kontemporer.jpg",
-      },
-      {
-        id: 13,
-        title: "Musik Fusion Tradisional-Modern",
-        description:
-          "Kolaborasi musik yang memadukan gamelan tradisional dengan instrumen modern",
-        creator: "Sanggar Seni Magetan",
-        period: "2012 - Sekarang",
-        image: "/assets/musik-fusion.jpg",
-      },
-      {
-        id: 14,
-        title: "Fashion Show Batik Kontemporer",
-        description:
-          "Pameran busana yang mengangkat motif batik Magetan dalam desain fashion masa kini",
-        creator: "Designer Lokal Magetan",
-        period: "2018 - Sekarang",
-        image: "/assets/fashion-batik.jpg",
-      },
-    ];
   } finally {
     loading.value = false;
   }
@@ -542,10 +490,10 @@ const scrollCarousel = (type, direction) => {
   });
 
   // Update scroll position
-  if (type === "cagar") {
-    cagarScrollPosition.value = Math.max(
+  if (type === "objek-pengembangan") {
+    objekPengembanganScrollPosition.value = Math.max(
       0,
-      cagarScrollPosition.value + (direction === "left" ? -1 : 1)
+      objekPengembanganScrollPosition.value + (direction === "left" ? -1 : 1)
     );
   }
 };
@@ -564,24 +512,24 @@ const truncateText = (text, length = 100) => {
   return text.substring(0, length) + "...";
 };
 
-const exploreHeritage = (id) => {
-  console.log("Explore heritage item:", id);
-  // Implementasi navigation ke detail Cagar Budaya
+const exploreObjekPengembangan = (id) => {
+  console.log("Navigate to objek pengembangan budaya detail:", id);
+  router.push({ name: "DetailBudaya", params: { id: id } });
 };
 
-const exploreCulture = (id) => {
-  console.log("Explore culture item:", id);
-  // Implementasi navigation ke detail Budaya
+const exploreSitusKebudayaan = (id) => {
+  console.log("Navigate to situs kebudayaan detail:", id);
+  router.push({ name: "DetailBudaya", params: { id: id } });
 };
 
-const exploreModern = (id) => {
-  console.log("Explore modern item:", id);
-  // Implementasi navigation ke detail Non-Cagar Budaya
+const exploreSejarah = (id) => {
+  console.log("Navigate to sejarah detail:", id);
+  router.push({ name: "DetailBudaya", params: { id: id } });
 };
 
 const learnMore = (id) => {
-  console.log("Learn more about budaya item:", id);
-  // Implementasi navigation ke detail page
+  console.log("Navigate to budaya detail:", id);
+  router.push({ name: "DetailBudaya", params: { id: id } });
 };
 
 const cardHover = (event) => {
@@ -593,6 +541,11 @@ const cardLeave = (event) => {
 };
 
 onMounted(() => {
+  // Scroll ke atas halaman
+  window.scrollTo({
+    top: 0,
+    behavior: "smooth",
+  });
   fetchBudayaData();
 });
 </script>

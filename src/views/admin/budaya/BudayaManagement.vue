@@ -1,7 +1,10 @@
 <template>
   <div>
     <div class="action-bar">
-      <button v-if="!formBudayaOpen" class="action-button create-button" @click="openBudayaForm()">
+      <button
+        v-if="!formBudayaOpen"
+        class="action-button create-button"
+        @click="openBudayaForm()">
         <i class="fas fa-plus-circle"></i> Tambah Budaya Baru
       </button>
     </div>
@@ -10,12 +13,10 @@
       <BudayaForm
         :is-editing="isEditingBudaya"
         :initial-data="formBudaya"
-        :kategori-list="kategoriBudayaList"
         :gallery-list="editingBudayaGallery"
         @close-form="closeBudayaForm"
         @save-budaya="handleSaveBudaya"
-        @update-budaya="handleUpdateBudaya"
-      />
+        @update-budaya="handleUpdateBudaya" />
     </div>
 
     <div v-else class="table-container card">
@@ -39,13 +40,23 @@
             <tr v-for="budaya in budayaList" :key="budaya.id_budaya">
               <td>{{ budaya.id_budaya }}</td>
               <td>{{ budaya.judul_budaya }}</td>
-              <td><span class="category-badge">{{ budaya.kategori.nama_kategori }}</span></td>
+              <td>
+                <span class="category-badge">{{
+                  budaya.kategori_budaya || "Tidak ada kategori"
+                }}</span>
+              </td>
               <td>{{ budaya.adminPengelola.username }}</td>
               <td class="actions">
-                <button class="action-button edit-button" @click="openBudayaForm(budaya)" title="Edit">
+                <button
+                  class="action-button edit-button"
+                  @click="openBudayaForm(budaya)"
+                  title="Edit">
                   <i class="fas fa-edit"></i>
                 </button>
-                <button class="action-button delete-button" @click="showDeleteConfirm(budaya.id_budaya)" title="Hapus">
+                <button
+                  class="action-button delete-button"
+                  @click="showDeleteConfirm(budaya.id_budaya)"
+                  title="Hapus">
                   <i class="fas fa-trash-alt"></i>
                 </button>
               </td>
@@ -63,19 +74,17 @@
       :entity-name="popUpEntity"
       :error-message="popUpMessage"
       @close="closePopUp"
-      @confirmed="handleDeleteConfirmed"
-    />
+      @confirmed="handleDeleteConfirmed" />
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, nextTick } from 'vue';
-import axios from 'axios';
-import BudayaForm from './BudayaForm.vue';
-import BasePopUp from '../../../components/pop-up/BasePopUp.vue';
+import { ref, onMounted, nextTick } from "vue";
+import axios from "axios";
+import BudayaForm from "./BudayaForm.vue";
+import BasePopUp from "../../../components/pop-up/BasePopUp.vue";
 
 const budayaList = ref([]);
-const kategoriBudayaList = ref([]);
 const formBudayaOpen = ref(false);
 const isEditingBudaya = ref(false);
 const formBudaya = ref(null);
@@ -104,15 +113,22 @@ const handleDeleteConfirmed = async () => {
   await nextTick();
 
   try {
-    const token = localStorage.getItem('access_token');
-    await axios.delete(`http://localhost:5000/api/budaya/${budayaToDeleteId.value}`, {
-      headers: { Authorization: `Bearer ${token}` }
-    });
+    const token = localStorage.getItem("access_token");
+    await axios.delete(
+      `http://localhost:5000/api/budaya/${budayaToDeleteId.value}`,
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    );
     openPopUp("success", "delete");
     fetchBudayaData();
   } catch (err) {
-    console.error('Gagal menghapus budaya:', err.response?.data);
-    openPopUp("error", "delete", err.response?.data?.error || "Gagal menghapus budaya.");
+    console.error("Gagal menghapus budaya:", err.response?.data);
+    openPopUp(
+      "error",
+      "delete",
+      err.response?.data?.error || "Gagal menghapus budaya."
+    );
   } finally {
     budayaToDeleteId.value = null;
   }
@@ -140,21 +156,11 @@ const closePopUp = () => {
 
 const fetchBudayaData = async () => {
   try {
-    const response = await axios.get('http://localhost:5000/api/budaya');
+    const response = await axios.get("http://localhost:5000/api/budaya");
     budayaList.value = response.data;
   } catch (err) {
-    console.error('Gagal memuat data budaya:', err);
+    console.error("Gagal memuat data budaya:", err);
     openPopUp("error", "fetch", "Gagal memuat data budaya.");
-  }
-};
-
-const fetchKategoriBudayaData = async () => {
-  try {
-    const response = await axios.get('http://localhost:5000/api/kategori-budaya');
-    kategoriBudayaList.value = response.data;
-  } catch (err) {
-    console.error('Gagal memuat data kategori budaya:', err);
-    openPopUp("error", "fetch", "Gagal memuat data kategori budaya.");
   }
 };
 
@@ -162,22 +168,24 @@ const openBudayaForm = async (budaya = null) => {
   isEditingBudaya.value = !!budaya;
   if (budaya) {
     try {
-      const response = await axios.get(`http://localhost:5000/api/budaya/${budaya.id_budaya}`);
+      const response = await axios.get(
+        `http://localhost:5000/api/budaya/${budaya.id_budaya}`
+      );
       const fullBudayaData = response.data;
-      formBudaya.value = {
-        ...fullBudayaData,
-        id_kategori_budaya: fullBudayaData.kategori.id_kategori_budaya,
-      };
+      formBudaya.value = { ...fullBudayaData };
       editingBudayaGallery.value = fullBudayaData.galeriBudaya;
     } catch (error) {
-      console.error('Gagal memuat detail budaya:', error);
+      console.error("Gagal memuat detail budaya:", error);
       openPopUp("error", "fetch", "Gagal memuat detail budaya untuk diedit.");
       return;
     }
   } else {
     formBudaya.value = {
-      id_budaya: null, judul_budaya: '', deskripsi_budaya: '',
-      gambar_budaya: null, id_kategori_budaya: '',
+      id_budaya: null,
+      judul_budaya: "",
+      deskripsi_budaya: "",
+      gambar_budaya: null,
+      kategori_budaya: "",
     };
     editingBudayaGallery.value = [];
   }
@@ -194,89 +202,117 @@ const closeBudayaForm = () => {
 
 const handleSaveBudaya = async (formData, galleryFiles) => {
   try {
-    const token = localStorage.getItem('access_token');
-    
-    const budayaResponse = await axios.post('http://localhost:5000/api/budaya', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-        Authorization: `Bearer ${token}`
+    const token = localStorage.getItem("access_token");
+
+    const budayaResponse = await axios.post(
+      "http://localhost:5000/api/budaya",
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+          Authorization: `Bearer ${token}`,
+        },
       }
-    });
+    );
     const id_budaya = budayaResponse.data.budaya.id_budaya;
-    
+
     if (galleryFiles && galleryFiles.length > 0) {
       const galleryFormData = new FormData();
-      galleryFormData.append('id_konten', id_budaya);
-      galleryFormData.append('tipe_konten', 'budaya');
-      galleryFiles.forEach(item => {
-        galleryFormData.append('media_galeri_files', item.file);
-        galleryFormData.append('deskripsi_file', item.deskripsi);
-        galleryFormData.append('jenis_file', item.jenis_file);
-        galleryFormData.append('urutan_tampil', item.urutan);
+      galleryFormData.append("id_konten", id_budaya);
+      galleryFormData.append("tipe_konten", "budaya");
+      galleryFiles.forEach((item) => {
+        galleryFormData.append("media_galeri_files", item.file);
+        galleryFormData.append("deskripsi_file", item.deskripsi);
+        galleryFormData.append("jenis_file", item.jenis_file);
+        galleryFormData.append("urutan_tampil", item.urutan);
       });
-      await axios.post('http://localhost:5000/api/media-galeri', galleryFormData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-          Authorization: `Bearer ${token}`
+      await axios.post(
+        "http://localhost:5000/api/media-galeri",
+        galleryFormData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+            Authorization: `Bearer ${token}`,
+          },
         }
-      });
+      );
     }
     openPopUp("success", "create");
     closeBudayaForm();
   } catch (err) {
-    console.error('Gagal menyimpan budaya:', err.response?.data);
-    openPopUp("error", "create", err.response?.data?.error || "Gagal menyimpan budaya.");
+    console.error("Gagal menyimpan budaya:", err.response?.data);
+    openPopUp(
+      "error",
+      "create",
+      err.response?.data?.error || "Gagal menyimpan budaya."
+    );
   }
 };
 
-const handleUpdateBudaya = async (formData, galleryFiles, deletedGalleryIds) => {
+const handleUpdateBudaya = async (
+  formData,
+  galleryFiles,
+  deletedGalleryIds
+) => {
   try {
-    const token = localStorage.getItem('access_token');
-    const id = formData.get('id_budaya');
-    
+    const token = localStorage.getItem("access_token");
+    const id = formData.get("id_budaya");
+
     await axios.put(`http://localhost:5000/api/budaya/${id}`, formData, {
       headers: {
-        'Content-Type': 'multipart/form-data',
-        Authorization: `Bearer ${token}`
-      }
+        "Content-Type": "multipart/form-data",
+        Authorization: `Bearer ${token}`,
+      },
     });
 
     if (galleryFiles && galleryFiles.length > 0) {
       const galleryFormData = new FormData();
-      galleryFormData.append('id_konten', id);
-      galleryFormData.append('tipe_konten', 'budaya');
-      galleryFiles.forEach(item => {
-        galleryFormData.append('media_galeri_files', item.file);
-        galleryFormData.append('deskripsi_file', item.deskripsi);
-        galleryFormData.append('jenis_file', item.jenis_file);
-        galleryFormData.append('urutan_tampil', item.urutan);
+      galleryFormData.append("id_konten", id);
+      galleryFormData.append("tipe_konten", "budaya");
+      galleryFiles.forEach((item) => {
+        galleryFormData.append("media_galeri_files", item.file);
+        galleryFormData.append("deskripsi_file", item.deskripsi);
+        galleryFormData.append("jenis_file", item.jenis_file);
+        galleryFormData.append("urutan_tampil", item.urutan);
       });
-      await axios.post('http://localhost:5000/api/media-galeri', galleryFormData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-          Authorization: `Bearer ${token}`
+      await axios.post(
+        "http://localhost:5000/api/media-galeri",
+        galleryFormData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+            Authorization: `Bearer ${token}`,
+          },
         }
-      });
+      );
     }
 
     if (deletedGalleryIds && deletedGalleryIds.length > 0) {
-      await Promise.all(deletedGalleryIds.map(async (mediaId) => {
-        await axios.delete(`http://localhost:5000/api/media-galeri/${mediaId}`, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-      }));
+      await Promise.all(
+        deletedGalleryIds.map(async (mediaId) => {
+          await axios.delete(
+            `http://localhost:5000/api/media-galeri/${mediaId}`,
+            {
+              headers: { Authorization: `Bearer ${token}` },
+            }
+          );
+        })
+      );
     }
     openPopUp("success", "update");
     closeBudayaForm();
   } catch (err) {
-    console.error('Gagal memperbarui budaya:', err.response?.data);
-    openPopUp("error", "update", err.response?.data?.error || "Gagal memperbarui budaya.");
+    console.error("Gagal memperbarui budaya:", err.response?.data);
+    openPopUp(
+      "error",
+      "update",
+      err.response?.data?.error || "Gagal memperbarui budaya."
+    );
   }
 };
 
 onMounted(() => {
   fetchBudayaData();
-  fetchKategoriBudayaData();
 });
 </script>
 
@@ -320,7 +356,7 @@ onMounted(() => {
   border-collapse: collapse;
   min-width: 600px;
 }
-.data-table th, 
+.data-table th,
 .data-table td {
   padding: 1rem 1.5rem;
   text-align: left;

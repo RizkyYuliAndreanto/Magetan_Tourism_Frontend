@@ -243,7 +243,7 @@ const getHeroImages = (dest) => {
   const galeri = Array.isArray(dest.galeriDestinasi)
     ? dest.galeriDestinasi.map((g) => getImageUrl(g.path_file))
     : [];
-  
+
   const utama = dest.gambar_utama ? [getImageUrl(dest.gambar_utama)] : [];
   return utama.concat(galeri.length ? galeri : []);
 };
@@ -342,6 +342,11 @@ function destroyMap() {
 }
 
 onMounted(async () => {
+  // Scroll ke atas halaman
+  window.scrollTo({
+    top: 0,
+    behavior: "smooth",
+  });
   try {
     const id = route.params.id;
     const res = await axios.get(`${API_BASE_URL}/api/destinasi/${id}`);

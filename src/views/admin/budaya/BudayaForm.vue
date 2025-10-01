@@ -53,26 +53,22 @@
               required />
           </div>
           <div class="form-group">
-            <label for="id_kategori_budaya"
-              >Kategori <span class="required">*</span></label
-            >
+            <label for="kategori_budaya">Kategori Budaya</label>
             <select
-              id="id_kategori_budaya"
-              v-model="formData.id_kategori_budaya"
-              class="form-input"
-              required>
+              id="kategori_budaya"
+              v-model="formData.kategori_budaya"
+              class="form-input">
               <option value="">Pilih Kategori</option>
-              <option
-                v-for="kategori in kategoriList"
-                :key="kategori.id_kategori_budaya"
-                :value="kategori.id_kategori_budaya">
-                {{ kategori.nama_kategori }}
+              <option value="Objek Pengembangan Budaya">
+                Objek Pengembangan Budaya
               </option>
+              <option value="Situs Kebudayaan">Situs Kebudayaan</option>
+              <option value="Sejarah">Sejarah</option>
             </select>
           </div>
           <div class="form-group span-2">
             <label for="deskripsi_budaya"
-              >Deskripsi <span class="required">*</span></label
+              >Deskripsi Budaya <span class="required">*</span></label
             >
             <textarea
               id="deskripsi_budaya"
@@ -127,9 +123,9 @@
                       :src="formData.preview_gambar_budaya"
                       alt="Budaya Image Preview"
                       class="hero-image-preview" />
-                     <button
+                    <button
                       type="button"
-                      @click="removeGambarAkomodasi"
+                      @click="removeHeroImage"
                       class="cancel-image-btn"
                       title="Batal">
                       <svg
@@ -414,7 +410,6 @@ import axios from "axios";
 const props = defineProps({
   isEditing: Boolean,
   initialData: Object,
-  kategoriList: Array,
   galleryList: {
     type: Array,
     default: () => [],
@@ -432,7 +427,10 @@ watch(
   () => props.initialData,
   (newVal) => {
     formData.value = { ...newVal };
-    if (formData.value.gambar_budaya && typeof formData.value.gambar_budaya === 'string') {
+    if (
+      formData.value.gambar_budaya &&
+      typeof formData.value.gambar_budaya === "string"
+    ) {
       formData.value.preview_gambar_budaya = `http://localhost:5000${formData.value.gambar_budaya}`;
     }
     initialGalleryFiles.value = props.galleryList ? [...props.galleryList] : [];
@@ -516,14 +514,25 @@ const removeExistingGalleryFile = (id) => {
 
 const submitForm = () => {
   const submitData = new FormData();
-  for (const key in formData.value) {
-    if (
-      key !== "preview_gambar_budaya" &&
-      key !== "galeriBudaya" &&
-      formData.value[key] !== null
-    ) {
-      submitData.append(key, formData.value[key]);
-    }
+
+  // Add only the fields that exist in backend model
+  if (formData.value.judul_budaya) {
+    submitData.append("judul_budaya", formData.value.judul_budaya);
+  }
+  if (formData.value.deskripsi_budaya) {
+    submitData.append("deskripsi_budaya", formData.value.deskripsi_budaya);
+  }
+  if (formData.value.kategori_budaya) {
+    submitData.append("kategori_budaya", formData.value.kategori_budaya);
+  }
+  if (
+    formData.value.gambar_budaya &&
+    formData.value.gambar_budaya instanceof File
+  ) {
+    submitData.append("gambar_budaya", formData.value.gambar_budaya);
+  }
+  if (props.isEditing && formData.value.id_budaya) {
+    submitData.append("id_budaya", formData.value.id_budaya);
   }
 
   if (props.isEditing) {
