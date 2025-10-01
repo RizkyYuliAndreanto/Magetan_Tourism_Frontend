@@ -9,10 +9,7 @@
         <!-- Trending Informasi -->
         <div>
           <div class="section-title">
-            <span class="section-title-text"
-              >IN// Navigate to informasi view const viewMoreNews = () => {
-              router.push({ name: 'Informasi' }); };ASI TRENDING</span
-            >
+            <span class="section-title-text">INFORMASI TRENDING</span>
             <span class="section-title-line"></span>
           </div>
           <div class="trending-grid">
@@ -438,7 +435,7 @@ onMounted(() => {
 
 // Navigate to news/berita view
 const viewMoreNews = () => {
-  router.push({ name: "pengumuman" });
+  router.push({ name: "Informasi" });
 };
 </script>
 

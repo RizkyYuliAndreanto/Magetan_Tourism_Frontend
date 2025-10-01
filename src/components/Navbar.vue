@@ -335,7 +335,7 @@ router.beforeEach((to, from, next) => {
   display: flex;
   align-items: center;
   position: relative;
-  overflow: hidden;
+ 
 }
 
 .navbar-links {
@@ -402,7 +402,7 @@ router.beforeEach((to, from, next) => {
   border: 2px solid #0077b6;
   padding: clamp(6px, 2vw, 10px) clamp(16px, 4vw, 24px);
   border-radius: 25px;
-  margin-left: 15px;
+  margin-left: 15px; /* Gunakan margin positif ini untuk spasi */
   color: #0077b6;
   font-weight: 600;
   background: linear-gradient(135deg, transparent, transparent);
@@ -410,6 +410,8 @@ router.beforeEach((to, from, next) => {
   overflow: hidden;
   transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   font-size: clamp(0.8rem, 2vw, 0.9rem);
+   margin-left: -20px; 
+  z-index: 1; /* z-index yang terlalu tinggi tidak diperlukan di sini */
 }
 
 .button-login::before {
@@ -584,26 +586,28 @@ router.beforeEach((to, from, next) => {
   }
 
   .navbar-menu.active {
-    opacity: 1;
+    padding: 24px 12px 24px 12px;
     visibility: visible;
     transform: translateY(0);
   }
-
-  .navbar-item {
-    height: auto;
-    padding: 12px 0;
-    justify-content: center;
+  .navbar-login {
+    margin-top: 12px;
+    margin-left: 0;
     width: 100%;
-    transform: translateX(-20px);
-    opacity: 0;
-    transition: all 0.4s ease;
+    display: flex;
+    justify-content: center;
+    padding-right: 8px;
   }
-
-  .navbar-menu.active .navbar-item {
-    transform: translateX(0);
-    opacity: 1;
+  .button-login {
+    width: 100%;
+    max-width: 180px;
+    text-align: center;
+    padding: 12px 12px;
+    font-size: 1rem;
+    border-radius: 25px;
+    margin: 0 auto;
+    box-sizing: border-box;
   }
-
   .navbar-menu.active .navbar-item:nth-child(1) {
     transition-delay: 0.1s;
   }
@@ -627,30 +631,35 @@ router.beforeEach((to, from, next) => {
   }
 
   .navbar-links {
-    text-align: center;
+    padding: 20px 8px 20px 8px;
     padding: 12px 20px;
     width: 90%;
     font-size: 1.1rem;
-    border-radius: 12px;
-    margin: 0 auto;
-  }
-
-  .navbar-links::after {
-    bottom: 8px;
+     width: 100%;
+     max-width: 150px;
+     padding: 10px 8px;
+     font-size: 0.95rem;
+     margin: 0 auto;
+     box-sizing: border-box;
   }
 
   .navbar-login {
-    margin-top: 16px;
-    margin-left: 0;
+     margin-top: 12px;
+     margin-left: 0;
+     width: 100%;
+     display: flex;
+     justify-content: center;
   }
 
   .button-login {
-    width: 80%;
-    text-align: center;
-    padding: 14px 20px;
-    font-size: 1.1rem;
-    border-radius: 25px;
-    margin: 0 auto;
+     width: 100%;
+     max-width: 220px;
+     text-align: center;
+     padding: 12px 16px;
+     font-size: 1rem;
+     border-radius: 25px;
+     margin: 0 auto;
+     box-sizing: border-box;
   }
   .user-menu-container {
     display: flex;
@@ -727,8 +736,12 @@ router.beforeEach((to, from, next) => {
   }
 
   .button-login {
-    padding: 12px 16px;
-    font-size: 1rem;
+     width: 100%;
+     max-width: 180px;
+     padding: 10px 10px;
+     font-size: 0.95rem;
+     margin: 0 auto;
+     box-sizing: border-box;
   }
 }
 

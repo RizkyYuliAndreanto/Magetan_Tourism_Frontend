@@ -20,7 +20,7 @@
           </div>
           <div class="brand-content">
             <h2 class="brand-title">Magetan Tourism</h2>
-            <span class="brand-tagline">Ngangeni Magetan</span>
+            <span class="brand-tagline">Magetan Ngangeni</span>
           </div>
         </div>
         <p class="brand-desc">
@@ -107,7 +107,7 @@
             <div class="contact-content">
               <span class="contact-label">Alamat</span>
               <span class="contact-detail"
-                >Jl. Raya Sarangan, Magetan, Jawa Timur 63394</span
+                >Jl. Hasanudin, No.20, Selosari, Magetan, Jawa Timur 63394</span
               >
             </div>
           </li>
@@ -145,7 +145,7 @@
             </div>
             <div class="contact-content">
               <span class="contact-label">Email</span>
-              <span class="contact-detail">info@magetantourism.id</span>
+              <span class="contact-detail">informasiwisatamagetan@gmail.com</span>
             </div>
           </li>
         </ul>
