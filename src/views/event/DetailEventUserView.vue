@@ -7,7 +7,9 @@
       </div>
       <div v-if="error" class="state-message error-message">
         <p>❌ Maaf, event tidak ditemukan atau terjadi kesalahan.</p>
-        <button @click="goBack" class="back-button">Kembali ke Daftar Event</button>
+        <button @click="goBack" class="back-button">
+          Kembali ke Daftar Event
+        </button>
       </div>
 
       <div v-if="eventDetail && !loading && !error" class="event-content">
@@ -15,12 +17,18 @@
           <i class="fas fa-arrow-left"></i> Kembali
         </button>
         <h1 class="event-title-main">{{ eventDetail.nama_event }}</h1>
-        
+
         <div class="event-meta-header">
           <p class="event-meta-item">
-            <i class="fas fa-calendar-alt"></i> 
-            <span v-if="eventDetail.tanggal_mulai">{{ formatDateDetail(eventDetail.tanggal_mulai) }}</span>
-            <span v-if="eventDetail.tanggal_selesai && eventDetail.tanggal_mulai !== eventDetail.tanggal_selesai">
+            <i class="fas fa-calendar-alt"></i>
+            <span v-if="eventDetail.tanggal_mulai">{{
+              formatDateDetail(eventDetail.tanggal_mulai)
+            }}</span>
+            <span
+              v-if="
+                eventDetail.tanggal_selesai &&
+                eventDetail.tanggal_mulai !== eventDetail.tanggal_selesai
+              ">
               - {{ formatDateDetail(eventDetail.tanggal_selesai) }}
             </span>
           </p>
@@ -28,13 +36,23 @@
             <i class="fas fa-map-marker-alt"></i> {{ eventDetail.lokasi_event }}
           </p>
           <div class="event-meta-stats-inline">
-            <p><i class="fas fa-eye"></i> Dilihat: {{ eventDetail.jumlah_dilihat || 0 }} kali</p>
-            <p><i class="fas fa-share-alt"></i> Dibagikan: {{ eventDetail.jumlah_share || 0 }} kali</p>
+            <p>
+              <i class="fas fa-eye"></i> Dilihat:
+              {{ eventDetail.jumlah_dilihat || 0 }} kali
+            </p>
+            <p>
+              <i class="fas fa-share-alt"></i> Dibagikan:
+              {{ eventDetail.jumlah_share || 0 }} kali
+            </p>
           </div>
         </div>
-        
+
         <div class="event-main-image-container">
-          <img :src="baseUrl + eventDetail.gambar_event" :alt="`Flyer ${eventDetail.nama_event}`" class="event-main-image" v-if="eventDetail.gambar_event">
+          <img
+            :src="baseUrl + eventDetail.gambar_event"
+            :alt="`Flyer ${eventDetail.nama_event}`"
+            class="event-main-image"
+            v-if="eventDetail.gambar_event" />
           <div v-else class="event-main-no-image">
             <i class="fas fa-image"></i> Flyer Tidak Tersedia
           </div>
@@ -44,7 +62,7 @@
           <div class="event-description-section">
             <p>{{ eventDetail.deskripsi_event }}</p>
           </div>
-          
+
           <div v-if="eventDetail.koordinat_lokasi" class="event-map-section">
             <h2 class="section-heading">Lokasi Event</h2>
             <div id="map-container" class="leaflet-map-frame"></div>
@@ -52,7 +70,12 @@
         </div>
 
         <div class="event-actions-bottom">
-          <a v-if="eventDetail.brosur_event" :href="baseUrl + eventDetail.brosur_event" target="_blank" rel="noopener noreferrer" class="download-brosur-button-lg">
+          <a
+            v-if="eventDetail.brosur_event"
+            :href="baseUrl + eventDetail.brosur_event"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="download-brosur-button-lg">
             <i class="fas fa-file-download"></i> Unduh Brosur
           </a>
         </div>
@@ -62,11 +85,11 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
-import axios from 'axios';
-import 'leaflet/dist/leaflet.css';
-import L from 'leaflet';
+import { ref, onMounted } from "vue";
+import { useRoute, useRouter } from "vue-router";
+import axios from "axios";
+import "leaflet/dist/leaflet.css";
+import L from "leaflet";
 
 const route = useRoute();
 const router = useRouter();
@@ -74,22 +97,26 @@ const router = useRouter();
 const eventDetail = ref(null);
 const loading = ref(true);
 const error = ref(false);
-const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
+const baseUrl = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
 
 const initMap = () => {
   if (!eventDetail.value || !eventDetail.value.koordinat_lokasi) return;
 
-  const [lat, lon] = eventDetail.value.koordinat_lokasi.split(',').map(Number);
-  
-  if (document.getElementById('map-container') && !document.getElementById('map-container')._leaflet_id) {
-    const map = L.map('map-container').setView([lat, lon], 15);
+  const [lat, lon] = eventDetail.value.koordinat_lokasi.split(",").map(Number);
 
-    L.tileLayer('http://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  if (
+    document.getElementById("map-container") &&
+    !document.getElementById("map-container")._leaflet_id
+  ) {
+    const map = L.map("map-container").setView([lat, lon], 15);
+
+    L.tileLayer("http://tile.openstreetmap.org/{z}/{x}/{y}.png", {
       maxZoom: 19,
-      attribution: '© OpenStreetMap contributors'
+      attribution: "© OpenStreetMap contributors",
     }).addTo(map);
 
-    L.marker([lat, lon]).addTo(map)
+    L.marker([lat, lon])
+      .addTo(map)
       .bindPopup(eventDetail.value.lokasi_event)
       .openPopup();
   }
@@ -103,7 +130,7 @@ const fetchEventDetail = async () => {
     const response = await axios.get(`${baseUrl}/api/event/${eventId}`);
     eventDetail.value = response.data;
     setTimeout(() => {
-        initMap();
+      initMap();
     }, 0);
   } catch (err) {
     console.error("Error fetching event detail:", err);
@@ -114,9 +141,9 @@ const fetchEventDetail = async () => {
 };
 
 const formatDateDetail = (dateString) => {
-  if (!dateString) return '';
-  const options = { year: 'numeric', month: 'long', day: 'numeric' };
-  return new Date(dateString).toLocaleDateString('id-ID', options);
+  if (!dateString) return "";
+  const options = { year: "numeric", month: "long", day: "numeric" };
+  return new Date(dateString).toLocaleDateString("id-ID", options);
 };
 
 const goBack = () => {
@@ -124,6 +151,11 @@ const goBack = () => {
 };
 
 onMounted(() => {
+  // Scroll ke atas halaman
+  window.scrollTo({
+    top: 0,
+    behavior: "smooth",
+  });
   fetchEventDetail();
 });
 </script>
@@ -165,8 +197,12 @@ onMounted(() => {
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 .event-content {
@@ -290,7 +326,7 @@ onMounted(() => {
   width: 100%;
   height: 400px;
   border-radius: 8px;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
 
 /* Action Button */

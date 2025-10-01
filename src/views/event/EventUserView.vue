@@ -347,6 +347,11 @@ const cardLeave = (event) => {
 };
 
 onMounted(() => {
+  // Scroll ke atas halaman
+  window.scrollTo({
+    top: 0,
+    behavior: "smooth",
+  });
   fetchEvents();
 });
 </script>
