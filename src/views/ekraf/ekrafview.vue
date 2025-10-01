@@ -123,17 +123,16 @@
                   :src="getImageUrl(item)"
                   :alt="item.nama_umkm"
                   class="luxury-umkm-image"
-                  loading="lazy" />
+                  loading="lazy"
+                  @error="handleImageError" />
               </div>
 
               <!-- Floating Category Badge -->
               <div class="floating-category-badge">
                 <span class="category-icon">{{
-                  getCategoryIcon(
-                    item.kategoriUMKM?.nama_kategori || item.jenis_usaha
-                  )
+                  getCategoryIcon(item.kategoriUMKM?.nama_kategori || "UMKM")
                 }}</span>
-                {{ item.kategoriUMKM?.nama_kategori || item.jenis_usaha }}
+                {{ item.kategoriUMKM?.nama_kategori || "UMKM" }}
               </div>
 
               <!-- Premium Rating -->
@@ -174,7 +173,7 @@
 
               <div class="umkm-details">
                 <div class="detail-item">
-                  <span class="detail-icon">�</span>
+                  <span class="detail-icon">📞</span>
                   <span class="detail-text">{{ item.kontak_umkm }}</span>
                 </div>
                 <div v-if="item.website_umkm" class="detail-item">
@@ -186,8 +185,16 @@
                     {{ item.website_umkm }}
                   </a>
                 </div>
+                <div v-if="item.jam_operasional" class="detail-item">
+                  <span class="detail-icon">🕒</span>
+                  <span class="detail-text">{{ item.jam_operasional }}</span>
+                </div>
+                <div v-if="item.hari_operasional" class="detail-item">
+                  <span class="detail-icon">📅</span>
+                  <span class="detail-text">{{ item.hari_operasional }}</span>
+                </div>
                 <div class="detail-item">
-                  <span class="detail-icon">�️</span>
+                  <span class="detail-icon">👁️</span>
                   <span class="detail-text"
                     >{{ item.jumlah_dilihat }} kali dilihat</span
                   >
@@ -196,15 +203,20 @@
 
               <div class="umkm-features">
                 <div class="feature-tags">
-                  <span class="feature-tag">
-                    {{ item.jenis_usaha }}
+                  <span v-if="item.hastag_umkm" class="feature-tag">
+                    {{ item.hastag_umkm }}
+                  </span>
+                  <span
+                    v-if="item.kategoriUMKM?.nama_kategori"
+                    class="feature-tag">
+                    {{ item.kategoriUMKM?.nama_kategori }}
                   </span>
                 </div>
               </div>
 
               <RouterLink
                 class="luxury-cta-button"
-                :to="`/ekraf/detail/${item.id_umkm}`"
+                :to="`/ekonomi-kreatif/detail/${item.id_umkm}`"
                 aria-label="Lihat detail UMKM">
                 <span class="button-glow"></span>
                 <span class="button-particles"></span>
@@ -305,9 +317,11 @@ interface UMKMItem {
   id_umkm: number;
   nama_umkm: string;
   deskripsi_umkm: string;
-  jenis_usaha: string;
+  hastag_umkm?: string;
   alamat_umkm: string;
   kontak_umkm: string;
+  jam_operasional?: string;
+  hari_operasional?: string;
   website_umkm?: string;
   gambar_produk_utama?: string;
   gambar_sampul?: string;
@@ -362,7 +376,7 @@ const loadUMKMData = async () => {
     console.log("Categories loaded:", categories.value.length, "categories");
   } catch (err) {
     console.error("Error loading UMKM data:", err);
-    error.value = "Gagal memuat data UMKM. Silakan coba lagi.";
+    error.value = "Gagal memuat data UMKM. Silakan coba lagi nanti.";
   } finally {
     isLoading.value = false;
   }
@@ -423,10 +437,7 @@ const filteredItems = computed(() => {
   // Filter by category
   if (activeFilter.value !== "Semua") {
     list = list.filter((item) => {
-      return (
-        item.kategoriUMKM?.nama_kategori === activeFilter.value ||
-        item.jenis_usaha === activeFilter.value
-      );
+      return item.kategoriUMKM?.nama_kategori === activeFilter.value;
     });
   }
 
@@ -438,7 +449,8 @@ const filteredItems = computed(() => {
         item.nama_umkm.toLowerCase().includes(query) ||
         item.deskripsi_umkm.toLowerCase().includes(query) ||
         item.alamat_umkm.toLowerCase().includes(query) ||
-        item.jenis_usaha.toLowerCase().includes(query)
+        item.hastag_umkm?.toLowerCase().includes(query) ||
+        item.kategoriUMKM?.nama_kategori.toLowerCase().includes(query)
     );
   }
 
@@ -455,26 +467,48 @@ const getCategoryIcon = (kategori: string) => {
     Kuliner: "🍜",
     Fashion: "👗",
     Kriya: "🎨",
+    Kerajinan: "🖼️",
     Musik: "🎵",
     Digital: "💻",
+    Perdagangan: "🏪",
+    Jasa: "🛠️",
+    Teknologi: "📱",
+    UMKM: "🏢",
+    // Fallback categories
+    "Makanan & Minuman": "🍽️",
+    "Seni & Budaya": "🎭",
+    "Teknologi Informasi": "💾",
+    "Perdagangan Umum": "🛍️",
   };
-  return icons[kategori] || "🌟";
+  return icons[kategori] || "�";
 };
 
 // Helper function to get image URL
 const getImageUrl = (item: UMKMItem) => {
+  const API_BASE_URL = "http://localhost:5000";
+
   // Priority: gambar_sampul > gambar_produk_utama > first gallery image > fallback
   if (item.gambar_sampul) {
-    return `http://localhost:5000${item.gambar_sampul}`;
+    if (item.gambar_sampul.startsWith("http")) {
+      return item.gambar_sampul;
+    }
+    return `${API_BASE_URL}${item.gambar_sampul}`;
   }
   if (item.gambar_produk_utama) {
-    return `http://localhost:5000${item.gambar_produk_utama}`;
+    if (item.gambar_produk_utama.startsWith("http")) {
+      return item.gambar_produk_utama;
+    }
+    return `${API_BASE_URL}${item.gambar_produk_utama}`;
   }
   if (item.galeriUMKM && item.galeriUMKM.length > 0) {
-    return `http://localhost:5000${item.galeriUMKM[0].path_file}`;
+    const galleryImage = item.galeriUMKM[0].path_file;
+    if (galleryImage.startsWith("http")) {
+      return galleryImage;
+    }
+    return `${API_BASE_URL}${galleryImage}`;
   }
-  // Fallback image
-  return "https://images.unsplash.com/photo-1560472354-b33ff0c44a43?q=80&w=1200&auto=format&fit=crop";
+  // Fallback image with UMKM theme
+  return "https://via.placeholder.com/400x300/3b82f6/ffffff?text=UMKM+Magetan";
 };
 
 const toggleDropdown = () => {
@@ -484,6 +518,12 @@ const toggleDropdown = () => {
 const selectKategoriCustom = (filter: Filter) => {
   activeFilter.value = filter;
   isDropdownOpen.value = false;
+};
+
+const handleImageError = (event: Event) => {
+  const img = event.target as HTMLImageElement;
+  img.src =
+    "https://via.placeholder.com/400x300/3b82f6/ffffff?text=UMKM+Magetan";
 };
 
 const cardHover = (event: Event) => {
@@ -1792,6 +1832,146 @@ onBeforeUnmount(() => {
   border-radius: 12px;
 }
 
+/* ========== LOADING STATES ========== */
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-height: 400px;
+  padding: 4rem 1rem;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.95) 0%,
+    rgba(249, 250, 251, 0.98) 100%
+  );
+  border-radius: var(--radius-2xl);
+  margin: 2rem 0;
+}
+
+.luxury-spinner {
+  position: relative;
+  width: 60px;
+  height: 60px;
+  margin-bottom: 2rem;
+}
+
+.spinner-ring {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border: 3px solid transparent;
+  border-top: 3px solid var(--primary-600);
+  border-radius: 50%;
+  animation: spin 1.2s linear infinite;
+}
+
+.spinner-ring:nth-child(2) {
+  width: 80%;
+  height: 80%;
+  top: 10%;
+  left: 10%;
+  border-top-color: var(--primary-700);
+  animation-delay: -0.4s;
+}
+
+.spinner-ring:nth-child(3) {
+  width: 60%;
+  height: 60%;
+  top: 20%;
+  left: 20%;
+  border-top-color: #60a5fa;
+  animation-delay: -0.8s;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.loading-text {
+  color: var(--muted);
+  font-size: 1.1rem;
+  font-weight: 500;
+  text-align: center;
+  margin: 0;
+  opacity: 0.8;
+  animation: fadeInOut 2s ease-in-out infinite;
+}
+
+@keyframes fadeInOut {
+  0%,
+  100% {
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+/* Error State */
+.error-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-height: 400px;
+  padding: 4rem 2rem;
+  background: linear-gradient(
+    135deg,
+    rgba(254, 242, 242, 0.95) 0%,
+    rgba(253, 246, 246, 0.98) 100%
+  );
+  border: 2px solid rgba(248, 113, 113, 0.2);
+  border-radius: var(--radius-2xl);
+  margin: 2rem 0;
+  text-align: center;
+}
+
+.error-icon {
+  font-size: 4rem;
+  margin-bottom: 1.5rem;
+  opacity: 0.7;
+}
+
+.error-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #dc2626;
+  margin-bottom: 1rem;
+}
+
+.error-message {
+  color: #991b1b;
+  font-size: 1rem;
+  line-height: 1.6;
+  max-width: 400px;
+  margin-bottom: 2rem;
+}
+
+.retry-button {
+  padding: 0.75rem 2rem;
+  background: linear-gradient(135deg, #dc2626, #b91c1c);
+  color: white;
+  border: none;
+  border-radius: var(--radius-xl);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: var(--shadow-md);
+}
+
+.retry-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 32px rgba(220, 38, 38, 0.3);
+}
+
 /* ========== RESPONSIVE DESIGN ========== */
 
 @media (max-width: 1200px) {
@@ -1855,6 +2035,48 @@ onBeforeUnmount(() => {
 
   .luxury-content-container {
     padding: 1.5rem 1.2rem;
+  }
+
+  /* Loading State Mobile */
+  .loading-container {
+    min-height: 300px;
+    padding: 3rem 1rem;
+  }
+
+  .luxury-spinner {
+    width: 50px;
+    height: 50px;
+    margin-bottom: 1.5rem;
+  }
+
+  .loading-text {
+    font-size: 1rem;
+  }
+
+  /* Error State Mobile */
+  .error-container {
+    min-height: 300px;
+    padding: 3rem 1.5rem;
+  }
+
+  .error-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+  }
+
+  .error-title {
+    font-size: 1.25rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .error-message {
+    font-size: 0.9rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .retry-button {
+    padding: 0.65rem 1.5rem;
+    font-size: 0.9rem;
   }
 }
 </style>

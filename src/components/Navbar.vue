@@ -52,14 +52,22 @@
           >
         </li>
 
-        <li :class="['navbar-item', { active: isActive('/Budaya') }]">
-          <router-link to="/Budaya" class="navbar-links" @click="closeMenu"
+        <li :class="['navbar-item', { active: isActive('/budaya') }]">
+          <router-link to="/budaya" class="navbar-links" @click="closeMenu"
             >Budaya</router-link
           >
         </li>
-        <li :class="['navbar-item', { active: isActive('/pengumuman') }]">
-          <router-link to="/ekonomi-kreatif" class="navbar-links" @click="closeMenu"
+        <li :class="['navbar-item', { active: isActive('/ekonomi-kreatif') }]">
+          <router-link
+            to="/ekonomi-kreatif"
+            class="navbar-links"
+            @click="closeMenu"
             >Ekraf</router-link
+          >
+        </li>
+        <li :class="['navbar-item', { active: isActive('/informasi') }]">
+          <router-link to="/informasi" class="navbar-links" @click="closeMenu"
+            >Informasi</router-link
           >
         </li>
 

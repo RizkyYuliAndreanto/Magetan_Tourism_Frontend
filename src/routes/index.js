@@ -33,6 +33,8 @@ import DetailPariwisata from "../views/Pariwisata/DetailPariwisata.vue";
 import BudayaView from "../views/budaya/BudayaView.vue";
 import DetailBudayaView from "../views/budaya/DetailBudayaView.vue";
 import Ekrafview from "../views/ekraf/ekrafview.vue";
+import InformasiView from "../views/informasi/InformasiView.vue";
+import DetailInformasiView from "../views/informasi/DetailInformasiView.vue";
 
 const routes = [
   //User
@@ -124,6 +126,18 @@ const routes = [
     path: "/ekonomi-kreatif",
     name: "Ekraf",
     component: Ekrafview,
+    props: true,
+  },
+  {
+    path: "/informasi",
+    name: "Informasi",
+    component: InformasiView,
+    props: true,
+  },
+  {
+    path: "/informasi/:id",
+    name: "DetailInformasi",
+    component: DetailInformasiView,
     props: true,
   },
   // {

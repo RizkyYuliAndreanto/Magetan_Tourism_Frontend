@@ -6,10 +6,13 @@
         {{ error }}
       </div>
       <template v-else>
-        <!-- Trending News -->
+        <!-- Trending Informasi -->
         <div>
           <div class="section-title">
-            <span class="section-title-text">TRENDING NEWS</span>
+            <span class="section-title-text"
+              >IN// Navigate to informasi view const viewMoreNews = () => {
+              router.push({ name: 'Informasi' }); };ASI TRENDING</span
+            >
             <span class="section-title-line"></span>
           </div>
           <div class="trending-grid">
@@ -19,11 +22,11 @@
                 :alt="popularNews.judul"
                 class="news-image" />
               <div class="news-content">
-                <h3 class="card-subtitle">Berita Paling Populer</h3>
+                <h3 class="card-subtitle">Informasi Paling Populer</h3>
                 <h2 class="news-title">{{ popularNews.judul }}</h2>
                 <p class="news-meta">
                   {{ formatDate(popularNews.tanggal_publikasi) }} -
-                  {{ popularNews.kategoriBerita?.nama_kategori || "Berita" }}
+                  {{ popularNews.kategoriBerita?.nama_kategori || "Informasi" }}
                 </p>
               </div>
             </div>
@@ -40,22 +43,22 @@
                   <h4 class="card-title-small">{{ news.judul }}</h4>
                   <p class="card-meta-small">
                     {{ formatDate(news.tanggal_publikasi) }} -
-                    {{ news.kategoriBerita?.nama_kategori || "Berita" }}
+                    {{ news.kategoriBerita?.nama_kategori || "Informasi" }}
                   </p>
                 </div>
               </div>
             </div>
           </div>
         </div>
-        <!-- Latest News & Instagram -->
+        <!-- Latest Informasi & Instagram -->
         <div>
           <div class="section-title latest">
-            <span class="section-title-text active">LATEST NEWS</span>
+            <span class="section-title-text active">INFORMASI TERBARU</span>
             <span class="section-title-line"></span>
           </div>
           <div class="latest-instagram-grid">
             <div class="latest-news-cards">
-              <div class="card-subtitle">Berita Terbaru</div>
+              <div class="card-subtitle">Informasi Terbaru</div>
               <div class="latest-news-subgrid">
                 <div
                   v-for="news in latestNews"
@@ -69,7 +72,7 @@
                     <h4 class="card-title-small">{{ news.judul }}</h4>
                     <p class="card-meta-small">
                       {{ formatDate(news.tanggal_publikasi) }} -
-                      {{ news.kategoriBerita?.nama_kategori || "Berita" }}
+                      {{ news.kategoriBerita?.nama_kategori || "Informasi" }}
                     </p>
                   </div>
                 </div>
@@ -335,6 +338,20 @@
               </blockquote>
             </div>
           </div>
+
+          <!-- View More Button -->
+          <div class="view-more-section">
+            <button @click="viewMoreNews" class="view-more-btn">
+              <span class="view-more-text">Lihat Semua Informasi</span>
+              <svg
+                class="view-more-arrow"
+                viewBox="0 0 24 24"
+                fill="currentColor">
+                <path
+                  d="M8.59 16.59L13.17 12L8.59 7.41L10 6L16 12L10 18L8.59 16.59Z" />
+              </svg>
+            </button>
+          </div>
         </div>
       </template>
     </div>
@@ -343,9 +360,11 @@
 
 <script setup>
 import { ref, onMounted } from "vue";
+import { useRouter } from "vue-router";
 import axios from "axios";
 
 const API_BASE_URL = "http://localhost:5000";
+const router = useRouter();
 const beritaList = ref([]);
 const popularNews = ref(null);
 const trendingNews = ref([]);
@@ -416,6 +435,11 @@ const fetchBerita = async () => {
 onMounted(() => {
   fetchBerita();
 });
+
+// Navigate to news/berita view
+const viewMoreNews = () => {
+  router.push({ name: "pengumuman" });
+};
 </script>
 
 <style scoped>
@@ -664,6 +688,81 @@ onMounted(() => {
   padding-bottom: 0;
 }
 
+/* View More Button */
+.view-more-section {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 32px;
+  padding: 16px 0;
+}
+
+.view-more-btn {
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+  color: #fff;
+  border: none;
+  border-radius: 50px;
+  padding: 16px 32px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3);
+  position: relative;
+  overflow: hidden;
+}
+
+.view-more-btn::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.2),
+    transparent
+  );
+  transition: left 0.5s ease;
+}
+
+.view-more-btn:hover::before {
+  left: 100%;
+}
+
+.view-more-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(37, 99, 235, 0.4);
+  background: linear-gradient(135deg, #1d4ed8 0%, #1e3a8a 100%);
+}
+
+.view-more-btn:active {
+  transform: translateY(0);
+}
+
+.view-more-text {
+  position: relative;
+  z-index: 1;
+  letter-spacing: 0.5px;
+}
+
+.view-more-arrow {
+  width: 20px;
+  height: 20px;
+  transition: transform 0.3s ease;
+  position: relative;
+  z-index: 1;
+}
+
+.view-more-btn:hover .view-more-arrow {
+  transform: translateX(4px);
+}
+
 /* Responsive */
 @media screen and (max-width: 1024px) {
   .main-news-grid,
@@ -680,6 +779,10 @@ onMounted(() => {
     min-height: 220px;
     margin-top: 20px;
   }
+  .view-more-btn {
+    padding: 14px 28px;
+    font-size: 1rem;
+  }
 }
 @media screen and (max-width: 600px) {
   .news-grid-section {
@@ -693,6 +796,14 @@ onMounted(() => {
   }
   .instagram-card-wrapper {
     min-height: 180px;
+  }
+  .view-more-btn {
+    padding: 12px 24px;
+    font-size: 0.95rem;
+  }
+  .view-more-arrow {
+    width: 18px;
+    height: 18px;
   }
 }
 </style>
