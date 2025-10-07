@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Frontend-Backend Connection Test</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+        background: #f8f9fa;
+      }
+      .test-container {
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        margin: 10px 0;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+      .success {
+        color: #28a745;
+      }
+      .error {
+        color: #dc3545;
+      }
+      .loading {
+        color: #007bff;
+      }
+      pre {
+        background: #f8f9fa;
+        padding: 10px;
+        border-radius: 4px;
+        overflow-x: auto;
+      }
+      button {
+        background: #007bff;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 4px;
+        cursor: pointer;
+        margin: 5px;
+      }
+      button:hover {
+        background: #0056b3;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>🔗 Frontend-Backend Connection Test</h1>
+
+    <div class="test-container">
+      <h3>📊 Dashboard Summary Test</h3>
+      <button onclick="testSummary()">Test Summary API</button>
+      <div id="summaryResult"></div>
+    </div>
+
+    <div class="test-container">
+      <h3>📋 Activity Log Test</h3>
+      <button onclick="testActivity()">Test Activity API</button>
+      <div id="activityResult"></div>
+    </div>
+
+    <div class="test-container">
+      <h3>🔄 Full Dashboard Test</h3>
+      <button onclick="testFullDashboard()">Test Complete Dashboard</button>
+      <div id="dashboardResult"></div>
+    </div>
+
+    <script>
+      const BACKEND_URL = "http://localhost:5000";
+
+      async function testSummary() {
+        const resultDiv = document.getElementById("summaryResult");
+        resultDiv.innerHTML =
+          '<p class="loading">🔄 Testing summary endpoint...</p>';
+
+        try {
+          const response = await fetch(`${BACKEND_URL}/api/dashboard/summary`);
+          const data = await response.json();
+
+          if (response.ok) {
+            resultDiv.innerHTML = `
+                        <p class="success">✅ Summary API works!</p>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    `;
+          } else {
+            resultDiv.innerHTML = `<p class="error">❌ Error: ${
+              response.status
+            } - ${data.message || "Unknown error"}</p>`;
+          }
+        } catch (error) {
+          resultDiv.innerHTML = `<p class="error">❌ Connection error: ${error.message}</p>`;
+        }
+      }
+
+      async function testActivity() {
+        const resultDiv = document.getElementById("activityResult");
+        resultDiv.innerHTML =
+          '<p class="loading">🔄 Testing activity endpoint...</p>';
+
+        try {
+          const response = await fetch(
+            `${BACKEND_URL}/api/admin/activity?limit=5`
+          );
+          const data = await response.json();
+
+          if (response.ok) {
+            resultDiv.innerHTML = `
+                        <p class="success">✅ Activity API works!</p>
+                        <p>Found ${data.data?.length || 0} activities</p>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    `;
+          } else {
+            resultDiv.innerHTML = `<p class="error">❌ Error: ${
+              response.status
+            } - ${data.message || "Unknown error"}</p>`;
+          }
+        } catch (error) {
+          resultDiv.innerHTML = `<p class="error">❌ Connection error: ${error.message}</p>`;
+        }
+      }
+
+      async function testFullDashboard() {
+        const resultDiv = document.getElementById("dashboardResult");
+        resultDiv.innerHTML =
+          '<p class="loading">🔄 Testing complete dashboard simulation...</p>';
+
+        try {
+          const [summaryRes, activityRes] = await Promise.all([
+            fetch(`${BACKEND_URL}/api/dashboard/summary`),
+            fetch(`${BACKEND_URL}/api/admin/activity?limit=10`),
+          ]);
+
+          const summaryData = await summaryRes.json();
+          const activityData = await activityRes.json();
+
+          if (summaryRes.ok && activityRes.ok) {
+            const totals = summaryData?.totals || summaryData || {};
+            const activities = activityData?.data || activityData || [];
+
+            resultDiv.innerHTML = `
+                        <p class="success">✅ Complete dashboard test successful!</p>
+                        <h4>📊 Statistics:</h4>
+                        <ul>
+                            <li>Berita: ${totals.berita || 0}</li>
+                            <li>Destinasi: ${totals.destinasi || 0}</li>
+                            <li>Event: ${totals.event || 0}</li>
+                            <li>UMKM: ${totals.umkm || 0}</li>
+                            <li>Sejarah: ${totals.sejarah || 0}</li>
+                            <li>Media: ${totals.media || 0}</li>
+                        </ul>
+                        <h4>📋 Recent Activities (${activities.length}):</h4>
+                        <ul>
+                            ${activities
+                              .slice(0, 3)
+                              .map(
+                                (a) => `
+                                <li>${a.actor || a.admin || "Admin"} - ${
+                                  a.action || a.type
+                                } ${a.entity} (${new Date(
+                                  a.createdAt
+                                ).toLocaleString()})</li>
+                            `
+                              )
+                              .join("")}
+                        </ul>
+                        <p class="success">🎉 Your AdminDashboard.vue should work perfectly!</p>
+                    `;
+          } else {
+            resultDiv.innerHTML = `<p class="error">❌ Some endpoints failed</p>`;
+          }
+        } catch (error) {
+          resultDiv.innerHTML = `<p class="error">❌ Connection error: ${error.message}</p>`;
+        }
+      }
+
+      // Auto test on load
+      setTimeout(() => {
+        testFullDashboard();
+      }, 1000);
+    </script>
+  </body>
+</html>

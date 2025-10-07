@@ -7,7 +7,15 @@
       </p>
     </div>
 
-    <div v-if="error" class="error-banner">{{ error }}</div>
+    <div v-if="error" class="error-banner">
+      {{ error }}
+      <div v-if="error.includes('Sesi login')" class="error-actions">
+        <button @click="goToLogin" class="login-button">
+          <i class="fas fa-sign-in-alt"></i>
+          Login
+        </button>
+      </div>
+    </div>
 
     <div class="stats-grid">
       <DashboardCard
@@ -20,7 +28,16 @@
     </div>
 
     <div class="recent-activity">
-      <h3 class="section-title">Aktivitas Terbaru</h3>
+      <div class="activity-header">
+        <h3 class="section-title">Aktivitas Terbaru</h3>
+        <button
+          @click="refreshDashboard"
+          class="refresh-button"
+          :disabled="loading">
+          <i class="fas fa-sync-alt" :class="{ 'fa-spin': loading }"></i>
+          {{ loading ? "Memuat..." : "Refresh" }}
+        </button>
+      </div>
       <div class="activity-card-list">
         <div v-if="loading" class="activity-loading">Memuat aktivitas...</div>
         <div v-else-if="recentActivity.length === 0" class="activity-empty">
@@ -52,6 +69,7 @@ import axios from "axios";
 const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
 const loading = ref(true);
 const error = ref(null);
+const autoRefresh = ref(null);
 
 const statsData = ref([
   {
@@ -81,20 +99,81 @@ const recentActivity = ref([]);
 
 function formatTime(ts) {
   try {
-    return new Date(ts).toLocaleString("id-ID");
+    const date = new Date(ts);
+    return date.toLocaleString("id-ID", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
   } catch {
     return ts;
   }
+}
+
+// Function untuk refresh data
+function refreshDashboard() {
+  console.log("🔄 Refreshing dashboard...");
+  loadDashboard();
+}
+
+// Function untuk redirect ke login
+function goToLogin() {
+  // You can implement router navigation here
+  console.log("Redirecting to login...");
+  // router.push('/admin/login');
 }
 
 async function loadDashboard() {
   loading.value = true;
   error.value = null;
   try {
-    const [summaryRes, activityRes] = await Promise.all([
-      axios.get(`${backendUrl}/api/dashboard/summary`),
-      axios.get(`${backendUrl}/api/admin/activity`, { params: { limit: 10 } }),
-    ]);
+    console.log("🔄 Loading dashboard data...");
+
+    // Get auth token from localStorage
+    const token = localStorage.getItem("token");
+    const authHeaders = token ? { Authorization: `Bearer ${token}` } : {};
+
+    console.log("🔑 Using auth token:", token ? "Present" : "Missing");
+
+    let summaryRes, activityRes;
+
+    try {
+      // Try to load both summary and activity
+      [summaryRes, activityRes] = await Promise.all([
+        axios.get(`${backendUrl}/api/dashboard/summary`, {
+          headers: authHeaders,
+        }),
+        axios.get(`${backendUrl}/api/dashboard/activity`, {
+          params: { limit: 10 },
+          headers: authHeaders,
+        }),
+      ]);
+    } catch (authError) {
+      console.warn(
+        "⚠️ Auth failed, trying summary only:",
+        authError.response?.status
+      );
+
+      if (authError.response?.status === 401) {
+        // If auth fails, try to get at least summary without auth
+        try {
+          summaryRes = await axios.get(`${backendUrl}/api/dashboard/summary`);
+          activityRes = { data: { data: [] } }; // Empty activity data
+          console.log("ℹ️ Loaded summary without auth, activity unavailable");
+        } catch (summaryError) {
+          throw authError; // Re-throw original auth error
+        }
+      } else {
+        throw authError; // Re-throw non-auth errors
+      }
+    }
+
+    console.log("✅ Data loaded successfully:", {
+      summaryRes: summaryRes.data,
+      activityRes: activityRes.data,
+    });
 
     const t = summaryRes.data?.totals || summaryRes.data || {};
     const totals = {
@@ -145,7 +224,10 @@ async function loadDashboard() {
     ];
 
     const logs = activityRes.data?.data ?? activityRes.data ?? [];
+    console.log("📋 Processing activity logs:", logs);
+
     recentActivity.value = logs.map((a, idx) => {
+      // Handle berbagai format action/type dari backend
       const rawType = (a.type || a.action || "").toString().toLowerCase();
       const typeMap = {
         create: "create",
@@ -154,44 +236,98 @@ async function loadDashboard() {
         edit: "update",
         delete: "delete",
         remove: "delete",
+        login: "update", // Login ditampilkan sebagai update
       };
       const mapped = typeMap[rawType] || "update";
+
       const iconMap = {
         create: "fas fa-plus",
         update: "fas fa-edit",
         delete: "fas fa-trash-alt",
+        login: "fas fa-sign-in-alt",
       };
+
+      // Ambil nama admin dari berbagai field yang mungkin ada
       const actor = a.actor || a.admin || a.user || "Admin";
+
+      // Ambil target entity dan nama
       const target = a.entity || a.module || a.target || "konten";
       const name = a.entityName || a.title || a.name || "";
-      const actionWord =
-        mapped === "create"
-          ? "menambahkan"
-          : mapped === "delete"
-          ? "menghapus"
-          : "memperbarui";
-      const message = `${actor} ${actionWord} ${target}${
-        name ? `: "${name}"` : ""
-      }`;
+
+      // Generate message berdasarkan action
+      let message = "";
+      let finalType = mapped;
+      let finalIconClass = iconMap[mapped];
+
+      if (rawType === "login") {
+        message = `${actor} login ke sistem`;
+        finalType = "login";
+        finalIconClass = iconMap.login;
+      } else {
+        const actionWord =
+          mapped === "create"
+            ? "menambahkan"
+            : mapped === "delete"
+            ? "menghapus"
+            : "memperbarui";
+        message = `${actor} ${actionWord} ${target}${
+          name ? `: "${name}"` : ""
+        }`;
+      }
+
       return {
         id: a.id || idx,
-        type: mapped,
+        type: finalType,
         message,
         timestamp: formatTime(
           a.createdAt || a.timestamp || new Date().toISOString()
         ),
-        iconClass: iconMap[mapped],
+        iconClass: finalIconClass,
       };
     });
   } catch (e) {
-    console.error(e);
-    error.value = "Gagal memuat data dashboard.";
+    console.error("❌ Dashboard loading error:", e);
+    if (e.response) {
+      // Server responded with error status
+      if (e.response.status === 401) {
+        error.value = "Sesi login telah berakhir. Silakan login kembali.";
+        // Optional: redirect to login
+        // router.push('/admin/login');
+      } else {
+        error.value = `Server error: ${e.response.status} - ${
+          e.response.data?.message || "Unknown error"
+        }`;
+      }
+    } else if (e.request) {
+      // Request was made but no response received
+      error.value =
+        "Tidak dapat terhubung ke server. Pastikan backend berjalan di port 5000.";
+    } else {
+      // Something else happened
+      error.value = `Error: ${e.message}`;
+    }
   } finally {
     loading.value = false;
   }
 }
 
-onMounted(loadDashboard);
+onMounted(() => {
+  loadDashboard();
+
+  // Auto refresh setiap 5 menit (opsional)
+  autoRefresh.value = setInterval(() => {
+    console.log("🔄 Auto refreshing dashboard...");
+    loadDashboard();
+  }, 5 * 60 * 1000); // 5 minutes
+});
+
+// Cleanup interval when component unmounts
+import { onUnmounted } from "vue";
+onUnmounted(() => {
+  if (autoRefresh.value) {
+    clearInterval(autoRefresh.value);
+  }
+});
 </script>
 
 <style scoped>
@@ -230,11 +366,44 @@ onMounted(loadDashboard);
   margin-bottom: 3rem;
 }
 
+.activity-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
 .section-title {
   font-size: 1.5rem;
   color: #212529; /* Teks lebih gelap */
-  margin-bottom: 1.5rem;
+  margin: 0;
   font-weight: 600;
+}
+
+.refresh-button {
+  background: #007bff;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.refresh-button:hover:not(:disabled) {
+  background: #0056b3;
+  transform: translateY(-2px);
+}
+
+.refresh-button:disabled {
+  background: #6c757d;
+  cursor: not-allowed;
+  transform: none;
 }
 
 .activity-card-list {
@@ -250,6 +419,31 @@ onMounted(loadDashboard);
   padding: 0.75rem 1rem;
   border-radius: 8px;
   margin-bottom: 1rem;
+  position: relative;
+}
+
+.error-actions {
+  margin-top: 1rem;
+  display: flex;
+  gap: 0.5rem;
+}
+
+.login-button {
+  background: #007bff;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  font-size: 0.875rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: background 0.3s ease;
+}
+
+.login-button:hover {
+  background: #0056b3;
 }
 
 .activity-loading,
@@ -298,6 +492,9 @@ onMounted(loadDashboard);
 }
 .activity-icon.delete {
   background-color: #dc3545;
+}
+.activity-icon.login {
+  background-color: #17a2b8;
 }
 
 .activity-content {

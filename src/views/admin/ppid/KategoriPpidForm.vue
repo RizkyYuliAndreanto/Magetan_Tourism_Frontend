@@ -2,7 +2,7 @@
   <div class="form-card">
     <div class="form-header">
       <h3 class="form-title">
-        {{ isEditing ? 'Edit Kategori' : 'Tambah Kategori Baru' }}
+        {{ isEditing ? "Edit Kategori" : "Tambah Kategori Baru" }}
       </h3>
       <button class="close-form-btn" @click="$emit('close-form')">
         <svg
@@ -23,30 +23,78 @@
     </div>
     <form @submit.prevent="submitForm" class="form-container">
       <div class="form-section" v-if="!isEditing">
-        <h4 class="section-title">Jenis Kategori</h4>
+        <h4 class="section-title">
+          <i class="fas fa-sitemap"></i>
+          Jenis Kategori
+        </h4>
+        <div class="category-type-explanation">
+          <p class="explanation-text">
+            <strong>Kategori Induk:</strong> Kategori utama yang berdiri sendiri
+            (contoh: Transparansi, Pelayanan Publik)<br />
+            <strong>Sub-Kategori:</strong> Kategori turunan dari kategori induk
+            (contoh: Laporan Keuangan dibawah Transparansi)
+          </p>
+        </div>
         <div class="radio-group">
-          <label>
-            <input type="radio" v-model="isCreatingSubcategory" :value="false" />
-            Kategori Induk
+          <label
+            class="radio-option"
+            :class="{ selected: !isCreatingSubcategory }">
+            <input
+              type="radio"
+              v-model="isCreatingSubcategory"
+              :value="false" />
+            <div class="radio-content">
+              <i class="fas fa-folder"></i>
+              <span>Kategori Induk</span>
+              <small>Kategori utama yang berdiri sendiri</small>
+            </div>
           </label>
-          <label>
+          <label
+            class="radio-option"
+            :class="{ selected: isCreatingSubcategory }">
             <input type="radio" v-model="isCreatingSubcategory" :value="true" />
-            Sub-Kategori
+            <div class="radio-content">
+              <i class="fas fa-folder-open"></i>
+              <span>Sub-Kategori</span>
+              <small>Kategori turunan dari kategori induk</small>
+            </div>
           </label>
         </div>
       </div>
 
       <div class="form-grid">
         <div class="form-group">
-          <label for="nama_kategori">Nama Kategori <span class="required">*</span></label>
-          <input type="text" id="nama_kategori" v-model="formData.nama_kategori" class="form-input" required>
+          <label for="nama_kategori"
+            >Nama Kategori <span class="required">*</span></label
+          >
+          <input
+            type="text"
+            id="nama_kategori"
+            v-model="formData.nama_kategori"
+            class="form-input"
+            required />
         </div>
-        
-        <div v-if="isCreatingSubcategory || (isEditing && formData.id_kategori_induk !== null)" class="form-group">
-          <label for="id_kategori_induk">Kategori Induk <span class="required" v-if="isCreatingSubcategory">*</span></label>
-          <select id="id_kategori_induk" v-model="formData.id_kategori_induk" class="form-input" :required="isCreatingSubcategory">
+
+        <div
+          v-if="
+            isCreatingSubcategory ||
+            (isEditing && formData.id_kategori_induk !== null)
+          "
+          class="form-group">
+          <label for="id_kategori_induk"
+            >Kategori Induk
+            <span class="required" v-if="isCreatingSubcategory">*</span></label
+          >
+          <select
+            id="id_kategori_induk"
+            v-model="formData.id_kategori_induk"
+            class="form-input"
+            :required="isCreatingSubcategory">
             <option :value="null">-- Pilih Kategori Induk --</option>
-            <option v-for="kategori in kategoriIndukList" :key="kategori.id_kategori_ppid" :value="kategori.id_kategori_ppid">
+            <option
+              v-for="kategori in kategoriIndukList"
+              :key="kategori.id_kategori_ppid"
+              :value="kategori.id_kategori_ppid">
               {{ kategori.nama_kategori }}
             </option>
           </select>
@@ -54,24 +102,52 @@
 
         <div class="form-group span-2">
           <label for="deskripsi_kategori">Deskripsi Kategori</label>
-          <textarea id="deskripsi_kategori" v-model="formData.deskripsi_kategori" class="form-input" rows="3"></textarea>
+          <textarea
+            id="deskripsi_kategori"
+            v-model="formData.deskripsi_kategori"
+            class="form-input"
+            rows="3"></textarea>
         </div>
       </div>
       <div class="form-actions">
-        <button type="button" class="action-button cancel-button" @click="$emit('close-form')">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-x">
+        <button
+          type="button"
+          class="action-button cancel-button"
+          @click="$emit('close-form')">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            class="feather feather-x">
             <line x1="18" y1="6" x2="6" y2="18"></line>
             <line x1="6" y1="6" x2="18" y2="18"></line>
           </svg>
           Batal
         </button>
         <button type="submit" class="action-button save-button">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-save">
-            <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            class="feather feather-save">
+            <path
+              d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
             <polyline points="17 21 17 13 7 13 7 21"></polyline>
             <polyline points="7 3 7 8 15 8"></polyline>
           </svg>
-          {{ isEditing ? 'Simpan Perubahan' : 'Simpan' }}
+          {{ isEditing ? "Simpan Perubahan" : "Simpan" }}
         </button>
       </div>
     </form>
@@ -79,7 +155,7 @@
 </template>
 
 <script setup>
-import { ref, watch, onMounted } from 'vue';
+import { ref, watch, onMounted } from "vue";
 
 const props = defineProps({
   isEditing: {
@@ -90,8 +166,8 @@ const props = defineProps({
     type: Object,
     default: () => ({
       id_kategori_ppid: null,
-      nama_kategori: '',
-      deskripsi_kategori: '',
+      nama_kategori: "",
+      deskripsi_kategori: "",
       id_kategori_induk: null,
     }),
   },
@@ -101,15 +177,19 @@ const props = defineProps({
   },
 });
 
-const emit = defineEmits(['close-form', 'save-kategori', 'update-kategori']);
+const emit = defineEmits(["close-form", "save-kategori", "update-kategori"]);
 
 const formData = ref({});
 const isCreatingSubcategory = ref(false);
 
-watch(() => props.initialData, (newVal) => {
-  formData.value = { ...newVal };
-  isCreatingSubcategory.value = !!formData.value.id_kategori_induk;
-}, { immediate: true });
+watch(
+  () => props.initialData,
+  (newVal) => {
+    formData.value = { ...newVal };
+    isCreatingSubcategory.value = !!formData.value.id_kategori_induk;
+  },
+  { immediate: true }
+);
 
 watch(isCreatingSubcategory, (newVal) => {
   if (!newVal) {
@@ -118,17 +198,23 @@ watch(isCreatingSubcategory, (newVal) => {
 });
 
 const submitForm = () => {
+  // Validasi untuk sub-kategori
+  if (isCreatingSubcategory.value && !formData.value.id_kategori_induk) {
+    alert("Silakan pilih kategori induk untuk sub-kategori.");
+    return;
+  }
+
   const submitData = { ...formData.value };
-  
+
   if (!isCreatingSubcategory.value) {
     submitData.id_kategori_induk = null;
   }
   delete submitData.level_kategori;
-  
+
   if (props.isEditing) {
-    emit('update-kategori', submitData);
+    emit("update-kategori", submitData);
   } else {
-    emit('save-kategori', submitData);
+    emit("save-kategori", submitData);
   }
 };
 </script>
@@ -140,8 +226,13 @@ const submitForm = () => {
   padding: 2.5rem;
   border-radius: 16px;
   box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
   border: 1px solid #f0f4f8;
+  position: relative;
+  z-index: 1002;
+  max-width: 100%;
+  overflow: visible;
 }
 
 .form-header {
@@ -182,18 +273,81 @@ const submitForm = () => {
 .form-section {
   margin-bottom: 2.5rem;
 }
-.radio-group {
-    display: flex;
-    gap: 2rem;
-    margin-bottom: 1.5rem;
+
+.category-type-explanation {
+  background-color: #e7f3ff;
+  border-left: 4px solid #007bff;
+  padding: 1rem 1.5rem;
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
 }
-.radio-group label {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    cursor: pointer;
-    font-weight: 500;
-    color: #495057;
+
+.explanation-text {
+  color: #495057;
+  font-size: 0.9rem;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.radio-group {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.radio-option {
+  display: block;
+  padding: 1.5rem;
+  border: 2px solid #e9ecef;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background-color: #ffffff;
+}
+
+.radio-option:hover {
+  border-color: #007bff;
+  background-color: #f8f9ff;
+}
+
+.radio-option.selected {
+  border-color: #007bff;
+  background-color: #e7f3ff;
+  box-shadow: 0 4px 12px rgba(0, 123, 255, 0.15);
+}
+
+.radio-option input[type="radio"] {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.radio-content {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.radio-content i {
+  font-size: 2rem;
+  color: #007bff;
+  margin-bottom: 0.5rem;
+}
+
+.radio-content span {
+  font-weight: 600;
+  color: #212529;
+  font-size: 1rem;
+}
+
+.radio-content small {
+  color: #6c757d;
+  font-size: 0.85rem;
+  text-align: center;
+  line-height: 1.3;
 }
 
 .section-title {

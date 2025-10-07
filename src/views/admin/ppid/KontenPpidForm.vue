@@ -2,7 +2,7 @@
   <div class="form-card">
     <div class="form-header">
       <h3 class="form-title">
-        {{ isEditing ? 'Edit Konten PPID' : 'Tambah Konten PPID Baru' }}
+        {{ isEditing ? "Edit Konten PPID" : "Tambah Konten PPID Baru" }}
       </h3>
       <button class="close-form-btn" @click="$emit('close-form')">
         <svg
@@ -15,8 +15,7 @@
           stroke-width="2"
           stroke-linecap="round"
           stroke-linejoin="round"
-          class="feather feather-x"
-        >
+          class="feather feather-x">
           <line x1="18" y1="6" x2="6" y2="18"></line>
           <line x1="6" y1="6" x2="18" y2="18"></line>
         </svg>
@@ -35,9 +34,9 @@
             stroke-width="2"
             stroke-linecap="round"
             stroke-linejoin="round"
-            class="feather feather-file-text"
-          >
-            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            class="feather feather-file-text">
+            <path
+              d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
             <polyline points="14 2 14 8 20 8"></polyline>
             <line x1="16" y1="13" x2="8" y2="13"></line>
             <line x1="16" y1="17" x2="8" y2="17"></line>
@@ -47,32 +46,47 @@
         </h4>
         <div class="form-grid">
           <div class="form-group">
-            <label for="judul_konten">Judul Konten <span class="required">*</span></label>
+            <label for="judul_konten"
+              >Judul Konten <span class="required">*</span></label
+            >
             <input
               type="text"
               id="judul_konten"
               v-model="formData.judul_konten"
               class="form-input"
-              required
-            />
+              required />
           </div>
           <div class="form-group">
-            <label for="id_kategori_ppid">Kategori PPID <span class="required">*</span></label>
+            <label for="id_kategori_ppid"
+              >Kategori PPID <span class="required">*</span></label
+            >
             <select
               id="id_kategori_ppid"
               v-model="formData.id_kategori_ppid"
               class="form-input"
-              required
-            >
+              required>
               <option value="">Pilih Kategori</option>
-              <option
-                v-for="kategori in kategoriList"
-                :key="kategori.id_kategori_ppid"
-                :value="kategori.id_kategori_ppid"
-              >
-                {{ kategori.nama_kategori }}
-              </option>
+              <optgroup
+                v-for="induk in kategoriBerstruktur"
+                :key="induk.id_kategori_ppid"
+                :label="induk.nama_kategori">
+                <option :value="induk.id_kategori_ppid">
+                  📁 {{ induk.nama_kategori }} (Kategori Utama)
+                </option>
+                <option
+                  v-for="sub in induk.subKategoris"
+                  :key="sub.id_kategori_ppid"
+                  :value="sub.id_kategori_ppid">
+                  📂 {{ sub.nama_kategori }} (Sub dari
+                  {{ induk.nama_kategori }})
+                </option>
+              </optgroup>
             </select>
+            <small class="form-helper">
+              <i class="fas fa-info-circle"></i>
+              Pilih kategori utama (📁) atau sub-kategori (📂) untuk
+              mengorganisir konten PPID
+            </small>
           </div>
           <div class="form-group span-2">
             <label for="deskripsi_konten">Deskripsi Konten</label>
@@ -80,19 +94,21 @@
               id="deskripsi_konten"
               v-model="formData.deskripsi_konten"
               class="form-input"
-              rows="5"
-            ></textarea>
+              rows="5"></textarea>
           </div>
           <div class="form-group">
-            <label for="file_pdf_ppid">File PDF Utama <span class="required" v-if="!isEditing">*</span></label>
+            <label for="file_pdf_ppid"
+              >File PDF Utama
+              <span class="required" v-if="!isEditing">*</span></label
+            >
             <div
-              :class="['file-drop-area', {'is-dragover': isPdfDragover}]"
+              :class="['file-drop-area', { 'is-dragover': isPdfDragover }]"
               @dragover.prevent="isPdfDragover = true"
               @dragleave.prevent="isPdfDragover = false"
-              @drop="handleDropPdfFile"
-            >
+              @drop="handleDropPdfFile">
               <div class="file-drop-content">
-                <template v-if="!formData.file_pdf_file && !formData.file_pdf_path">
+                <template
+                  v-if="!formData.file_pdf_file && !formData.file_pdf_path">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     width="24"
@@ -103,17 +119,16 @@
                     stroke-width="2"
                     stroke-linecap="round"
                     stroke-linejoin="round"
-                    class="feather feather-upload-cloud file-icon"
-                  >
+                    class="feather feather-upload-cloud file-icon">
                     <polyline points="16 16 12 12 8 16"></polyline>
                     <line x1="12" y1="12" x2="12" y2="21"></line>
                     <path
-                      d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"
-                    ></path>
+                      d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"></path>
                   </svg>
                   <span class="file-message">
                     Drag & drop file here or
-                    <label for="file_pdf_ppid" class="file-link">browse</label> to upload
+                    <label for="file_pdf_ppid" class="file-link">browse</label>
+                    to upload
                   </span>
                   <input
                     type="file"
@@ -121,8 +136,7 @@
                     @change="handlePdfUpload"
                     class="file-input"
                     accept="application/pdf"
-                    :required="!isEditing && !formData.file_pdf_path"
-                  />
+                    :required="!isEditing && !formData.file_pdf_path" />
                 </template>
                 <template v-else>
                   <div class="file-preview-main">
@@ -136,23 +150,24 @@
                       stroke-width="2"
                       stroke-linecap="round"
                       stroke-linejoin="round"
-                      class="feather feather-file-text file-icon large-icon"
-                    >
-                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                      class="feather feather-file-text file-icon large-icon">
+                      <path
+                        d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
                       <polyline points="14 2 14 8 20 8"></polyline>
                       <line x1="16" y1="13" x2="8" y2="13"></line>
                       <line x1="16" y1="17" x2="8" y2="17"></line>
                       <polyline points="10 9 9 9 8 9"></polyline>
                     </svg>
                     <span class="file-message file-name-display">{{
-                      formData.file_pdf_file ? formData.file_pdf_file.name : formData.file_pdf_path.split('/').pop()
+                      formData.file_pdf_file
+                        ? formData.file_pdf_file.name
+                        : formData.file_pdf_path.split("/").pop()
                     }}</span>
                     <button
                       type="button"
                       @click="removePdfFile"
                       class="cancel-image-btn"
-                      title="Batal"
-                    >
+                      title="Batal">
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
                         width="24"
@@ -163,9 +178,14 @@
                         stroke-width="2"
                         stroke-linecap="round"
                         stroke-linejoin="round"
-                        class="feather feather-x-square"
-                      >
-                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                        class="feather feather-x-square">
+                        <rect
+                          x="3"
+                          y="3"
+                          width="18"
+                          height="18"
+                          rx="2"
+                          ry="2"></rect>
                         <line x1="9" y1="9" x2="15" y2="15"></line>
                         <line x1="15" y1="9" x2="9" y2="15"></line>
                       </svg>
@@ -177,8 +197,7 @@
             </div>
             <p
               v-if="isEditing && formData.file_pdf_path"
-              class="mt-2 text-sm text-gray-500"
-            >
+              class="mt-2 text-sm text-gray-500">
               File saat ini:
               <a :href="getFilePath(formData.file_pdf_path)" target="_blank">{{
                 formData.file_pdf_path.split("/").pop()
@@ -186,15 +205,20 @@
             </p>
           </div>
           <div class="form-group">
-            <label for="gambar_sampul_ppid">Gambar Sampul <span class="required" v-if="!isEditing">*</span></label>
+            <label for="gambar_sampul_ppid"
+              >Gambar Sampul
+              <span class="required" v-if="!isEditing">*</span></label
+            >
             <div
-              :class="['file-drop-area', {'is-dragover': isSampulDragover}]"
+              :class="['file-drop-area', { 'is-dragover': isSampulDragover }]"
               @dragover.prevent="isSampulDragover = true"
               @dragleave.prevent="isSampulDragover = false"
-              @drop="handleDropSampulFile"
-            >
+              @drop="handleDropSampulFile">
               <div class="file-drop-content">
-                <template v-if="!formData.gambar_sampul_file && !formData.gambar_sampul">
+                <template
+                  v-if="
+                    !formData.gambar_sampul_file && !formData.gambar_sampul
+                  ">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     width="24"
@@ -205,17 +229,18 @@
                     stroke-width="2"
                     stroke-linecap="round"
                     stroke-linejoin="round"
-                    class="feather feather-upload-cloud file-icon"
-                  >
+                    class="feather feather-upload-cloud file-icon">
                     <polyline points="16 16 12 12 8 16"></polyline>
                     <line x1="12" y1="12" x2="12" y2="21"></line>
                     <path
-                      d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"
-                    ></path>
+                      d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"></path>
                   </svg>
                   <span class="file-message">
                     Drag & drop file here or
-                    <label for="gambar_sampul_ppid" class="file-link">browse</label> to upload
+                    <label for="gambar_sampul_ppid" class="file-link"
+                      >browse</label
+                    >
+                    to upload
                   </span>
                   <input
                     type="file"
@@ -223,22 +248,23 @@
                     @change="handleSampulUpload"
                     class="file-input"
                     accept="image/*"
-                    :required="!isEditing && !formData.gambar_sampul"
-                  />
+                    :required="!isEditing && !formData.gambar_sampul" />
                 </template>
                 <template v-else>
                   <div class="image-preview-main">
                     <img
-                      :src="formData.gambar_sampul_file ? getFileUrl(formData.gambar_sampul_file) : getFilePath(formData.gambar_sampul)"
+                      :src="
+                        formData.gambar_sampul_file
+                          ? getFileUrl(formData.gambar_sampul_file)
+                          : getFilePath(formData.gambar_sampul)
+                      "
                       alt="Sampul Image Preview"
-                      class="hero-image-preview"
-                    />
+                      class="hero-image-preview" />
                     <button
                       type="button"
                       @click="removeSampulFile"
                       class="cancel-image-btn"
-                      title="Batal"
-                    >
+                      title="Batal">
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
                         width="24"
@@ -249,9 +275,14 @@
                         stroke-width="2"
                         stroke-linecap="round"
                         stroke-linejoin="round"
-                        class="feather feather-x-square"
-                      >
-                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                        class="feather feather-x-square">
+                        <rect
+                          x="3"
+                          y="3"
+                          width="18"
+                          height="18"
+                          rx="2"
+                          ry="2"></rect>
                         <line x1="9" y1="9" x2="15" y2="15"></line>
                         <line x1="15" y1="9" x2="9" y2="15"></line>
                       </svg>
@@ -277,19 +308,18 @@
             stroke-width="2"
             stroke-linecap="round"
             stroke-linejoin="round"
-            class="feather feather-save"
-          >
-            <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+            class="feather feather-save">
+            <path
+              d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
             <polyline points="17 21 17 13 7 13 7 21"></polyline>
             <polyline points="7 3 7 8 15 8"></polyline>
           </svg>
-          {{ isEditing ? 'Simpan Perubahan' : 'Simpan Konten' }}
+          {{ isEditing ? "Simpan Perubahan" : "Simpan Konten" }}
         </button>
         <button
           type="button"
           class="action-button cancel-button"
-          @click="$emit('close-form')"
-        >
+          @click="$emit('close-form')">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             width="24"
@@ -300,8 +330,7 @@
             stroke-width="2"
             stroke-linecap="round"
             stroke-linejoin="round"
-            class="feather feather-x"
-          >
+            class="feather feather-x">
             <line x1="18" y1="6" x2="6" y2="18"></line>
             <line x1="6" y1="6" x2="18" y2="18"></line>
           </svg>
@@ -313,7 +342,14 @@
 </template>
 
 <script setup>
-import { ref, watch, defineProps, defineEmits, onUnmounted } from 'vue';
+import {
+  ref,
+  watch,
+  computed,
+  defineProps,
+  defineEmits,
+  onUnmounted,
+} from "vue";
 
 const props = defineProps({
   isEditing: Boolean,
@@ -324,15 +360,37 @@ const props = defineProps({
   },
 });
 
-const emit = defineEmits(['close-form', 'save-konten', 'update-konten']);
+const emit = defineEmits(["close-form", "save-konten", "update-konten"]);
 
 const formData = ref({});
 const isPdfDragover = ref(false);
 const isSampulDragover = ref(false);
 
-watch(() => props.initialData, (newVal) => {
-  formData.value = newVal ? { ...newVal } : {};
-}, { immediate: true, deep: true });
+// Computed property untuk struktur kategori hierarkis
+const kategoriBerstruktur = computed(() => {
+  if (!props.kategoriList || props.kategoriList.length === 0) return [];
+
+  // Filter kategori induk (tidak memiliki parent)
+  const kategoriInduk = props.kategoriList.filter(
+    (k) => k.id_kategori_induk === null
+  );
+
+  // Untuk setiap kategori induk, cari sub-kategorinya
+  return kategoriInduk.map((induk) => ({
+    ...induk,
+    subKategoris: props.kategoriList.filter(
+      (k) => k.id_kategori_induk === induk.id_kategori_ppid
+    ),
+  }));
+});
+
+watch(
+  () => props.initialData,
+  (newVal) => {
+    formData.value = newVal ? { ...newVal } : {};
+  },
+  { immediate: true, deep: true }
+);
 
 const getFilePath = (path) => {
   return `http://localhost:5000${path}`;
@@ -344,7 +402,7 @@ const getFileUrl = (file) => {
 // Logika untuk File PDF Utama
 const handlePdfUpload = (event) => {
   const file = event.target.files[0];
-  if (file && file.type === 'application/pdf') {
+  if (file && file.type === "application/pdf") {
     formData.value.file_pdf_file = file;
     if (formData.value.file_pdf_path) {
       formData.value.file_pdf_path = null;
@@ -358,7 +416,7 @@ const handleDropPdfFile = (event) => {
   event.preventDefault();
   isPdfDragover.value = false;
   const file = event.dataTransfer.files[0];
-  if (file && file.type === 'application/pdf') {
+  if (file && file.type === "application/pdf") {
     formData.value.file_pdf_file = file;
     if (formData.value.file_pdf_path) {
       formData.value.file_pdf_path = null;
@@ -378,7 +436,7 @@ const removePdfFile = () => {
 // Logika untuk Gambar Sampul
 const handleSampulUpload = (event) => {
   const file = event.target.files[0];
-  if (file && file.type.startsWith('image/')) {
+  if (file && file.type.startsWith("image/")) {
     formData.value.gambar_sampul_file = file;
     if (formData.value.gambar_sampul) {
       formData.value.gambar_sampul = null;
@@ -392,7 +450,7 @@ const handleDropSampulFile = (event) => {
   event.preventDefault();
   isSampulDragover.value = false;
   const file = event.dataTransfer.files[0];
-  if (file && file.type.startsWith('image/')) {
+  if (file && file.type.startsWith("image/")) {
     formData.value.gambar_sampul_file = file;
     if (formData.value.gambar_sampul) {
       formData.value.gambar_sampul = null;
@@ -421,29 +479,33 @@ const submitForm = () => {
   const submitData = new FormData();
 
   // Tambahkan field teks secara eksplisit
-  if (formData.value.judul_konten) submitData.append('judul_konten', formData.value.judul_konten);
-  if (formData.value.deskripsi_konten) submitData.append('deskripsi_konten', formData.value.deskripsi_konten);
-  if (formData.value.id_kategori_ppid) submitData.append('id_kategori_ppid', formData.value.id_kategori_ppid);
+  if (formData.value.judul_konten)
+    submitData.append("judul_konten", formData.value.judul_konten);
+  if (formData.value.deskripsi_konten)
+    submitData.append("deskripsi_konten", formData.value.deskripsi_konten);
+  if (formData.value.id_kategori_ppid)
+    submitData.append("id_kategori_ppid", formData.value.id_kategori_ppid);
 
   // Tambahkan file hanya jika ada
   if (formData.value.file_pdf_file) {
-    submitData.append('file_pdf_ppid', formData.value.file_pdf_file);
+    submitData.append("file_pdf_ppid", formData.value.file_pdf_file);
   } else if (props.isEditing && formData.value.file_pdf_path) {
     // Jika tidak ada file baru diunggah, kirim kembali path yang sudah ada
-    submitData.append('file_pdf_path', formData.value.file_pdf_path);
+    submitData.append("file_pdf_path", formData.value.file_pdf_path);
   }
   if (formData.value.gambar_sampul_file) {
-    submitData.append('gambar_sampul_ppid', formData.value.gambar_sampul_file);
+    submitData.append("gambar_sampul_ppid", formData.value.gambar_sampul_file);
   } else if (props.isEditing && formData.value.gambar_sampul) {
     // Jika tidak ada file baru diunggah, kirim kembali path yang sudah ada
-    submitData.append('gambar_sampul', formData.value.gambar_sampul);
+    submitData.append("gambar_sampul", formData.value.gambar_sampul);
   }
 
   if (props.isEditing) {
-    if (formData.value.id_konten_ppid) submitData.append('id_konten_ppid', formData.value.id_konten_ppid);
-    emit('update-konten', submitData);
+    if (formData.value.id_konten_ppid)
+      submitData.append("id_konten_ppid", formData.value.id_konten_ppid);
+    emit("update-konten", submitData);
   } else {
-    emit('save-konten', submitData);
+    emit("save-konten", submitData);
   }
 };
 </script>
@@ -456,10 +518,14 @@ const submitForm = () => {
   padding: 2.5rem;
   border-radius: 16px;
   box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
-  margin: 2rem auto;
-  max-width: 900px;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  margin: 0;
+  max-width: 100%;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
   border: 1px solid #f0f4f8;
+  position: relative;
+  z-index: 1002;
+  overflow: visible;
 }
 
 .form-header {
@@ -554,6 +620,47 @@ const submitForm = () => {
   border-color: #007bff;
   box-shadow: 0 0 0 4px rgba(0, 123, 255, 0.15);
   background-color: #ffffff;
+}
+
+select.form-input {
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+  background-position: right 0.75rem center;
+  background-repeat: no-repeat;
+  background-size: 1.5em 1.5em;
+  padding-right: 2.5rem;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+}
+
+select.form-input optgroup {
+  font-weight: 700;
+  font-style: normal;
+  background-color: #f8f9fa;
+  color: #495057;
+}
+
+select.form-input option {
+  font-weight: 500;
+  padding: 0.5rem;
+}
+
+.form-helper {
+  display: block;
+  margin-top: 0.5rem;
+  font-size: 0.85rem;
+  color: #6c757d;
+  font-style: italic;
+}
+
+.form-helper i {
+  color: #007bff;
+  margin-right: 0.25rem;
+}
+
+.required {
+  color: #dc3545;
+  font-weight: 700;
 }
 
 textarea.form-input {

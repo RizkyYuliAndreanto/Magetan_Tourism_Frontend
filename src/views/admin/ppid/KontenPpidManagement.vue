@@ -1,35 +1,91 @@
 <template>
-  <div>
-    <div class="action-bar">
-      <button v-if="!formKontenOpen" class="action-button create-button" @click="openKontenForm()">
-        <i class="fas fa-plus-circle"></i> Tambah Konten Baru
-      </button>
+
+    <!-- Header dengan Penjelasan -->
+    <div class="header-section">
+      <div class="header-info">
+        <h2 class="main-title">
+          <i class="fas fa-file-alt"></i>
+          Manajemen Konten PPID
+        </h2>
+        <p class="subtitle">
+          Kelola dokumen dan informasi PPID berdasarkan kategori yang telah ditentukan. 
+          Setiap konten akan ditampilkan sesuai dengan kategori yang dipilih.
+        </p>
+      </div>
+      <div class="action-bar">
+        <button v-if="!formKontenOpen" class="action-button create-button" @click="openKontenForm()">
+          <i class="fas fa-plus-circle"></i> Tambah Konten Baru
+        </button>
+      </div>
     </div>
 
-    <div v-if="formKontenOpen" class="form-card card">
-      <KontenPpidForm
-        :is-editing="isEditingKonten"
-        :initial-data="formKonten"
-        :kategori-list="kategoriList"
-        @close-form="closeKontenForm"
-        @save-konten="handleSaveKonten"
-        @update-konten="handleUpdateKonten"
-      />
+    <div v-if="formKontenOpen" class="form-overlay">
+      <div class="form-card card">
+        <KontenPpidForm
+          :is-editing="isEditingKonten"
+          :initial-data="formKonten"
+          :kategori-list="kategoriList"
+          @close-form="closeKontenForm"
+          @save-konten="handleSaveKonten"
+          @update-konten="handleUpdateKonten"
+        />
+      </div>
     </div>
 
-    <div v-else class="table-container card">
-      <div class="table-responsive">
-        <table class="data-table">
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Judul Konten</th>
-              <th>Kategori</th>
-              <th>Admin Pengelola</th>
-              <th>Tanggal Publikasi</th>
-              <th>Aksi</th>
-            </tr>
-          </thead>
+    <div v-else>
+      <!-- Statistik -->
+      <div class="stats-container">
+        <div class="stat-card">
+          <div class="stat-icon">
+            <i class="fas fa-file-alt"></i>
+          </div>
+          <div class="stat-content">
+            <h3>{{ kontenList.length }}</h3>
+            <p>Total Konten</p>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">
+            <i class="fas fa-tags"></i>
+          </div>
+          <div class="stat-content">
+            <h3>{{ kategoriList.length }}</h3>
+            <p>Kategori Tersedia</p>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">
+            <i class="fas fa-calendar-alt"></i>
+          </div>
+          <div class="stat-content">
+            <h3>{{ kontenBulanIni }}</h3>
+            <p>Konten Bulan Ini</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="table-container card">
+        <div class="table-header">
+          <h3 class="table-title">
+            <i class="fas fa-list"></i>
+            Daftar Konten PPID
+          </h3>
+          <div class="table-count">
+            Total: <strong>{{ kontenList.length }}</strong> konten
+          </div>
+        </div>
+        <div class="table-responsive">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th><i class="fas fa-hashtag"></i> ID</th>
+                <th><i class="fas fa-file-text"></i> Judul Konten</th>
+                <th><i class="fas fa-tag"></i> Kategori</th>
+                <th><i class="fas fa-user"></i> Admin Pengelola</th>
+                <th><i class="fas fa-calendar"></i> Tanggal Publikasi</th>
+                <th><i class="fas fa-cogs"></i> Aksi</th>
+              </tr>
+            </thead>
           <tbody>
             <tr v-if="kontenList.length === 0">
               <td colspan="6" class="no-data-found">
@@ -39,7 +95,18 @@
             <tr v-for="konten in kontenList" :key="konten.id_konten_ppid">
               <td>{{ konten.id_konten_ppid }}</td>
               <td>{{ konten.judul_konten }}</td>
-              <td><span class="category-badge">{{ konten.kategoriPPID ? konten.kategoriPPID.nama_kategori : 'N/A' }}</span></td>
+              <td>
+                <div class="category-display" v-if="konten.kategoriPPID">
+                  <span class="category-badge" :class="konten.kategoriPPID.id_kategori_induk ? 'sub-category' : 'main-category'">
+                    <i :class="konten.kategoriPPID.id_kategori_induk ? 'fas fa-folder-open' : 'fas fa-folder'"></i>
+                    {{ konten.kategoriPPID.nama_kategori }}
+                  </span>
+                  <small v-if="konten.kategoriPPID.id_kategori_induk" class="parent-category">
+                    Sub dari: {{ getParentCategoryName(konten.kategoriPPID.id_kategori_induk) }}
+                  </small>
+                </div>
+                <span v-else class="category-badge inactive">N/A</span>
+              </td>
               <td>{{ konten.adminPengelola ? konten.adminPengelola.username : 'N/A' }}</td>
               <td>{{ formatDate(konten.tanggal_publikasi) }}</td>
               <td class="actions">
@@ -70,7 +137,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, nextTick } from 'vue';
+import { ref, computed, onMounted, nextTick } from 'vue';
 import axios from 'axios';
 import KontenPpidForm from './KontenPpidForm.vue';
 import BasePopUp from '../../../components/pop-up/BasePopUp.vue';
@@ -89,6 +156,18 @@ const popUpMessage = ref("");
 const kontenToDeleteId = ref(null);
 
 const getToken = () => localStorage.getItem('access_token');
+
+// Computed property untuk statistik
+const kontenBulanIni = computed(() => {
+  const bulanIni = new Date();
+  bulanIni.setDate(1);
+  bulanIni.setHours(0, 0, 0, 0);
+  
+  return kontenList.value.filter(konten => {
+    const tanggalPublikasi = new Date(konten.tanggal_publikasi);
+    return tanggalPublikasi >= bulanIni;
+  }).length;
+});
 
 const fetchKontenData = async () => {
   try {
@@ -132,12 +211,23 @@ const openKontenForm = (konten = null) => {
     };
   }
   formKontenOpen.value = true;
+  
+  // Prevent body scroll
+  document.body.style.overflow = 'hidden';
+  document.body.style.position = 'fixed';
+  document.body.style.width = '100%';
 };
 
 const closeKontenForm = () => {
   formKontenOpen.value = false;
   formKonten.value = null;
   isEditingKonten.value = false;
+  
+  // Restore body scroll
+  document.body.style.overflow = '';
+  document.body.style.position = '';
+  document.body.style.width = '';
+  
   fetchKontenData();
   fetchKategoriData();
 };
@@ -225,6 +315,11 @@ const formatDate = (dateString) => {
   return new Date(dateString).toLocaleDateString('id-ID', options);
 };
 
+const getParentCategoryName = (parentId) => {
+  const parent = kategoriList.value.find(k => k.id_kategori_ppid === parentId);
+  return parent ? parent.nama_kategori : 'Tidak ditemukan';
+};
+
 onMounted(() => {
   fetchKontenData();
   fetchKategoriData();
@@ -232,11 +327,106 @@ onMounted(() => {
 </script>
 
 <style scoped>
-/* Gaya CSS tidak ada perubahan. */
+/* ========== Styling yang diselaraskan dengan KategoriPpidManagement ========== */
+/* Header Section */
+.header-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 2rem;
+  gap: 2rem;
+}
+
+.header-info {
+  flex: 1;
+}
+
+.main-title {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #212529;
+  margin: 0 0 0.5rem 0;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.main-title i {
+  color: #007bff;
+  font-size: 1.5rem;
+}
+
+.subtitle {
+  font-size: 1rem;
+  color: #6c757d;
+  margin: 0;
+  line-height: 1.5;
+}
+
 .action-bar {
   display: flex;
   justify-content: flex-end;
-  margin-bottom: 1.5rem;
+  align-items: center;
+}
+
+/* Stats Section */
+.stats-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.stat-card {
+  background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+  color: white;
+  padding: 1.5rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0, 123, 255, 0.2);
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 123, 255, 0.3);
+}
+
+.stat-card:nth-child(2) {
+  background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%);
+  box-shadow: 0 4px 15px rgba(40, 167, 69, 0.2);
+}
+
+.stat-card:nth-child(2):hover {
+  box-shadow: 0 8px 25px rgba(40, 167, 69, 0.3);
+}
+
+.stat-card:nth-child(3) {
+  background: linear-gradient(135deg, #ffc107 0%, #e0a800 100%);
+  box-shadow: 0 4px 15px rgba(255, 193, 7, 0.2);
+}
+
+.stat-card:nth-child(3):hover {
+  box-shadow: 0 8px 25px rgba(255, 193, 7, 0.3);
+}
+
+.stat-icon {
+  font-size: 2.5rem;
+  opacity: 0.9;
+}
+
+.stat-content h3 {
+  font-size: 2rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.stat-content p {
+  font-size: 0.9rem;
+  margin: 0.25rem 0 0 0;
+  opacity: 0.9;
 }
 .action-button {
   padding: 0.75rem 1.5rem;
@@ -269,14 +459,34 @@ onMounted(() => {
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
   overflow: hidden;
 }
-.table-container .table-title {
+
+.table-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border-bottom: 1px solid #e0e6ed;
+}
+
+.table-title {
   font-size: 1.25rem;
   font-weight: 600;
   color: #212529;
-  padding: 1.5rem;
-  border-bottom: 1px solid #e0e6ed;
   margin: 0;
-  background-color: #f8f9fa;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.table-title i {
+  color: #007bff;
+}
+
+.table-count {
+  font-size: 0.9rem;
+  color: #6c757d;
+  font-weight: 500;
 }
 .data-table {
   width: 100%;
@@ -291,11 +501,17 @@ onMounted(() => {
 }
 .data-table th {
   background-color: #f8f9fa;
-  color: #6c757d;
+  color: #495057;
   font-weight: 600;
-  font-size: 0.8rem;
+  font-size: 0.85rem;
   text-transform: uppercase;
   letter-spacing: 0.05em;
+}
+
+.data-table th i {
+  color: #007bff;
+  margin-right: 0.5rem;
+  font-size: 0.8rem;
 }
 .data-table td {
   color: #212529;
@@ -344,17 +560,161 @@ onMounted(() => {
   background-color: #c82333;
   box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
 }
+.category-display {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
 .category-badge {
-  display: inline-block;
-  padding: 0.3rem 0.7rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.4rem 0.8rem;
   border-radius: 20px;
-  background-color: #28a745;
-  color: white;
   font-size: 0.8rem;
-  font-weight: 500;
+  font-weight: 600;
   white-space: nowrap;
+  transition: all 0.2s ease;
+}
+
+.category-badge.main-category {
+  background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+  color: white;
+  box-shadow: 0 2px 8px rgba(0, 123, 255, 0.2);
+}
+
+.category-badge.sub-category {
+  background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%);
+  color: white;
+  box-shadow: 0 2px 8px rgba(40, 167, 69, 0.2);
+}
+
+.category-badge.inactive {
+  background-color: #6c757d;
+  color: white;
+}
+
+.category-badge i {
+  font-size: 0.75rem;
+}
+
+.parent-category {
+  font-size: 0.7rem;
+  color: #6c757d;
+  font-style: italic;
+  margin-left: 0.5rem;
 }
 .mt-4 {
     margin-top: 1.5rem;
+}
+
+/* Form Overlay Styles */
+.form-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  overflow-y: auto;
+  padding: 2rem;
+  box-sizing: border-box;
+}
+
+.form-overlay .form-card {
+  position: relative;
+  max-width: 900px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  margin: auto;
+  z-index: 10000;
+  box-shadow: 0 25px 80px rgba(0, 0, 0, 0.3);
+  border: 2px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Prevent background interaction */
+.form-overlay::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: transparent;
+  z-index: 9998;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .header-section {
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .action-bar {
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .stats-container {
+    grid-template-columns: 1fr;
+  }
+  
+  .table-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+  
+  .table-count {
+    align-self: flex-start;
+  }
+  
+  .category-display {
+    align-items: flex-start;
+  }
+  
+  .actions {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .form-overlay {
+    padding: 1rem;
+  }
+  
+  .form-overlay .form-card {
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 576px) {
+  .main-title {
+    font-size: 1.5rem;
+  }
+  
+  .stats-container {
+    gap: 1rem;
+  }
+  
+  .stat-card {
+    padding: 1rem;
+  }
+  
+  .stat-content h3 {
+    font-size: 1.5rem;
+  }
+  
+  .category-badge {
+    font-size: 0.75rem;
+    padding: 0.3rem 0.6rem;
+  }
 }
 </style>

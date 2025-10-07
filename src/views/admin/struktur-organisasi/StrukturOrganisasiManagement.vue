@@ -1,10 +1,16 @@
 <template>
   <div>
     <div class="action-bar">
-      <button v-if="!strukturOrganisasiData" class="action-button create-button" @click="openForm()">
+      <button
+        v-if="!strukturOrganisasiData"
+        class="action-button create-button"
+        @click="openForm()">
         <i class="fas fa-plus-circle"></i> Tambah Struktur Organisasi
       </button>
-      <button v-else class="action-button edit-button" @click="openForm(strukturOrganisasiData)">
+      <button
+        v-else
+        class="action-button edit-button"
+        @click="openForm(strukturOrganisasiData)">
         <i class="fas fa-edit"></i> Edit Struktur Organisasi
       </button>
     </div>
@@ -15,8 +21,7 @@
         :initial-data="formStrukturOrganisasi"
         @close-form="closeForm"
         @save-struktur="handleSave"
-        @update-struktur="handleUpdate"
-      />
+        @update-struktur="handleUpdate" />
     </div>
 
     <div v-else-if="strukturOrganisasiData" class="preview-container card">
@@ -28,20 +33,33 @@
         </div>
         <div class="preview-section">
           <h4 class="preview-subtitle">Deskripsi</h4>
-          <p>{{ strukturOrganisasiData.deskripsi_struktur || '-' }}</p>
+          <p>{{ strukturOrganisasiData.deskripsi_struktur || "-" }}</p>
         </div>
-        <div class="preview-section" v-if="strukturOrganisasiData.gambar_struktur_path">
+        <div
+          class="preview-section"
+          v-if="strukturOrganisasiData.gambar_struktur_path">
           <h4 class="preview-subtitle">Gambar Struktur</h4>
           <div class="file-preview-area">
-            <img :src="getFilePath(strukturOrganisasiData.gambar_struktur_path)" alt="Struktur Organisasi" class="file-thumbnail" />
+            <img
+              :src="getFilePath(strukturOrganisasiData.gambar_struktur_path)"
+              alt="Struktur Organisasi"
+              class="file-thumbnail" />
           </div>
         </div>
       </div>
     </div>
-    
+
     <div v-else class="no-data-card card">
       <div class="empty-state">
-        <p>Belum ada data Struktur Organisasi. Silakan tambahkan satu.</p>
+        <div class="empty-icon">
+          <i class="fas fa-sitemap"></i>
+        </div>
+        <h3 class="empty-title">Belum Ada Struktur Organisasi</h3>
+        <p class="empty-description">
+          Belum ada data Struktur Organisasi yang tersimpan. Klik tombol "Tambah
+          Struktur Organisasi" di atas untuk menambahkan struktur organisasi
+          Anda.
+        </p>
       </div>
     </div>
 
@@ -52,16 +70,15 @@
       :action="popUpAction"
       :entity-name="popUpEntity"
       :error-message="popUpMessage"
-      @close="closePopUp"
-    />
+      @close="closePopUp" />
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, nextTick } from 'vue';
-import axios from 'axios';
-import StrukturOrganisasiForm from './StrukturOrganisasiForm.vue';
-import BasePopUp from '../../../components/pop-up/BasePopUp.vue';
+import { ref, onMounted, nextTick } from "vue";
+import axios from "axios";
+import StrukturOrganisasiForm from "./StrukturOrganisasiForm.vue";
+import BasePopUp from "../../../components/pop-up/BasePopUp.vue";
 
 const strukturOrganisasiData = ref(null);
 const formStrukturOrganisasi = ref({});
@@ -96,23 +113,61 @@ const closePopUp = () => {
 
 const fetchStrukturOrganisasiData = async () => {
   try {
-    const response = await axios.get('http://localhost:5000/api/struktur-organisasi');
+    const response = await axios.get(
+      "http://localhost:5000/api/struktur-organisasi"
+    );
+
+    // Jika berhasil mendapat response
     if (response.data && response.data.id_struktur_organisasi) {
+      // Ada data struktur organisasi
       strukturOrganisasiData.value = response.data;
-      formStrukturOrganisasi.value = { ...response.data, gambar_struktur_organisasi: null };
+      formStrukturOrganisasi.value = {
+        ...response.data,
+        gambar_struktur_organisasi: null,
+      };
     } else {
+      // Tidak ada data struktur organisasi (kondisi normal)
       strukturOrganisasiData.value = null;
-      formStrukturOrganisasi.value = { id_struktur_organisasi: null, judul_struktur: 'Struktur Organisasi', deskripsi_struktur: null, gambar_struktur_organisasi: null };
+      formStrukturOrganisasi.value = {
+        id_struktur_organisasi: null,
+        judul_struktur: "Struktur Organisasi",
+        deskripsi_struktur: null,
+        gambar_struktur_organisasi: null,
+      };
     }
   } catch (err) {
-    console.error('Gagal memuat data Struktur Organisasi:', err);
-    openPopUp("error", "fetch", "Gagal memuat data Struktur Organisasi.");
-    strukturOrganisasiData.value = null;
+    // Hanya tampilkan error jika bukan 404 (data tidak ditemukan)
+    if (err.response && err.response.status === 404) {
+      // 404 berarti belum ada data, ini normal
+      strukturOrganisasiData.value = null;
+      formStrukturOrganisasi.value = {
+        id_struktur_organisasi: null,
+        judul_struktur: "Struktur Organisasi",
+        deskripsi_struktur: null,
+        gambar_struktur_organisasi: null,
+      };
+    } else {
+      // Error lainnya yang perlu ditampilkan
+      console.error("Gagal memuat data Struktur Organisasi:", err);
+      const errorMessage =
+        err.response?.data?.message ||
+        err.response?.data?.error ||
+        "Terjadi kesalahan saat memuat data Struktur Organisasi";
+      openPopUp("error", "fetch", errorMessage);
+      strukturOrganisasiData.value = null;
+    }
   }
 };
 
 const openForm = (data = null) => {
-  formStrukturOrganisasi.value = data ? { ...data, gambar_struktur_organisasi: null } : { id_struktur_organisasi: null, judul_struktur: 'Struktur Organisasi', deskripsi_struktur: null, gambar_struktur_organisasi: null };
+  formStrukturOrganisasi.value = data
+    ? { ...data, gambar_struktur_organisasi: null }
+    : {
+        id_struktur_organisasi: null,
+        judul_struktur: "Struktur Organisasi",
+        deskripsi_struktur: null,
+        gambar_struktur_organisasi: null,
+      };
   formOpen.value = true;
 };
 
@@ -123,35 +178,51 @@ const closeForm = () => {
 
 const handleSave = async (formData) => {
   try {
-    const token = localStorage.getItem('access_token');
-    await axios.post('http://localhost:5000/api/struktur-organisasi', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-        Authorization: `Bearer ${token}`
+    const token = localStorage.getItem("access_token");
+    await axios.post(
+      "http://localhost:5000/api/struktur-organisasi",
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+          Authorization: `Bearer ${token}`,
+        },
       }
-    });
+    );
     openPopUp("success", "create");
     closeForm();
   } catch (err) {
-    console.error('Gagal menyimpan Struktur Organisasi:', err.response?.data);
-    openPopUp("error", "create", err.response?.data?.error || 'Gagal menyimpan Struktur Organisasi.');
+    console.error("Gagal menyimpan Struktur Organisasi:", err.response?.data);
+    openPopUp(
+      "error",
+      "create",
+      err.response?.data?.error || "Gagal menyimpan Struktur Organisasi."
+    );
   }
 };
 
 const handleUpdate = async (id, formData) => {
   try {
-    const token = localStorage.getItem('access_token');
-    await axios.put(`http://localhost:5000/api/struktur-organisasi/${id}`, formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-        Authorization: `Bearer ${token}`
+    const token = localStorage.getItem("access_token");
+    await axios.put(
+      `http://localhost:5000/api/struktur-organisasi/${id}`,
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+          Authorization: `Bearer ${token}`,
+        },
       }
-    });
+    );
     openPopUp("success", "update");
     closeForm();
   } catch (err) {
-    console.error('Gagal memperbarui Struktur Organisasi:', err.response?.data);
-    openPopUp("error", "update", err.response?.data?.error || 'Gagal memperbarui Struktur Organisasi.');
+    console.error("Gagal memperbarui Struktur Organisasi:", err.response?.data);
+    openPopUp(
+      "error",
+      "update",
+      err.response?.data?.error || "Gagal memperbarui Struktur Organisasi."
+    );
   }
 };
 
@@ -211,7 +282,8 @@ onMounted(() => {
   background-color: #ffffff;
 }
 
-.form-title, .preview-title {
+.form-title,
+.preview-title {
   font-size: 1.5rem;
   font-weight: 700;
   color: #212529;
@@ -261,8 +333,31 @@ onMounted(() => {
   padding: 3rem;
 }
 
-.empty-state p {
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.empty-icon {
+  font-size: 4rem;
+  color: #6c757d;
+  margin-bottom: 1rem;
+}
+
+.empty-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #495057;
+  margin: 0;
+}
+
+.empty-description {
   color: #6c757d;
   font-style: italic;
+  max-width: 500px;
+  line-height: 1.6;
+  margin: 0;
 }
 </style>
