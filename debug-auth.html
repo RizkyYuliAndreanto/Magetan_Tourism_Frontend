@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Authentication Debug Tool</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        max-width: 1000px;
+        margin: 0 auto;
+        padding: 20px;
+        background: #f8f9fa;
+      }
+      .debug-container {
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        margin: 10px 0;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+      .success {
+        color: #28a745;
+      }
+      .error {
+        color: #dc3545;
+      }
+      .warning {
+        color: #ffc107;
+      }
+      .info {
+        color: #007bff;
+      }
+      pre {
+        background: #f8f9fa;
+        padding: 10px;
+        border-radius: 4px;
+        overflow-x: auto;
+        max-height: 300px;
+      }
+      button {
+        background: #007bff;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 4px;
+        cursor: pointer;
+        margin: 5px;
+      }
+      button:hover {
+        background: #0056b3;
+      }
+      input {
+        padding: 8px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        width: 300px;
+        margin: 5px;
+      }
+      .token-input {
+        width: 100%;
+        font-family: monospace;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>🔐 Authentication Debug Tool</h1>
+
+    <div class="debug-container">
+      <h3>📋 Current Token Status</h3>
+      <div id="tokenStatus"></div>
+      <input
+        type="text"
+        id="tokenInput"
+        class="token-input"
+        placeholder="Paste JWT token here (optional)" />
+      <button onclick="setToken()">Set Token</button>
+      <button onclick="clearToken()">Clear Token</button>
+    </div>
+
+    <div class="debug-container">
+      <h3>🔍 Server Status Test</h3>
+      <button onclick="testServerStatus()">Test Server Status</button>
+      <div id="serverStatusResult"></div>
+    </div>
+
+    <div class="debug-container">
+      <h3>📊 Dashboard Summary Test (Public)</h3>
+      <button onclick="testSummaryPublic()">Test Summary (No Auth)</button>
+      <div id="summaryPublicResult"></div>
+    </div>
+
+    <div class="debug-container">
+      <h3>🔒 Dashboard Summary Test (With Auth)</h3>
+      <button onclick="testSummaryAuth()">Test Summary (With Auth)</button>
+      <div id="summaryAuthResult"></div>
+    </div>
+
+    <div class="debug-container">
+      <h3>📋 Activity Log Test</h3>
+      <button onclick="testActivity()">Test Activity (With Auth)</button>
+      <div id="activityResult"></div>
+    </div>
+
+    <div class="debug-container">
+      <h3>🔍 Visi Misi Test</h3>
+      <button onclick="testVisiMisi()">Test Visi Misi</button>
+      <div id="visiMisiResult"></div>
+    </div>
+
+    <script>
+      const BACKEND_URL = "http://localhost:5000";
+
+      function updateTokenStatus() {
+        const token = localStorage.getItem("token");
+        const statusDiv = document.getElementById("tokenStatus");
+
+        if (token) {
+          statusDiv.innerHTML = `
+                    <p class="success">✅ Token found in localStorage</p>
+                    <p><strong>Token preview:</strong> ${token.substring(
+                      0,
+                      50
+                    )}...</p>
+                `;
+          document.getElementById("tokenInput").value = token;
+        } else {
+          statusDiv.innerHTML =
+            '<p class="warning">⚠️ No token found in localStorage</p>';
+        }
+      }
+
+      function setToken() {
+        const token = document.getElementById("tokenInput").value.trim();
+        if (token) {
+          localStorage.setItem("token", token);
+          updateTokenStatus();
+        }
+      }
+
+      function clearToken() {
+        localStorage.removeItem("token");
+        document.getElementById("tokenInput").value = "";
+        updateTokenStatus();
+      }
+
+      async function testServerStatus() {
+        const resultDiv = document.getElementById("serverStatusResult");
+        resultDiv.innerHTML = '<p class="info">🔄 Testing server status...</p>';
+
+        try {
+          const response = await fetch(`${BACKEND_URL}/api/public/status`);
+          const data = await response.json();
+
+          if (response.ok) {
+            resultDiv.innerHTML = `
+                        <p class="success">✅ Server is running!</p>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    `;
+          } else {
+            resultDiv.innerHTML = `<p class="error">❌ Server error: ${response.status}</p>`;
+          }
+        } catch (error) {
+          resultDiv.innerHTML = `<p class="error">❌ Connection error: ${error.message}</p>`;
+        }
+      }
+
+      async function testSummaryPublic() {
+        const resultDiv = document.getElementById("summaryPublicResult");
+        resultDiv.innerHTML =
+          '<p class="info">🔄 Testing summary without auth...</p>';
+
+        try {
+          const response = await fetch(`${BACKEND_URL}/api/dashboard/summary`);
+          const data = await response.json();
+
+          if (response.ok) {
+            resultDiv.innerHTML = `
+                        <p class="success">✅ Summary works without auth!</p>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    `;
+          } else {
+            resultDiv.innerHTML = `
+                        <p class="error">❌ Error: ${response.status}</p>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    `;
+          }
+        } catch (error) {
+          resultDiv.innerHTML = `<p class="error">❌ Connection error: ${error.message}</p>`;
+        }
+      }
+
+      async function testSummaryAuth() {
+        const resultDiv = document.getElementById("summaryAuthResult");
+        resultDiv.innerHTML =
+          '<p class="info">🔄 Testing summary with auth...</p>';
+
+        const token = localStorage.getItem("token");
+        const headers = token ? { Authorization: `Bearer ${token}` } : {};
+
+        try {
+          const response = await fetch(`${BACKEND_URL}/api/dashboard/summary`, {
+            headers,
+          });
+          const data = await response.json();
+
+          if (response.ok) {
+            resultDiv.innerHTML = `
+                        <p class="success">✅ Summary works with auth!</p>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    `;
+          } else {
+            resultDiv.innerHTML = `
+                        <p class="error">❌ Auth error: ${response.status}</p>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    `;
+          }
+        } catch (error) {
+          resultDiv.innerHTML = `<p class="error">❌ Connection error: ${error.message}</p>`;
+        }
+      }
+
+      async function testActivity() {
+        const resultDiv = document.getElementById("activityResult");
+        resultDiv.innerHTML =
+          '<p class="info">🔄 Testing activity with auth...</p>';
+
+        const token = localStorage.getItem("token");
+        const headers = token ? { Authorization: `Bearer ${token}` } : {};
+
+        try {
+          const response = await fetch(
+            `${BACKEND_URL}/api/admin/activity?limit=5`,
+            { headers }
+          );
+          const data = await response.json();
+
+          if (response.ok) {
+            resultDiv.innerHTML = `
+                        <p class="success">✅ Activity works! Found ${
+                          data.data?.length || 0
+                        } activities</p>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    `;
+          } else {
+            resultDiv.innerHTML = `
+                        <p class="error">❌ Activity error: ${
+                          response.status
+                        }</p>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    `;
+          }
+        } catch (error) {
+          resultDiv.innerHTML = `<p class="error">❌ Connection error: ${error.message}</p>`;
+        }
+      }
+
+      async function testVisiMisi() {
+        const resultDiv = document.getElementById("visiMisiResult");
+        resultDiv.innerHTML = '<p class="info">🔄 Testing visi misi...</p>';
+
+        try {
+          const response = await fetch(`${BACKEND_URL}/api/visi-misi`);
+          const data = await response.json();
+
+          if (response.ok) {
+            resultDiv.innerHTML = `
+                        <p class="success">✅ Visi Misi endpoint works!</p>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    `;
+          } else {
+            resultDiv.innerHTML = `
+                        <p class="error">❌ Visi Misi error: ${
+                          response.status
+                        }</p>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    `;
+          }
+        } catch (error) {
+          resultDiv.innerHTML = `<p class="error">❌ Connection error: ${error.message}</p>`;
+        }
+      }
+
+      // Initialize
+      updateTokenStatus();
+
+      // Auto test on load
+      setTimeout(() => {
+        testServerStatus();
+      }, 1000);
+    </script>
+  </body>
+</html>

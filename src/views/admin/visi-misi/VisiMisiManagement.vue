@@ -1,10 +1,16 @@
 <template>
   <div>
     <div class="action-bar">
-      <button v-if="!visiMisiData" class="action-button create-button" @click="openForm()">
+      <button
+        v-if="!visiMisiData"
+        class="action-button create-button"
+        @click="openForm()">
         <i class="fas fa-plus-circle"></i> Tambah Visi Misi
       </button>
-      <button v-else class="action-button edit-button" @click="openForm(visiMisiData)">
+      <button
+        v-else
+        class="action-button edit-button"
+        @click="openForm(visiMisiData)">
         <i class="fas fa-edit"></i> Edit Visi Misi
       </button>
     </div>
@@ -15,8 +21,7 @@
         :initial-data="formVisiMisi"
         @close-form="closeForm"
         @save-visi-misi="handleSave"
-        @update-visi-misi="handleUpdate"
-      />
+        @update-visi-misi="handleUpdate" />
     </div>
 
     <div v-else-if="visiMisiData" class="preview-container card">
@@ -29,8 +34,16 @@
         <div v-if="visiMisiData.visi_misi_file_path" class="preview-section">
           <h4 class="preview-subtitle">File Visi Misi</h4>
           <div class="file-preview-area">
-            <img v-if="visiMisiData.tipe_file_visi_misi === 'gambar'" :src="getFilePath(visiMisiData.visi_misi_file_path)" alt="Visi Misi File" class="file-thumbnail" />
-            <a v-else-if="visiMisiData.tipe_file_visi_misi === 'pdf'" :href="getFilePath(visiMisiData.visi_misi_file_path)" target="_blank" class="pdf-link">
+            <img
+              v-if="visiMisiData.tipe_file_visi_misi === 'gambar'"
+              :src="getFilePath(visiMisiData.visi_misi_file_path)"
+              alt="Visi Misi File"
+              class="file-thumbnail" />
+            <a
+              v-else-if="visiMisiData.tipe_file_visi_misi === 'pdf'"
+              :href="getFilePath(visiMisiData.visi_misi_file_path)"
+              target="_blank"
+              class="pdf-link">
               <i class="fas fa-file-pdf pdf-icon"></i>
               <span>Lihat PDF</span>
             </a>
@@ -38,13 +51,20 @@
         </div>
       </div>
     </div>
-    
+
     <div v-else class="no-data-card card">
       <div class="empty-state">
-        <p>Belum ada data Visi Misi. Silakan tambahkan satu.</p>
+        <div class="empty-icon">
+          <i class="fas fa-file-alt"></i>
+        </div>
+        <h3 class="empty-title">Belum Ada Visi Misi</h3>
+        <p class="empty-description">
+          Belum ada data Visi Misi yang tersimpan. Klik tombol "Tambah Visi
+          Misi" di atas untuk menambahkan visi dan misi organisasi Anda.
+        </p>
       </div>
     </div>
-    
+
     <!-- Implementasi komponen pop-up -->
     <BasePopUp
       v-if="showPopUp"
@@ -53,16 +73,15 @@
       :action="popUpAction"
       :entity-name="popUpEntity"
       :error-message="popUpMessage"
-      @close="closePopUp"
-    />
+      @close="closePopUp" />
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, nextTick } from 'vue';
-import axios from 'axios';
-import VisiMisiForm from './VisiMisiForm.vue';
-import BasePopUp from '../../../components/pop-up/BasePopUp.vue';
+import { ref, onMounted, nextTick } from "vue";
+import axios from "axios";
+import VisiMisiForm from "./VisiMisiForm.vue";
+import BasePopUp from "../../../components/pop-up/BasePopUp.vue";
 
 const visiMisiData = ref(null);
 const formVisiMisi = ref({});
@@ -80,7 +99,7 @@ const openPopUp = (status, action, message = "") => {
   popUpStatus.value = status;
   popUpAction.value = action;
   popUpMessage.value = message;
-  
+
   if (showPopUp.value) {
     showPopUp.value = false;
     requestAnimationFrame(() => {
@@ -97,23 +116,49 @@ const closePopUp = () => {
 
 const fetchVisiMisiData = async () => {
   try {
-    const response = await axios.get('http://localhost:5000/api/visi-misi');
+    const response = await axios.get("http://localhost:5000/api/visi-misi");
+
+    // Jika berhasil mendapat response
     if (response.data && response.data.id_visi_misi) {
+      // Ada data visi misi
       visiMisiData.value = response.data;
       formVisiMisi.value = { ...response.data, visi_misi_file: null };
     } else {
+      // Tidak ada data visi misi (kondisi normal)
       visiMisiData.value = null;
-      formVisiMisi.value = { id_visi_misi: null, visi_misi_file: null, deskripsi: null };
+      formVisiMisi.value = {
+        id_visi_misi: null,
+        visi_misi_file: null,
+        deskripsi: null,
+      };
     }
   } catch (err) {
-    console.error('Gagal memuat data Visi Misi:', err);
-    openPopUp("error", "fetch", "Gagal memuat data Visi Misi.");
-    visiMisiData.value = null;
+    // Hanya tampilkan error jika bukan 404 (data tidak ditemukan)
+    if (err.response && err.response.status === 404) {
+      // 404 berarti belum ada data, ini normal
+      visiMisiData.value = null;
+      formVisiMisi.value = {
+        id_visi_misi: null,
+        visi_misi_file: null,
+        deskripsi: null,
+      };
+    } else {
+      // Error lainnya yang perlu ditampilkan
+      console.error("Gagal memuat data Visi Misi:", err);
+      const errorMessage =
+        err.response?.data?.message ||
+        err.response?.data?.error ||
+        "Terjadi kesalahan saat memuat data Visi Misi";
+      openPopUp("error", "fetch", errorMessage);
+      visiMisiData.value = null;
+    }
   }
 };
 
 const openForm = (data = null) => {
-  formVisiMisi.value = data ? { ...data, visi_misi_file: null } : { id_visi_misi: null, visi_misi_file: null, deskripsi: null };
+  formVisiMisi.value = data
+    ? { ...data, visi_misi_file: null }
+    : { id_visi_misi: null, visi_misi_file: null, deskripsi: null };
   formOpen.value = true;
 };
 
@@ -124,35 +169,43 @@ const closeForm = () => {
 
 const handleSave = async (formData) => {
   try {
-    const token = localStorage.getItem('access_token');
-    await axios.post('http://localhost:5000/api/visi-misi', formData, {
+    const token = localStorage.getItem("access_token");
+    await axios.post("http://localhost:5000/api/visi-misi", formData, {
       headers: {
-        'Content-Type': 'multipart/form-data',
-        Authorization: `Bearer ${token}`
-      }
+        "Content-Type": "multipart/form-data",
+        Authorization: `Bearer ${token}`,
+      },
     });
     openPopUp("success", "create");
     closeForm();
   } catch (err) {
-    console.error('Gagal menyimpan Visi Misi:', err.response?.data);
-    openPopUp("error", "create", err.response?.data?.error || 'Gagal menyimpan Visi Misi.');
+    console.error("Gagal menyimpan Visi Misi:", err.response?.data);
+    openPopUp(
+      "error",
+      "create",
+      err.response?.data?.error || "Gagal menyimpan Visi Misi."
+    );
   }
 };
 
 const handleUpdate = async (id, formData) => {
   try {
-    const token = localStorage.getItem('access_token');
+    const token = localStorage.getItem("access_token");
     await axios.put(`http://localhost:5000/api/visi-misi/${id}`, formData, {
       headers: {
-        'Content-Type': 'multipart/form-data',
-        Authorization: `Bearer ${token}`
-      }
+        "Content-Type": "multipart/form-data",
+        Authorization: `Bearer ${token}`,
+      },
     });
     openPopUp("success", "update");
     closeForm();
   } catch (err) {
-    console.error('Gagal memperbarui Visi Misi:', err.response?.data);
-    openPopUp("error", "update", err.response?.data?.error || 'Gagal memperbarui Visi Misi.');
+    console.error("Gagal memperbarui Visi Misi:", err.response?.data);
+    openPopUp(
+      "error",
+      "update",
+      err.response?.data?.error || "Gagal memperbarui Visi Misi."
+    );
   }
 };
 
@@ -212,7 +265,8 @@ onMounted(() => {
   background-color: #ffffff;
 }
 
-.form-title, .preview-title {
+.form-title,
+.preview-title {
   font-size: 1.5rem;
   font-weight: 700;
   color: #212529;
@@ -259,7 +313,6 @@ onMounted(() => {
   margin: auto;
   width: 50%;
   padding: 10px;
-  ;
 }
 .pdf-link {
   display: flex;

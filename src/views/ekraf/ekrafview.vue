@@ -185,14 +185,25 @@
                     {{ item.website_umkm }}
                   </a>
                 </div>
-                <div v-if="item.jam_operasional" class="detail-item">
-                  <span class="detail-icon">🕒</span>
-                  <span class="detail-text">{{ item.jam_operasional }}</span>
+                
+                <!-- Operational Hours Section -->
+                <div v-if="item.jam_operasional || item.hari_operasional" class="operational-hours">
+                  <div class="operational-header">
+                    <span class="operational-icon">⏰</span>
+                    <span class="operational-title">Jam Operasional</span>
+                  </div>
+                  <div class="operational-content">
+                    <div v-if="item.hari_operasional" class="operational-item">
+                      <span class="day-icon">�</span>
+                      <span class="operational-text">{{ item.hari_operasional }}</span>
+                    </div>
+                    <div v-if="item.jam_operasional" class="operational-item">
+                      <span class="time-icon">�</span>
+                      <span class="operational-text">{{ item.jam_operasional }}</span>
+                    </div>
+                  </div>
                 </div>
-                <div v-if="item.hari_operasional" class="detail-item">
-                  <span class="detail-icon">📅</span>
-                  <span class="detail-text">{{ item.hari_operasional }}</span>
-                </div>
+
                 <div class="detail-item">
                   <span class="detail-icon">👁️</span>
                   <span class="detail-text"
@@ -203,13 +214,20 @@
 
               <div class="umkm-features">
                 <div class="feature-tags">
-                  <span v-if="item.hastag_umkm" class="feature-tag">
-                    {{ item.hastag_umkm }}
-                  </span>
+                  <!-- Category Tag -->
                   <span
                     v-if="item.kategoriUMKM?.nama_kategori"
-                    class="feature-tag">
+                    class="feature-tag category-tag">
+                    <span class="tag-icon">🏷️</span>
                     {{ item.kategoriUMKM?.nama_kategori }}
+                  </span>
+                  
+                  <!-- Hashtags -->
+                  <span 
+                    v-for="hashtag in parseHashtags(item.hastag_umkm)"
+                    :key="hashtag"
+                    class="feature-tag hashtag-tag">
+                    {{ hashtag }}
                   </span>
                 </div>
               </div>
@@ -524,6 +542,17 @@ const handleImageError = (event: Event) => {
   const img = event.target as HTMLImageElement;
   img.src =
     "https://via.placeholder.com/400x300/3b82f6/ffffff?text=UMKM+Magetan";
+};
+
+const parseHashtags = (hashtagString: string | undefined): string[] => {
+  if (!hashtagString) return [];
+  
+  // Split by common separators and clean up
+  return hashtagString
+    .split(/[,;|\s]+/)
+    .map(tag => tag.trim())
+    .filter(tag => tag.length > 0)
+    .map(tag => tag.startsWith('#') ? tag : `#${tag}`);
 };
 
 const cardHover = (event: Event) => {
@@ -1196,9 +1225,12 @@ onBeforeUnmount(() => {
 
 .luxury-cards-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
-  gap: 2.5rem;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
   margin-top: 3rem;
+  max-width: 1200px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .luxury-umkm-card {
@@ -1255,10 +1287,10 @@ onBeforeUnmount(() => {
   opacity: 1;
 }
 
-/* Premium Image Container */
+/* Premium Image Container - Compact Portrait Layout */
 .luxury-image-container {
   position: relative;
-  height: 280px;
+  height: 220px;
   overflow: hidden;
   background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
 }
@@ -1420,7 +1452,7 @@ onBeforeUnmount(() => {
 
 /* Premium Content Container */
 .luxury-content-container {
-  padding: 2rem 1.8rem;
+  padding: 1.5rem 1.4rem;
   position: relative;
   z-index: 2;
   background: linear-gradient(
@@ -1431,17 +1463,17 @@ onBeforeUnmount(() => {
 }
 
 .umkm-header {
-  margin-bottom: 1.5rem;
+  margin-bottom: 1rem;
 }
 
 .luxury-umkm-title {
-  font-size: 1.8rem;
+  font-size: 1.4rem;
   font-weight: 700;
   background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.4rem;
   line-height: 1.3;
   font-family: "Georgia", serif;
 }
@@ -1461,29 +1493,29 @@ onBeforeUnmount(() => {
 
 .umkm-description {
   color: rgba(55, 65, 81, 0.8);
-  font-size: 0.95rem;
-  line-height: 1.6;
-  margin-bottom: 1.5rem;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  margin-bottom: 1rem;
   display: -webkit-box;
-  -webkit-line-clamp: 3;
-  line-clamp: 3;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
 
 .umkm-details {
-  margin-bottom: 1.5rem;
+  margin-bottom: 1rem;
   display: grid;
-  gap: 8px;
+  gap: 6px;
 }
 
 .detail-item {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 8px 12px;
+  gap: 8px;
+  padding: 6px 10px;
   background: rgba(59, 130, 246, 0.05);
-  border-radius: 12px;
+  border-radius: 10px;
   border: 1px solid rgba(59, 130, 246, 0.1);
 }
 
@@ -1510,8 +1542,63 @@ onBeforeUnmount(() => {
   text-decoration: underline;
 }
 
+/* Operational Hours Styling */
+.operational-hours {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.08) 0%, rgba(5, 150, 105, 0.05) 100%);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  border-radius: 12px;
+  padding: 12px;
+  margin: 8px 0;
+}
+
+.operational-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(16, 185, 129, 0.15);
+}
+
+.operational-icon {
+  font-size: 1.2rem;
+}
+
+.operational-title {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #059669;
+}
+
+.operational-content {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.operational-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 12px;
+  background: rgba(255, 255, 255, 0.6);
+  border-radius: 10px;
+  border: 1px solid rgba(16, 185, 129, 0.1);
+}
+
+.day-icon,
+.time-icon {
+  font-size: 1rem;
+}
+
+.operational-text {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #374151;
+}
+
 .umkm-features {
-  margin-bottom: 2rem;
+  margin-bottom: 1.5rem;
 }
 
 .feature-tags {
@@ -1521,17 +1608,58 @@ onBeforeUnmount(() => {
 }
 
 .feature-tag {
+  padding: 6px 12px;
+  border-radius: 15px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  transition: all 0.3s ease;
+}
+
+.category-tag {
   background: linear-gradient(
     135deg,
     rgba(59, 130, 246, 0.1) 0%,
     rgba(147, 197, 253, 0.05) 100%
   );
   color: #1e40af;
-  padding: 6px 12px;
-  border-radius: 15px;
-  font-size: 0.8rem;
-  font-weight: 500;
   border: 1px solid rgba(59, 130, 246, 0.2);
+}
+
+.category-tag:hover {
+  background: linear-gradient(
+    135deg,
+    rgba(59, 130, 246, 0.15) 0%,
+    rgba(147, 197, 253, 0.08) 100%
+  );
+  transform: translateY(-1px);
+}
+
+.hashtag-tag {
+  background: linear-gradient(
+    135deg,
+    rgba(236, 72, 153, 0.1) 0%,
+    rgba(251, 207, 232, 0.05) 100%
+  );
+  color: #be185d;
+  border: 1px solid rgba(236, 72, 153, 0.2);
+  font-family: 'Courier New', monospace;
+}
+
+.hashtag-tag:hover {
+  background: linear-gradient(
+    135deg,
+    rgba(236, 72, 153, 0.15) 0%,
+    rgba(251, 207, 232, 0.08) 100%
+  );
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(236, 72, 153, 0.2);
+}
+
+.tag-icon {
+  font-size: 0.9rem;
 }
 
 /* Premium CTA Button */
@@ -1539,19 +1667,19 @@ onBeforeUnmount(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: 6px;
   width: 100%;
-  padding: 16px 24px;
+  padding: 12px 20px;
   background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
   color: #ffffff;
-  border-radius: 25px;
+  border-radius: 20px;
   text-decoration: none;
   font-weight: 600;
-  font-size: 1rem;
+  font-size: 0.9rem;
   position: relative;
   overflow: hidden;
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 8px 25px rgba(59, 130, 246, 0.3);
+  box-shadow: 0 6px 20px rgba(59, 130, 246, 0.3);
 }
 
 .luxury-cta-button:hover {
@@ -1976,8 +2104,8 @@ onBeforeUnmount(() => {
 
 @media (max-width: 1200px) {
   .luxury-cards-grid {
-    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-    gap: 2rem;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 1.3rem;
   }
 }
 
@@ -2002,8 +2130,8 @@ onBeforeUnmount(() => {
   }
 
   .luxury-cards-grid {
-    grid-template-columns: 1fr;
-    gap: 1.5rem;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1.2rem;
   }
 
   .inspirations-grid {
@@ -2013,6 +2141,28 @@ onBeforeUnmount(() => {
 
   .main-content {
     padding: 0 15px;
+  }
+
+  /* Mobile operational hours */
+  .operational-hours {
+    padding: 10px;
+  }
+
+  .operational-content {
+    gap: 5px;
+  }
+
+  .operational-item {
+    padding: 4px 8px;
+  }
+
+  .feature-tags {
+    gap: 5px;
+  }
+
+  .feature-tag {
+    font-size: 0.75rem;
+    padding: 4px 8px;
   }
 }
 
@@ -2035,6 +2185,19 @@ onBeforeUnmount(() => {
 
   .luxury-content-container {
     padding: 1.5rem 1.2rem;
+  }
+
+  /* Portrait layout adjustments for mobile */
+  .luxury-image-container {
+    height: 200px;
+  }
+
+  .luxury-cards-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .luxury-content-container {
+    padding: 1.2rem 1rem;
   }
 
   /* Loading State Mobile */
