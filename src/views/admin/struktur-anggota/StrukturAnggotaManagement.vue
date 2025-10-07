@@ -1,9 +1,57 @@
 <template>
   <div>
-    <div class="action-bar">
-      <button v-if="!formAnggotaOpen" class="action-button create-button" @click="openAnggotaForm()">
-        <i class="fas fa-plus-circle"></i> Tambah Anggota Baru
-      </button>
+    <!-- Header Section -->
+    <div class="header-section">
+      <div class="header-info">
+        <h1 class="main-title">
+          <i class="fas fa-users"></i>
+          Data Struktur Anggota
+        </h1>
+        <p class="subtitle">
+          Kelola struktur anggota organisasi dinas pariwisata Magetan termasuk
+          informasi jabatan, foto, dan urutan tampilan dalam struktur
+          organisasi.
+        </p>
+      </div>
+      <div class="action-bar">
+        <button
+          v-if="!formAnggotaOpen"
+          class="action-button add-button"
+          @click="openAnggotaForm()">
+          <i class="fas fa-plus-circle"></i> Tambah Anggota Baru
+        </button>
+      </div>
+    </div>
+
+    <!-- Statistics Dashboard -->
+    <div v-if="!formAnggotaOpen" class="stats-container">
+      <div class="stat-card">
+        <div class="stat-icon">
+          <i class="fas fa-users"></i>
+        </div>
+        <div class="stat-content">
+          <h3>{{ totalAnggota }}</h3>
+          <p>Total Anggota</p>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">
+          <i class="fas fa-user-tie"></i>
+        </div>
+        <div class="stat-content">
+          <h3>{{ totalJabatan }}</h3>
+          <p>Jabatan Berbeda</p>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">
+          <i class="fas fa-calendar-plus"></i>
+        </div>
+        <div class="stat-content">
+          <h3>{{ bulanIniAnggota }}</h3>
+          <p>Ditambah Bulan Ini</p>
+        </div>
+      </div>
     </div>
 
     <div v-if="formAnggotaOpen" class="form-card card">
@@ -12,27 +60,38 @@
         :initial-data="formAnggota"
         @close-form="closeAnggotaForm"
         @save-anggota="handleSaveAnggota"
-        @update-anggota="handleUpdateAnggota"
-      />
+        @update-anggota="handleUpdateAnggota" />
     </div>
 
     <div v-else class="table-container card">
       <div class="table-responsive">
-        <table class="data-table">
+        <table class="table">
           <thead>
             <tr>
-              <th>ID</th>
-              <th>Nama Anggota</th>
-              <th>Jabatan</th>
-              <th>Urutan</th>
-              <th>Admin Pengelola</th>
-              <th>Aksi</th>
+              <th><i class="fas fa-hashtag"></i>ID</th>
+              <th><i class="fas fa-user"></i>Nama Anggota</th>
+              <th><i class="fas fa-user-tie"></i>Jabatan</th>
+              <th><i class="fas fa-sort-numeric-up"></i>Urutan</th>
+              <th><i class="fas fa-user-shield"></i>Admin Pengelola</th>
+              <th><i class="fas fa-cogs"></i>Aksi</th>
             </tr>
           </thead>
           <tbody>
             <tr v-if="anggotaList.length === 0">
-              <td colspan="6" class="no-data-found">
-                Tidak ada data anggota yang tersedia.
+              <td colspan="6">
+                <div class="empty-state">
+                  <i class="fas fa-users"></i>
+                  <h3>Belum Ada Anggota</h3>
+                  <p>
+                    Mulai tambahkan anggota struktur organisasi untuk melengkapi
+                    profil dinas pariwisata Magetan.
+                  </p>
+                  <button
+                    class="action-button add-button"
+                    @click="openAnggotaForm()">
+                    <i class="fas fa-plus-circle"></i> Tambah Anggota Pertama
+                  </button>
+                </div>
               </td>
             </tr>
             <tr v-for="anggota in anggotaList" :key="anggota.id_anggota">
@@ -42,10 +101,16 @@
               <td>{{ anggota.urutan_tampilan }}</td>
               <td>{{ anggota.adminPengelola.username }}</td>
               <td class="actions">
-                <button class="action-button edit-button" @click="openAnggotaForm(anggota)" title="Edit">
+                <button
+                  class="action-button edit-button"
+                  @click="openAnggotaForm(anggota)"
+                  title="Edit">
                   <i class="fas fa-edit"></i>
                 </button>
-                <button class="action-button delete-button" @click="showDeleteConfirm(anggota.id_anggota)" title="Hapus">
+                <button
+                  class="action-button delete-button"
+                  @click="showDeleteConfirm(anggota.id_anggota)"
+                  title="Hapus">
                   <i class="fas fa-trash-alt"></i>
                 </button>
               </td>
@@ -63,16 +128,15 @@
       :entity-name="popUpEntity"
       :error-message="popUpMessage"
       @close="closePopUp"
-      @confirmed="handleDeleteConfirmed"
-    />
+      @confirmed="handleDeleteConfirmed" />
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, nextTick } from 'vue';
-import axios from 'axios';
-import StrukturAnggotaForm from './StrukturAnggotaForm.vue';
-import BasePopUp from '../../../components/pop-up/BasePopUp.vue';
+import { ref, computed, onMounted, nextTick } from "vue";
+import axios from "axios";
+import StrukturAnggotaForm from "./StrukturAnggotaForm.vue";
+import BasePopUp from "../../../components/pop-up/BasePopUp.vue";
 
 const anggotaList = ref([]);
 const formAnggotaOpen = ref(false);
@@ -86,6 +150,30 @@ const popUpAction = ref("");
 const popUpEntity = ref("Anggota");
 const popUpMessage = ref("");
 const anggotaToDeleteId = ref(null);
+
+// Computed properties untuk statistics
+const totalAnggota = computed(() => anggotaList.value.length);
+
+const totalJabatan = computed(() => {
+  const uniqueJabatan = new Set(
+    anggotaList.value.map((anggota) => anggota.jabatan)
+  );
+  return uniqueJabatan.size;
+});
+
+const bulanIniAnggota = computed(() => {
+  const currentDate = new Date();
+  const currentMonth = currentDate.getMonth();
+  const currentYear = currentDate.getFullYear();
+
+  return anggotaList.value.filter((anggota) => {
+    const createdDate = new Date(anggota.createdAt);
+    return (
+      createdDate.getMonth() === currentMonth &&
+      createdDate.getFullYear() === currentYear
+    );
+  }).length;
+});
 
 // Fungsi yang memicu pop-up konfirmasi
 const showDeleteConfirm = (id) => {
@@ -102,15 +190,22 @@ const handleDeleteConfirmed = async () => {
   await nextTick();
 
   try {
-    const token = localStorage.getItem('access_token');
-    await axios.delete(`http://localhost:5000/api/struktur-anggota/${anggotaToDeleteId.value}`, {
-      headers: { Authorization: `Bearer ${token}` }
-    });
+    const token = localStorage.getItem("access_token");
+    await axios.delete(
+      `http://localhost:5000/api/struktur-anggota/${anggotaToDeleteId.value}`,
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    );
     openPopUp("success", "delete");
     fetchAnggotaData();
   } catch (err) {
-    console.error('Gagal menghapus anggota:', err.response?.data);
-    openPopUp("error", "delete", err.response?.data?.error || "Gagal menghapus anggota.");
+    console.error("Gagal menghapus anggota:", err.response?.data);
+    openPopUp(
+      "error",
+      "delete",
+      err.response?.data?.error || "Gagal menghapus anggota."
+    );
   } finally {
     anggotaToDeleteId.value = null;
   }
@@ -138,10 +233,12 @@ const closePopUp = () => {
 
 const fetchAnggotaData = async () => {
   try {
-    const response = await axios.get('http://localhost:5000/api/struktur-anggota');
+    const response = await axios.get(
+      "http://localhost:5000/api/struktur-anggota"
+    );
     anggotaList.value = response.data;
   } catch (err) {
-    console.error('Gagal memuat data struktur anggota:', err);
+    console.error("Gagal memuat data struktur anggota:", err);
     openPopUp("error", "fetch", "Gagal memuat data struktur anggota.");
   }
 };
@@ -152,50 +249,73 @@ const openAnggotaForm = (anggota = null) => {
     formAnggota.value = { ...anggota };
   } else {
     formAnggota.value = {
-      id_anggota: null, nama_anggota: '', jabatan: '', deskripsi_tugas: '', foto_anggota: null, urutan_tampilan: 0,
+      id_anggota: null,
+      nama_anggota: "",
+      jabatan: "",
+      deskripsi_tugas: "",
+      foto_anggota: null,
+      urutan_tampilan: 0,
     };
   }
   formAnggotaOpen.value = true;
+  // Mencegah scroll pada body saat form terbuka
+  document.body.style.overflow = "hidden";
 };
 
 const closeAnggotaForm = () => {
   formAnggotaOpen.value = false;
   formAnggota.value = null;
   isEditingAnggota.value = false;
+  // Mengembalikan scroll pada body saat form ditutup
+  document.body.style.overflow = "auto";
   fetchAnggotaData();
 };
 
 const handleSaveAnggota = async (formData) => {
   try {
-    const token = localStorage.getItem('access_token');
-    await axios.post('http://localhost:5000/api/struktur-anggota', formData, {
+    const token = localStorage.getItem("access_token");
+    await axios.post("http://localhost:5000/api/struktur-anggota", formData, {
       headers: {
-        'Content-Type': 'multipart/form-data',
-        Authorization: `Bearer ${token}`
-      }
+        "Content-Type": "multipart/form-data",
+        Authorization: `Bearer ${token}`,
+      },
     });
     openPopUp("success", "create");
     closeAnggotaForm();
   } catch (err) {
-    console.error('Gagal menyimpan anggota:', err.response?.data);
-    openPopUp("error", "create", err.response?.data?.error || "Gagal menyimpan anggota.");
+    console.error("Gagal menyimpan anggota:", err.response?.data);
+    openPopUp(
+      "error",
+      "create",
+      err.response?.data?.error || "Gagal menyimpan anggota."
+    );
   }
 };
 
 const handleUpdateAnggota = async (formData) => {
   try {
-    const token = localStorage.getItem('access_token');
-    await axios.put(`http://localhost:5000/api/struktur-anggota/${formData.get('id_anggota')}`, formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-        Authorization: `Bearer ${token}`
+    const token = localStorage.getItem("access_token");
+    await axios.put(
+      `http://localhost:5000/api/struktur-anggota/${formData.get(
+        "id_anggota"
+      )}`,
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+          Authorization: `Bearer ${token}`,
+        },
       }
-    });
+    );
     openPopUp("success", "update");
     closeAnggotaForm();
   } catch (err) {
-    console.error('Gagal memperbarui anggota:', err.response?.data);
-    openPopUp("error", "update", err.response?.data?.error || "Gagal memperbarui anggota.");
+    console.error("Gagal memperbarui anggota:", err.response?.data);
+    openPopUp(
+      "error",
+      "update",
+      err.response?.data?.error || "Gagal memperbarui anggota."
+    );
   }
 };
 
@@ -205,14 +325,110 @@ onMounted(() => {
 </script>
 
 <style scoped>
-/* =========== Perubahan Styling untuk Konsistensi =========== */
+/* ========== Styling yang diselaraskan dengan Template Konsisten ========== */
+
+/* Header Section */
+.header-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 2rem;
+  gap: 2rem;
+}
+
+.header-info {
+  flex: 1;
+}
+
+.main-title {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #212529;
+  margin: 0 0 0.5rem 0;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.main-title i {
+  color: #007bff;
+  font-size: 1.5rem;
+}
+
+.subtitle {
+  font-size: 1rem;
+  color: #6c757d;
+  margin: 0;
+  line-height: 1.5;
+}
 
 .action-bar {
   display: flex;
   justify-content: flex-end;
-  margin-bottom: 1.5rem;
+  align-items: center;
 }
 
+/* Stats Section */
+.stats-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.stat-card {
+  background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+  color: white;
+  padding: 1.5rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0, 123, 255, 0.2);
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 123, 255, 0.3);
+}
+
+.stat-card:nth-child(2) {
+  background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%);
+  box-shadow: 0 4px 15px rgba(40, 167, 69, 0.2);
+}
+
+.stat-card:nth-child(2):hover {
+  box-shadow: 0 8px 25px rgba(40, 167, 69, 0.3);
+}
+
+.stat-card:nth-child(3) {
+  background: linear-gradient(135deg, #ffc107 0%, #e0a800 100%);
+  box-shadow: 0 4px 15px rgba(255, 193, 7, 0.2);
+}
+
+.stat-card:nth-child(3):hover {
+  box-shadow: 0 8px 25px rgba(255, 193, 7, 0.3);
+}
+
+.stat-icon {
+  font-size: 2.5rem;
+  opacity: 0.9;
+}
+
+.stat-content h3 {
+  font-size: 2rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.stat-content p {
+  font-size: 0.9rem;
+  margin: 0.25rem 0 0 0;
+  opacity: 0.9;
+}
+
+/* Action Button */
 .action-button {
   padding: 0.75rem 1.5rem;
   border-radius: 8px;
@@ -224,91 +440,96 @@ onMounted(() => {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  font-size: 0.9rem;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
-.create-button {
-  background-color: #007bff;
+.action-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
 }
 
-.create-button:hover {
-  background-color: #0069d9;
-  box-shadow: 0 6px 16px rgba(0, 123, 255, 0.2);
+.add-button {
+  background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
 }
 
-.form-card.card,
-.table-container.card {
-  padding: 0;
-  border: 1px solid #e0e6ed;
+/* Table Styling */
+.table-container {
+  background: white;
   border-radius: 12px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
   overflow: hidden;
 }
 
-.form-card.card {
-  padding: 2rem;
-}
-
-.table-container.card {
-  padding: 0;
-}
-
-.data-table {
+.table {
   width: 100%;
   border-collapse: collapse;
-  min-width: 600px;
 }
 
-.data-table th,
-.data-table td {
-  padding: 1rem 1.5rem;
+.table thead th {
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  padding: 1rem;
   text-align: left;
-  border-bottom: 1px solid #e9ecef;
-}
-
-.data-table th {
-  background-color: #f8f9fa;
-  color: #6c757d;
   font-weight: 600;
-  font-size: 0.8rem;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
+  color: #495057;
+  border-bottom: 2px solid #dee2e6;
+  position: relative;
 }
 
-.data-table td {
-  color: #212529;
+.table thead th i {
+  margin-right: 0.5rem;
+  color: #007bff;
 }
 
-.data-table tr:last-child td {
-  border-bottom: none;
+.table tbody td {
+  padding: 1rem;
+  border-bottom: 1px solid #f1f3f4;
+  vertical-align: middle;
 }
 
-.data-table tr:hover {
-  background-color: #f1f3f5;
+.table tbody tr:hover {
+  background-color: #f8f9fa;
 }
 
-.no-data-found {
+/* Empty State */
+.empty-state {
   text-align: center;
-  font-style: italic;
-  color: #888;
-  padding: 2rem;
+  padding: 3rem 2rem;
+  color: #6c757d;
 }
 
+.empty-state i {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  color: #dee2e6;
+}
+
+.empty-state h3 {
+  font-size: 1.25rem;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+}
+
+.empty-state p {
+  margin-bottom: 1.5rem;
+  opacity: 0.8;
+}
+
+/* Action Buttons in Table */
 .actions {
   display: flex;
   gap: 0.5rem;
 }
 
-.actions .action-button {
-  padding: 0.6rem;
-  width: 2.2rem;
-  height: 2.2rem;
-  border-radius: 50%;
+.actions button {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s ease;
   display: flex;
   align-items: center;
-  justify-content: center;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  gap: 0.25rem;
 }
 
 .actions .edit-button {
@@ -331,5 +552,26 @@ onMounted(() => {
 .actions .delete-button:hover {
   background-color: #c82333;
   box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .header-section {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .stats-container {
+    grid-template-columns: 1fr;
+  }
+
+  .table-container {
+    overflow-x: auto;
+  }
+
+  .actions {
+    flex-direction: column;
+    gap: 0.25rem;
+  }
 }
 </style>

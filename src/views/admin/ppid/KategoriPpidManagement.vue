@@ -5,7 +5,7 @@
       <div class="header-info">
         <h2 class="main-title">
           <i class="fas fa-sitemap"></i>
-          Manajemen Kategori PPID
+          Data Kategori PPID
         </h2>
         <p class="subtitle">
           Kelola kategori dan sub-kategori untuk mengorganisir dokumen dan
