@@ -6,26 +6,35 @@
       </button>
     </div>
 
-    <div v-if="formKategoriOpen" class="form-card card">
-      <KategoriForm
-        :is-editing="isEditingKategori"
-        :initial-data="formKategori"
-        @close-form="closeKategoriForm"
-        @save-kategori="handleSaveKategori"
-        @update-kategori="handleUpdateKategori"
-      />
+    <div v-if="formKategoriOpen" class="form-overlay">
+      <div class="form-card card">
+        <KategoriForm
+          :is-editing="isEditingKategori"
+          :initial-data="formKategori"
+          @close-form="closeKategoriForm"
+          @save-kategori="handleSaveKategori"
+          @update-kategori="handleUpdateKategori"
+        />
+      </div>
     </div>
 
     <div v-else class="table-container card">
+      <div class="table-header">
+        <h3 class="table-title">
+          <i class="fas fa-tags"></i>
+          Daftar Kategori UMKM
+        </h3>
+        <span class="table-count">{{ kategoriList.length }} Kategori</span>
+      </div>
       <div class="table-responsive">
         <table class="data-table">
           <thead>
             <tr>
-              <th>ID</th>
-              <th>Nama Kategori</th>
-              <th>Deskripsi</th>
-              <th>Gambar Sampul</th>
-              <th>Aksi</th>
+              <th><i class="fas fa-hashtag"></i>ID</th>
+              <th><i class="fas fa-tags"></i>Nama Kategori</th>
+              <th><i class="fas fa-align-left"></i>Deskripsi</th>
+              <th><i class="fas fa-image"></i>Gambar Sampul</th>
+              <th><i class="fas fa-cogs"></i>Aksi</th>
             </tr>
           </thead>
           <tbody>
@@ -159,12 +168,23 @@ const openKategoriForm = (kategori = null) => {
     };
   }
   formKategoriOpen.value = true;
+
+  // Prevent body scroll
+  document.body.style.overflow = "hidden";
+  document.body.style.position = "fixed";
+  document.body.style.width = "100%";
 };
 
 const closeKategoriForm = () => {
   formKategoriOpen.value = false;
   formKategori.value = null;
   isEditingKategori.value = false;
+
+  // Restore body scroll
+  document.body.style.overflow = "";
+  document.body.style.position = "";
+  document.body.style.width = "";
+
   fetchKategoriData();
 };
 
@@ -315,5 +335,113 @@ onMounted(() => {
   object-fit: cover;
   border-radius: 8px;
   border: 1px solid #e9ecef;
+}
+
+/* Form Overlay Styles */
+.form-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  overflow-y: auto;
+  padding: 2rem;
+  box-sizing: border-box;
+}
+
+.form-overlay .form-card {
+  position: relative;
+  max-width: 800px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  margin: auto;
+  z-index: 10000;
+  box-shadow: 0 25px 80px rgba(0, 0, 0, 0.3);
+  border: 2px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Prevent background interaction */
+.form-overlay::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: transparent;
+  z-index: 9998;
+}
+
+/* Table Header Styles */
+.table-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border-bottom: 1px solid #e0e6ed;
+}
+
+.table-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #212529;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.table-title i {
+  color: #007bff;
+}
+
+.table-count {
+  background-color: #007bff;
+  color: white;
+  padding: 0.4rem 0.8rem;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+/* Table Header Icons */
+.data-table th i {
+  color: #007bff;
+  margin-right: 0.5rem;
+  font-size: 0.8rem;
+}
+
+.data-table th {
+  color: #495057;
+  font-size: 0.85rem;
+}
+
+/* Responsive Design for Form Overlay */
+@media (max-width: 768px) {
+  .table-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .table-count {
+    align-self: flex-start;
+  }
+
+  .form-overlay {
+    padding: 1rem;
+  }
+
+  .form-overlay .form-card {
+    max-height: 95vh;
+  }
 }
 </style>

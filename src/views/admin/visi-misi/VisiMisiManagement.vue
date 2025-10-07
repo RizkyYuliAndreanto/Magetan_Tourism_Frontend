@@ -1,18 +1,62 @@
 <template>
   <div>
-    <div class="action-bar">
-      <button
-        v-if="!visiMisiData"
-        class="action-button create-button"
-        @click="openForm()">
-        <i class="fas fa-plus-circle"></i> Tambah Visi Misi
-      </button>
-      <button
-        v-else
-        class="action-button edit-button"
-        @click="openForm(visiMisiData)">
-        <i class="fas fa-edit"></i> Edit Visi Misi
-      </button>
+    <!-- Header Section -->
+    <div class="header-section">
+      <div class="header-info">
+        <h1 class="main-title">
+          <i class="fas fa-flag"></i>
+          Data Visi & Misi
+        </h1>
+        <p class="subtitle">
+          Kelola visi dan misi dinas pariwisata Magetan untuk memberikan arah
+          strategis dalam pengembangan pariwisata daerah.
+        </p>
+      </div>
+      <div class="action-bar">
+        <button
+          v-if="!visiMisiData"
+          class="action-button add-button"
+          @click="openForm()">
+          <i class="fas fa-plus-circle"></i> Tambah Visi Misi
+        </button>
+        <button
+          v-else
+          class="action-button edit-button"
+          @click="openForm(visiMisiData)">
+          <i class="fas fa-edit"></i> Edit Visi Misi
+        </button>
+      </div>
+    </div>
+
+    <!-- Statistics Dashboard -->
+    <div v-if="!formOpen" class="stats-container">
+      <div class="stat-card">
+        <div class="stat-icon">
+          <i class="fas fa-flag"></i>
+        </div>
+        <div class="stat-content">
+          <h3>{{ visiMisiData ? "1" : "0" }}</h3>
+          <p>Visi & Misi</p>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">
+          <i class="fas fa-file-alt"></i>
+        </div>
+        <div class="stat-content">
+          <h3>{{ visiMisiData?.tipe_file_visi_misi || "-" }}</h3>
+          <p>Tipe File</p>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">
+          <i class="fas fa-calendar-check"></i>
+        </div>
+        <div class="stat-content">
+          <h3>{{ visiMisiData ? formatDate(visiMisiData.updatedAt) : "-" }}</h3>
+          <p>Terakhir Diperbarui</p>
+        </div>
+      </div>
     </div>
 
     <div v-if="formOpen" class="form-card card">
@@ -52,16 +96,17 @@
       </div>
     </div>
 
-    <div v-else class="no-data-card card">
+    <div v-else-if="!visiMisiData" class="table-container card">
       <div class="empty-state">
-        <div class="empty-icon">
-          <i class="fas fa-file-alt"></i>
-        </div>
-        <h3 class="empty-title">Belum Ada Visi Misi</h3>
-        <p class="empty-description">
-          Belum ada data Visi Misi yang tersimpan. Klik tombol "Tambah Visi
-          Misi" di atas untuk menambahkan visi dan misi organisasi Anda.
+        <i class="fas fa-flag"></i>
+        <h3>Belum Ada Visi & Misi</h3>
+        <p>
+          Mulai tambahkan visi dan misi dinas pariwisata untuk memberikan arah
+          strategis pengembangan wisata Magetan.
         </p>
+        <button class="action-button add-button" @click="openForm()">
+          <i class="fas fa-plus-circle"></i> Tambah Visi Misi Pertama
+        </button>
       </div>
     </div>
 
@@ -78,7 +123,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, nextTick } from "vue";
+import { ref, computed, onMounted, nextTick } from "vue";
 import axios from "axios";
 import VisiMisiForm from "./VisiMisiForm.vue";
 import BasePopUp from "../../../components/pop-up/BasePopUp.vue";
@@ -160,10 +205,14 @@ const openForm = (data = null) => {
     ? { ...data, visi_misi_file: null }
     : { id_visi_misi: null, visi_misi_file: null, deskripsi: null };
   formOpen.value = true;
+  // Mencegah scroll pada body saat form terbuka
+  document.body.style.overflow = "hidden";
 };
 
 const closeForm = () => {
   formOpen.value = false;
+  // Mengembalikan scroll pada body saat form ditutup
+  document.body.style.overflow = "auto";
   fetchVisiMisiData(); // Refresh data setelah form ditutup
 };
 
@@ -338,5 +387,145 @@ onMounted(() => {
 .empty-state p {
   color: #6c757d;
   font-style: italic;
+}
+
+/* Header Section */
+.header-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 2rem;
+  gap: 2rem;
+}
+
+.header-info {
+  flex: 1;
+}
+
+.main-title {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #212529;
+  margin: 0 0 0.5rem 0;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.main-title i {
+  color: #007bff;
+  font-size: 1.5rem;
+}
+
+.subtitle {
+  font-size: 1rem;
+  color: #6c757d;
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* Stats Section */
+.stats-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.stat-card {
+  background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+  color: white;
+  padding: 1.5rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0, 123, 255, 0.2);
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 123, 255, 0.3);
+}
+
+.stat-card:nth-child(2) {
+  background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%);
+  box-shadow: 0 4px 15px rgba(40, 167, 69, 0.2);
+}
+
+.stat-card:nth-child(2):hover {
+  box-shadow: 0 8px 25px rgba(40, 167, 69, 0.3);
+}
+
+.stat-card:nth-child(3) {
+  background: linear-gradient(135deg, #ffc107 0%, #e0a800 100%);
+  box-shadow: 0 4px 15px rgba(255, 193, 7, 0.2);
+}
+
+.stat-card:nth-child(3):hover {
+  box-shadow: 0 8px 25px rgba(255, 193, 7, 0.3);
+}
+
+.stat-icon {
+  font-size: 2.5rem;
+  opacity: 0.9;
+}
+
+.stat-content h3 {
+  font-size: 2rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.stat-content p {
+  font-size: 0.9rem;
+  margin: 0.25rem 0 0 0;
+  opacity: 0.9;
+}
+
+.add-button {
+  background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+}
+
+.edit-button {
+  background: linear-gradient(135deg, #ffc107 0%, #e0a800 100%);
+}
+
+/* Enhanced Empty State */
+.empty-state {
+  text-align: center;
+  padding: 3rem 2rem;
+  color: #6c757d;
+}
+
+.empty-state i {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  color: #dee2e6;
+}
+
+.empty-state h3 {
+  font-size: 1.25rem;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+}
+
+.empty-state p {
+  margin-bottom: 1.5rem;
+  opacity: 0.8;
+  font-style: normal;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .header-section {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .stats-container {
+    grid-template-columns: 1fr;
+  }
 }
 </style>

@@ -21,24 +21,49 @@
           <button
             :class="['tab-button', { 'active': activeTab === 'umkm' }]"
             @click="activeTab = 'umkm'">
-            <i class="fas fa-store tab-icon"></i>
+            <svg
+              class="tab-icon"
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round">
+              <path d="M6 2L3 6v14c0 1.1.9 2 2 2h14c0-1.1-.9-2-2-2V6l-3-4H6z"/>
+              <line x1="3" y1="6" x2="21" y2="6"/>
+              <path d="M16 10a4 4 0 0 1-8 0"/>
+            </svg>
             Manajemen UMKM
           </button>
           <button
             :class="['tab-button', { 'active': activeTab === 'kategori' }]"
             @click="activeTab = 'kategori'">
-            <i class="fas fa-tags tab-icon"></i>
+            <svg
+              class="tab-icon"
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round">
+              <path d="M20.5 12.5l-9.9 9.9c-.8.8-2.2.8-3 0L3.6 15.6c-.8-.8-.8-2.2 0-3L13.1 2.1c.8-.8 2.2-.8 3 0L20.5 5c.8.8.8 2.2 0 3z"/>
+              <line x1="14.5" y1="8.5" x2="8.5" y2="14.5"/>
+            </svg>
             Manajemen Kategori
           </button>
         </div>
         
         <div class="tab-content">
-          <div class="tab-pane" v-if="activeTab === 'umkm'">
-            <UMKMManagement />
-          </div>
-          <div class="tab-pane" v-if="activeTab === 'kategori'">
-            <KategoriManagement />
-          </div>
+          <transition name="fade" mode="out-in">
+            <div v-if="activeTab === 'umkm'" key="umkm">
+              <UMKMManagement />
+            </div>
+            <div v-else-if="activeTab === 'kategori'" key="kategori">
+              <KategoriManagement />
+            </div>
+          </transition>
         </div>
       </div>
     </main>
@@ -76,8 +101,8 @@ const pageTitle = computed(() => {
   flex-grow: 1;
   display: flex;
   flex-direction: column;
+  padding-top: var(--navbar-height);
   background-color: var(--background-light); 
-  padding-top: calc(var(--navbar-height) + 2rem);
   margin-top: 80px;
 }
 .admin-header {
@@ -122,7 +147,7 @@ const pageTitle = computed(() => {
 }
 .content-area {
   flex-grow: 1;
-  padding: 0 2rem 2rem 2rem;
+  padding: 2rem;
   background-color: var(--background-light);
 }
 .content-wrapper {
@@ -132,7 +157,6 @@ const pageTitle = computed(() => {
   margin-bottom: 2rem;
   padding-bottom: 1rem;
   border-bottom: 1px solid var(--border-color);
-  margin-top: 32px;
 }
 .page-title {
   font-size: 2rem;
@@ -189,16 +213,26 @@ const pageTitle = computed(() => {
   background-color: var(--primary-blue);
 }
 .tab-icon {
-  font-size: 1.1rem;
+  width: 20px;
+  height: 20px;
 }
 
 .tab-content {
   background-color: var(--background-dark);
   padding: 2rem;
-  border-radius: 12px;
+  border-radius: var(--border-radius, 12px);
   box-shadow: var(--box-shadow);
   overflow: hidden;
   border: 1px solid var(--border-color);
+}
+
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.5s ease;
+}
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
 }
 
 @media (max-width: 992px) {
@@ -207,8 +241,13 @@ const pageTitle = computed(() => {
   }
 }
 @media (max-width: 768px) {
-  .main-content-inner {
-    padding-top: calc(var(--navbar-height) + 1rem);
+  .main-content {
+    margin-left: 0;
+  }
+  .main-content.sidebar-open {
+    overflow: hidden;
+    position: fixed;
+    width: 100%;
   }
   .admin-header {
     left: 0;
@@ -218,9 +257,6 @@ const pageTitle = computed(() => {
   }
   .header-title {
     font-size: 1.3rem;
-  }
-  .content-area {
-    padding: 0 1rem 1rem 1rem;
   }
   .tab-navigation {
     flex-direction: column;

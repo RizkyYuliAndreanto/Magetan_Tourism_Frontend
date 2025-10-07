@@ -1,27 +1,82 @@
 <template>
   <div>
-    <div class="action-bar">
-      <button
-        v-if="!strukturOrganisasiData"
-        class="action-button create-button"
-        @click="openForm()">
-        <i class="fas fa-plus-circle"></i> Tambah Struktur Organisasi
-      </button>
-      <button
-        v-else
-        class="action-button edit-button"
-        @click="openForm(strukturOrganisasiData)">
-        <i class="fas fa-edit"></i> Edit Struktur Organisasi
-      </button>
+    <!-- Header Section -->
+    <div class="header-section">
+      <div class="header-info">
+        <h1 class="main-title">
+          <i class="fas fa-sitemap"></i>
+          Data Struktur Organisasi
+        </h1>
+        <p class="subtitle">
+          Kelola struktur organisasi dinas pariwisata Magetan dalam bentuk bagan
+          atau diagram untuk memberikan gambaran hierarki jabatan yang jelas.
+        </p>
+      </div>
+      <div class="action-bar">
+        <button
+          v-if="!strukturOrganisasiData"
+          class="action-button add-button"
+          @click="openForm()">
+          <i class="fas fa-plus-circle"></i> Tambah Struktur Organisasi
+        </button>
+        <button
+          v-else
+          class="action-button edit-button"
+          @click="openForm(strukturOrganisasiData)">
+          <i class="fas fa-edit"></i> Edit Struktur Organisasi
+        </button>
+      </div>
     </div>
 
-    <div v-if="formOpen" class="form-card card">
-      <StrukturOrganisasiForm
-        :is-editing="!!strukturOrganisasiData"
-        :initial-data="formStrukturOrganisasi"
-        @close-form="closeForm"
-        @save-struktur="handleSave"
-        @update-struktur="handleUpdate" />
+    <!-- Statistics Dashboard -->
+    <div v-if="!formOpen" class="stats-container">
+      <div class="stat-card">
+        <div class="stat-icon">
+          <i class="fas fa-sitemap"></i>
+        </div>
+        <div class="stat-content">
+          <h3>{{ strukturOrganisasiData ? "1" : "0" }}</h3>
+          <p>Struktur Organisasi</p>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">
+          <i class="fas fa-image"></i>
+        </div>
+        <div class="stat-content">
+          <h3>
+            {{ strukturOrganisasiData?.gambar_struktur_path ? "Ada" : "Tidak" }}
+          </h3>
+          <p>Gambar Struktur</p>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">
+          <i class="fas fa-calendar-check"></i>
+        </div>
+        <div class="stat-content">
+          <h3>
+            {{
+              strukturOrganisasiData
+                ? formatDate(strukturOrganisasiData.updatedAt)
+                : "-"
+            }}
+          </h3>
+          <p>Terakhir Diperbarui</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Form Overlay -->
+    <div v-if="formOpen" class="form-overlay">
+      <div class="form-card card">
+        <StrukturOrganisasiForm
+          :is-editing="!!strukturOrganisasiData"
+          :initial-data="formStrukturOrganisasi"
+          @close-form="closeForm"
+          @save-struktur="handleSave"
+          @update-struktur="handleUpdate" />
+      </div>
     </div>
 
     <div v-else-if="strukturOrganisasiData" class="preview-container card">
@@ -75,7 +130,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, nextTick } from "vue";
+import { ref, computed, onMounted, nextTick } from "vue";
 import axios from "axios";
 import StrukturOrganisasiForm from "./StrukturOrganisasiForm.vue";
 import BasePopUp from "../../../components/pop-up/BasePopUp.vue";
@@ -169,10 +224,21 @@ const openForm = (data = null) => {
         gambar_struktur_organisasi: null,
       };
   formOpen.value = true;
+
+  // Prevent body scroll
+  document.body.style.overflow = "hidden";
+  document.body.style.position = "fixed";
+  document.body.style.width = "100%";
 };
 
 const closeForm = () => {
   formOpen.value = false;
+
+  // Restore body scroll
+  document.body.style.overflow = "";
+  document.body.style.position = "";
+  document.body.style.width = "";
+
   fetchStrukturOrganisasiData(); // Refresh data setelah form ditutup
 };
 
@@ -230,13 +296,151 @@ const getFilePath = (path) => {
   return `http://localhost:5000${path}`;
 };
 
+const formatDate = (dateString) => {
+  if (!dateString) return "-";
+  const date = new Date(dateString);
+  return date.toLocaleDateString("id-ID", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+};
+
 onMounted(() => {
   fetchStrukturOrganisasiData();
 });
 </script>
 
 <style scoped>
-/* =========== Perubahan Styling untuk Konsistensi =========== */
+/* =========== Template Konsisten untuk Admin Management =========== */
+
+/* Card Base Style */
+.card {
+  background-color: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+  border: 1px solid #e0e6ed;
+}
+
+/* Header Section */
+.header-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 2rem;
+  gap: 2rem;
+}
+
+.header-info {
+  flex: 1;
+}
+
+.main-title {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #212529;
+  margin: 0 0 0.5rem 0;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.main-title i {
+  color: #007bff;
+  font-size: 1.5rem;
+}
+
+.subtitle {
+  font-size: 1rem;
+  color: #6c757d;
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* Stats Section */
+.stats-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.stat-card {
+  background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+  color: white;
+  padding: 1.5rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0, 123, 255, 0.2);
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 123, 255, 0.3);
+}
+
+.stat-card:nth-child(2) {
+  background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%);
+  box-shadow: 0 4px 15px rgba(40, 167, 69, 0.2);
+}
+
+.stat-card:nth-child(2):hover {
+  box-shadow: 0 8px 25px rgba(40, 167, 69, 0.3);
+}
+
+.stat-card:nth-child(3) {
+  background: linear-gradient(135deg, #ffc107 0%, #e0a800 100%);
+  box-shadow: 0 4px 15px rgba(255, 193, 7, 0.2);
+}
+
+.stat-card:nth-child(3):hover {
+  box-shadow: 0 8px 25px rgba(255, 193, 7, 0.3);
+}
+
+.stat-icon {
+  font-size: 2.5rem;
+  opacity: 0.9;
+}
+
+.stat-content h3 {
+  font-size: 2rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.stat-content p {
+  font-size: 0.9rem;
+  margin: 0.25rem 0 0 0;
+  opacity: 0.9;
+}
+
+/* Form Overlay */
+.form-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1rem;
+}
+
+.form-card {
+  max-width: 800px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  margin: auto;
+  padding: 2rem;
+}
 
 .action-bar {
   display: flex;
@@ -359,5 +563,34 @@ onMounted(() => {
   max-width: 500px;
   line-height: 1.6;
   margin: 0;
+}
+
+/* Content Containers */
+.preview-container,
+.no-data-card {
+  padding: 2rem;
+  margin-bottom: 2rem;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .header-section {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .stats-container {
+    grid-template-columns: 1fr;
+  }
+
+  .form-card,
+  .preview-container,
+  .no-data-card {
+    padding: 1.5rem;
+  }
+
+  .stat-content h3 {
+    font-size: 1.5rem;
+  }
 }
 </style>

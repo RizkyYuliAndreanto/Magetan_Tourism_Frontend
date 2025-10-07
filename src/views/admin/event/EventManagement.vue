@@ -1,13 +1,56 @@
 <template>
   <div>
-    <div class="action-bar">
-      <button
-        v-if="!formEventOpen"
-        class="action-button create-button"
-        @click="openEventForm()"
-      >
-        <i class="fas fa-plus-circle"></i> Tambah Event Baru
-      </button>
+    <!-- Header Section -->
+    <div class="header-section">
+      <div class="header-info">
+        <h1 class="main-title">
+          <i class="fas fa-calendar-alt"></i>
+          Data Event & Kegiatan
+        </h1>
+        <p class="subtitle">
+          Kelola event dan kegiatan wisata di Magetan termasuk festival,
+          pameran, dan acara budaya untuk meningkatkan daya tarik wisata daerah.
+        </p>
+      </div>
+      <div class="action-bar">
+        <button
+          v-if="!formEventOpen"
+          class="action-button add-button"
+          @click="openEventForm()">
+          <i class="fas fa-plus-circle"></i> Tambah Event Baru
+        </button>
+      </div>
+    </div>
+
+    <!-- Statistics Dashboard -->
+    <div v-if="!formEventOpen" class="stats-container">
+      <div class="stat-card">
+        <div class="stat-icon">
+          <i class="fas fa-calendar-alt"></i>
+        </div>
+        <div class="stat-content">
+          <h3>{{ totalEvent }}</h3>
+          <p>Total Event</p>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">
+          <i class="fas fa-calendar-plus"></i>
+        </div>
+        <div class="stat-content">
+          <h3>{{ eventAktif }}</h3>
+          <p>Event Aktif</p>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">
+          <i class="fas fa-calendar-check"></i>
+        </div>
+        <div class="stat-content">
+          <h3>{{ bulanIniEvent }}</h3>
+          <p>Event Bulan Ini</p>
+        </div>
+      </div>
     </div>
 
     <div v-if="formEventOpen" class="table-container card">
@@ -17,48 +60,60 @@
         :gallery-list="editingEventGallery"
         @close-form="closeEventForm"
         @save-event="handleSaveEvent"
-        @update-event="handleUpdateEvent"
-      />
+        @update-event="handleUpdateEvent" />
     </div>
 
     <div v-else class="table-container card">
       <div class="table-responsive">
-        <table class="data-table">
+        <table class="table">
           <thead>
             <tr>
-              <th>ID</th>
-              <th>Nama Event</th>
-              <th>Lokasi</th>
-              <th>Tanggal</th>
-              <th>Admin</th>
-              <th>Aksi</th>
+              <th><i class="fas fa-hashtag"></i>ID</th>
+              <th><i class="fas fa-calendar-alt"></i>Nama Event</th>
+              <th><i class="fas fa-map-marker-alt"></i>Lokasi</th>
+              <th><i class="fas fa-clock"></i>Tanggal</th>
+              <th><i class="fas fa-user-shield"></i>Admin</th>
+              <th><i class="fas fa-cogs"></i>Aksi</th>
             </tr>
           </thead>
           <tbody>
             <tr v-if="eventList.length === 0">
-              <td colspan="6" class="no-data-found">
-                Tidak ada event yang tersedia.
+              <td colspan="6">
+                <div class="empty-state">
+                  <i class="fas fa-calendar-alt"></i>
+                  <h3>Belum Ada Event</h3>
+                  <p>
+                    Mulai tambahkan event dan kegiatan wisata untuk menarik
+                    lebih banyak pengunjung ke Magetan.
+                  </p>
+                  <button
+                    class="action-button add-button"
+                    @click="openEventForm()">
+                    <i class="fas fa-plus-circle"></i> Tambah Event Pertama
+                  </button>
+                </div>
               </td>
             </tr>
             <tr v-for="event in eventList" :key="event.id_event">
               <td>{{ event.id_event }}</td>
               <td>{{ event.nama_event }}</td>
               <td>{{ event.lokasi_event }}</td>
-              <td>{{ formatDate(event.tanggal_mulai) }} - {{ formatDate(event.tanggal_selesai) }}</td>
+              <td>
+                {{ formatDate(event.tanggal_mulai) }} -
+                {{ formatDate(event.tanggal_selesai) }}
+              </td>
               <td>{{ event.adminPembuat.username }}</td>
               <td class="actions">
                 <button
                   class="action-button edit-button"
                   @click="openEventForm(event)"
-                  title="Edit"
-                >
+                  title="Edit">
                   <i class="fas fa-edit"></i>
                 </button>
                 <button
                   class="action-button delete-button"
                   @click="showDeleteConfirm(event.id_event)"
-                  title="Hapus"
-                >
+                  title="Hapus">
                   <i class="fas fa-trash-alt"></i>
                 </button>
               </td>
@@ -76,13 +131,12 @@
       :entity-name="popUpEntity"
       :error-message="popUpMessage"
       @close="closePopUp"
-      @confirmed="handleDeleteConfirmed"
-    />
+      @confirmed="handleDeleteConfirmed" />
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, nextTick } from "vue";
+import { ref, computed, onMounted, nextTick } from "vue";
 import axios from "axios";
 import EventForm from "./EventForm.vue";
 import BasePopUp from "../../../components/pop-up/BasePopUp.vue";
@@ -100,6 +154,31 @@ const formEventOpen = ref(false);
 const isEditingEvent = ref(false);
 const formEvent = ref(null);
 const editingEventGallery = ref([]);
+
+// Computed properties untuk statistics
+const totalEvent = computed(() => eventList.value.length);
+
+const eventAktif = computed(() => {
+  const currentDate = new Date();
+  return eventList.value.filter((event) => {
+    const endDate = new Date(event.tanggal_selesai);
+    return endDate >= currentDate;
+  }).length;
+});
+
+const bulanIniEvent = computed(() => {
+  const currentDate = new Date();
+  const currentMonth = currentDate.getMonth();
+  const currentYear = currentDate.getFullYear();
+
+  return eventList.value.filter((event) => {
+    const startDate = new Date(event.tanggal_mulai);
+    return (
+      startDate.getMonth() === currentMonth &&
+      startDate.getFullYear() === currentYear
+    );
+  }).length;
+});
 
 // Menampilkan konfirmasi delete
 const showDeleteConfirm = (id) => {
@@ -184,6 +263,8 @@ const openEventForm = async (event = null) => {
     editingEventGallery.value = [];
   }
   formEventOpen.value = true;
+  // Mencegah scroll pada body saat form terbuka
+  document.body.style.overflow = "hidden";
 };
 
 // Tutup form event
@@ -192,6 +273,8 @@ const closeEventForm = () => {
   formEvent.value = null;
   editingEventGallery.value = [];
   isEditingEvent.value = false;
+  // Mengembalikan scroll pada body saat form ditutup
+  document.body.style.overflow = "auto";
   fetchEventData();
 };
 
@@ -224,19 +307,27 @@ const handleSaveEvent = async (formData, galleryFiles) => {
         galleryFormData.append("jenis_file", galleryItem.jenis_file);
         galleryFormData.append("urutan_tampil", galleryItem.urutan);
       });
-      await axios.post("http://localhost:5000/api/media-galeri", galleryFormData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      await axios.post(
+        "http://localhost:5000/api/media-galeri",
+        galleryFormData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
     }
 
     openPopUp("success", "create");
     closeEventForm();
   } catch (err) {
     console.error("Gagal menyimpan event:", err.response?.data);
-    openPopUp("error", "create", err.response?.data?.error || "Gagal menyimpan event.");
+    openPopUp(
+      "error",
+      "create",
+      err.response?.data?.error || "Gagal menyimpan event."
+    );
   }
 };
 
@@ -263,20 +354,27 @@ const handleUpdateEvent = async (formData, galleryFiles, deletedGalleryIds) => {
         galleryFormData.append("jenis_file", galleryItem.jenis_file);
         galleryFormData.append("urutan_tampil", galleryItem.urutan);
       });
-      await axios.post("http://localhost:5000/api/media-galeri", galleryFormData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      await axios.post(
+        "http://localhost:5000/api/media-galeri",
+        galleryFormData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
     }
 
     if (deletedGalleryIds && deletedGalleryIds.length > 0) {
       await Promise.all(
         deletedGalleryIds.map(async (mediaId) => {
-          await axios.delete(`http://localhost:5000/api/media-galeri/${mediaId}`, {
-            headers: { Authorization: `Bearer ${token}` },
-          });
+          await axios.delete(
+            `http://localhost:5000/api/media-galeri/${mediaId}`,
+            {
+              headers: { Authorization: `Bearer ${token}` },
+            }
+          );
         })
       );
     }
@@ -285,7 +383,11 @@ const handleUpdateEvent = async (formData, galleryFiles, deletedGalleryIds) => {
     closeEventForm();
   } catch (err) {
     console.error("Gagal memperbarui event:", err.response?.data);
-    openPopUp("error", "update", err.response?.data?.error || "Gagal memperbarui event.");
+    openPopUp(
+      "error",
+      "update",
+      err.response?.data?.error || "Gagal memperbarui event."
+    );
   }
 };
 
@@ -300,7 +402,11 @@ const handleDeleteEvent = async (id) => {
     fetchEventData();
   } catch (err) {
     console.error("Gagal menghapus event:", err.response?.data);
-    openPopUp("error", "delete", err.response?.data?.error || "Gagal menghapus event.");
+    openPopUp(
+      "error",
+      "delete",
+      err.response?.data?.error || "Gagal menghapus event."
+    );
   }
 };
 
@@ -414,5 +520,159 @@ onMounted(() => {
 .actions .delete-button:hover {
   background-color: #c82333;
   box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+}
+
+/* Header Section */
+.header-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 2rem;
+  gap: 2rem;
+}
+
+.header-info {
+  flex: 1;
+}
+
+.main-title {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #212529;
+  margin: 0 0 0.5rem 0;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.main-title i {
+  color: #007bff;
+  font-size: 1.5rem;
+}
+
+.subtitle {
+  font-size: 1rem;
+  color: #6c757d;
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* Stats Section */
+.stats-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.stat-card {
+  background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+  color: white;
+  padding: 1.5rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0, 123, 255, 0.2);
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 123, 255, 0.3);
+}
+
+.stat-card:nth-child(2) {
+  background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%);
+  box-shadow: 0 4px 15px rgba(40, 167, 69, 0.2);
+}
+
+.stat-card:nth-child(2):hover {
+  box-shadow: 0 8px 25px rgba(40, 167, 69, 0.3);
+}
+
+.stat-card:nth-child(3) {
+  background: linear-gradient(135deg, #ffc107 0%, #e0a800 100%);
+  box-shadow: 0 4px 15px rgba(255, 193, 7, 0.2);
+}
+
+.stat-card:nth-child(3):hover {
+  box-shadow: 0 8px 25px rgba(255, 193, 7, 0.3);
+}
+
+.stat-icon {
+  font-size: 2.5rem;
+  opacity: 0.9;
+}
+
+.stat-content h3 {
+  font-size: 2rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.stat-content p {
+  font-size: 0.9rem;
+  margin: 0.25rem 0 0 0;
+  opacity: 0.9;
+}
+
+/* Table Styling */
+.table thead th {
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  padding: 1rem;
+  text-align: left;
+  font-weight: 600;
+  color: #495057;
+  border-bottom: 2px solid #dee2e6;
+}
+
+.table thead th i {
+  margin-right: 0.5rem;
+  color: #007bff;
+}
+
+/* Empty State */
+.empty-state {
+  text-align: center;
+  padding: 3rem 2rem;
+  color: #6c757d;
+}
+
+.empty-state i {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  color: #dee2e6;
+}
+
+.empty-state h3 {
+  font-size: 1.25rem;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+}
+
+.empty-state p {
+  margin-bottom: 1.5rem;
+  opacity: 0.8;
+}
+
+.add-button {
+  background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .header-section {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .stats-container {
+    grid-template-columns: 1fr;
+  }
+
+  .table-container {
+    overflow-x: auto;
+  }
 }
 </style>

@@ -1,91 +1,93 @@
 <template>
+  <!-- Header dengan Penjelasan -->
+  <div class="header-section">
+    <div class="header-info">
+      <h2 class="main-title">
+        <i class="fas fa-file-alt"></i>
+        Data Konten PPID
+      </h2>
+      <p class="subtitle">
+        Kelola dokumen dan informasi PPID berdasarkan kategori yang telah
+        ditentukan. Setiap konten akan ditampilkan sesuai dengan kategori yang
+        dipilih.
+      </p>
+    </div>
+    <div class="action-bar">
+      <button
+        v-if="!formKontenOpen"
+        class="action-button create-button"
+        @click="openKontenForm()">
+        <i class="fas fa-plus-circle"></i> Tambah Konten Baru
+      </button>
+    </div>
+  </div>
 
-    <!-- Header dengan Penjelasan -->
-    <div class="header-section">
-      <div class="header-info">
-        <h2 class="main-title">
+  <div v-if="formKontenOpen" class="form-overlay">
+    <div class="form-card card">
+      <KontenPpidForm
+        :is-editing="isEditingKonten"
+        :initial-data="formKonten"
+        :kategori-list="kategoriList"
+        @close-form="closeKontenForm"
+        @save-konten="handleSaveKonten"
+        @update-konten="handleUpdateKonten" />
+    </div>
+  </div>
+
+  <div v-else>
+    <!-- Statistik -->
+    <div class="stats-container">
+      <div class="stat-card">
+        <div class="stat-icon">
           <i class="fas fa-file-alt"></i>
-          Manajemen Konten PPID
-        </h2>
-        <p class="subtitle">
-          Kelola dokumen dan informasi PPID berdasarkan kategori yang telah ditentukan. 
-          Setiap konten akan ditampilkan sesuai dengan kategori yang dipilih.
-        </p>
+        </div>
+        <div class="stat-content">
+          <h3>{{ kontenList.length }}</h3>
+          <p>Total Konten</p>
+        </div>
       </div>
-      <div class="action-bar">
-        <button v-if="!formKontenOpen" class="action-button create-button" @click="openKontenForm()">
-          <i class="fas fa-plus-circle"></i> Tambah Konten Baru
-        </button>
+      <div class="stat-card">
+        <div class="stat-icon">
+          <i class="fas fa-tags"></i>
+        </div>
+        <div class="stat-content">
+          <h3>{{ kategoriList.length }}</h3>
+          <p>Kategori Tersedia</p>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">
+          <i class="fas fa-calendar-alt"></i>
+        </div>
+        <div class="stat-content">
+          <h3>{{ kontenBulanIni }}</h3>
+          <p>Konten Bulan Ini</p>
+        </div>
       </div>
     </div>
 
-    <div v-if="formKontenOpen" class="form-overlay">
-      <div class="form-card card">
-        <KontenPpidForm
-          :is-editing="isEditingKonten"
-          :initial-data="formKonten"
-          :kategori-list="kategoriList"
-          @close-form="closeKontenForm"
-          @save-konten="handleSaveKonten"
-          @update-konten="handleUpdateKonten"
-        />
-      </div>
-    </div>
-
-    <div v-else>
-      <!-- Statistik -->
-      <div class="stats-container">
-        <div class="stat-card">
-          <div class="stat-icon">
-            <i class="fas fa-file-alt"></i>
-          </div>
-          <div class="stat-content">
-            <h3>{{ kontenList.length }}</h3>
-            <p>Total Konten</p>
-          </div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-icon">
-            <i class="fas fa-tags"></i>
-          </div>
-          <div class="stat-content">
-            <h3>{{ kategoriList.length }}</h3>
-            <p>Kategori Tersedia</p>
-          </div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-icon">
-            <i class="fas fa-calendar-alt"></i>
-          </div>
-          <div class="stat-content">
-            <h3>{{ kontenBulanIni }}</h3>
-            <p>Konten Bulan Ini</p>
-          </div>
+    <div class="table-container card">
+      <div class="table-header">
+        <h3 class="table-title">
+          <i class="fas fa-list"></i>
+          Daftar Konten PPID
+        </h3>
+        <div class="table-count">
+          Total: <strong>{{ kontenList.length }}</strong> konten
         </div>
       </div>
-
-      <div class="table-container card">
-        <div class="table-header">
-          <h3 class="table-title">
-            <i class="fas fa-list"></i>
-            Daftar Konten PPID
-          </h3>
-          <div class="table-count">
-            Total: <strong>{{ kontenList.length }}</strong> konten
-          </div>
-        </div>
-        <div class="table-responsive">
-          <table class="data-table">
-            <thead>
-              <tr>
-                <th><i class="fas fa-hashtag"></i> ID</th>
-                <th><i class="fas fa-file-text"></i> Judul Konten</th>
-                <th><i class="fas fa-tag"></i> Kategori</th>
-                <th><i class="fas fa-user"></i> Admin Pengelola</th>
-                <th><i class="fas fa-calendar"></i> Tanggal Publikasi</th>
-                <th><i class="fas fa-cogs"></i> Aksi</th>
-              </tr>
-            </thead>
+      <div class="table-responsive">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th><i class="fas fa-hashtag"></i> ID</th>
+              <th><i class="fas fa-file-text"></i> Judul Konten</th>
+              <th><i class="fas fa-tag"></i> Kategori</th>
+              <th><i class="fas fa-user"></i> Admin Pengelola</th>
+              <th><i class="fas fa-calendar"></i> Tanggal Publikasi</th>
+              <th><i class="fas fa-cogs"></i> Aksi</th>
+            </tr>
+          </thead>
           <tbody>
             <tr v-if="kontenList.length === 0">
               <td colspan="6" class="no-data-found">
@@ -97,23 +99,51 @@
               <td>{{ konten.judul_konten }}</td>
               <td>
                 <div class="category-display" v-if="konten.kategoriPPID">
-                  <span class="category-badge" :class="konten.kategoriPPID.id_kategori_induk ? 'sub-category' : 'main-category'">
-                    <i :class="konten.kategoriPPID.id_kategori_induk ? 'fas fa-folder-open' : 'fas fa-folder'"></i>
+                  <span
+                    class="category-badge"
+                    :class="
+                      konten.kategoriPPID.id_kategori_induk
+                        ? 'sub-category'
+                        : 'main-category'
+                    ">
+                    <i
+                      :class="
+                        konten.kategoriPPID.id_kategori_induk
+                          ? 'fas fa-folder-open'
+                          : 'fas fa-folder'
+                      "></i>
                     {{ konten.kategoriPPID.nama_kategori }}
                   </span>
-                  <small v-if="konten.kategoriPPID.id_kategori_induk" class="parent-category">
-                    Sub dari: {{ getParentCategoryName(konten.kategoriPPID.id_kategori_induk) }}
+                  <small
+                    v-if="konten.kategoriPPID.id_kategori_induk"
+                    class="parent-category">
+                    Sub dari:
+                    {{
+                      getParentCategoryName(
+                        konten.kategoriPPID.id_kategori_induk
+                      )
+                    }}
                   </small>
                 </div>
                 <span v-else class="category-badge inactive">N/A</span>
               </td>
-              <td>{{ konten.adminPengelola ? konten.adminPengelola.username : 'N/A' }}</td>
+              <td>
+                {{
+                  konten.adminPengelola ? konten.adminPengelola.username : "N/A"
+                }}
+              </td>
               <td>{{ formatDate(konten.tanggal_publikasi) }}</td>
               <td class="actions">
-                <button class="action-button edit-button" @click="openKontenForm(konten)" title="Edit">
+                <button
+                  class="action-button edit-button"
+                  @click="openKontenForm(konten)"
+                  title="Edit">
                   <i class="fas fa-edit"></i>
                 </button>
-                <button class="action-button delete-button" @click="showDeleteConfirm(konten.id_konten_ppid)" title="Hapus">
+                <button
+                  class="action-button delete-button"
+                  @click="showDeleteConfirm(konten.id_konten_ppid)"
+                  title="Hapus">
                   <i class="fas fa-trash-alt"></i>
                 </button>
               </td>
@@ -122,7 +152,7 @@
         </table>
       </div>
     </div>
-    
+
     <BasePopUp
       v-if="showPopUp"
       :key="`${popUpStatus}-${popUpAction}`"
@@ -131,16 +161,15 @@
       :entity-name="popUpEntity"
       :error-message="popUpMessage"
       @close="closePopUp"
-      @confirmed="handleDeleteConfirmed"
-    />
+      @confirmed="handleDeleteConfirmed" />
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted, nextTick } from 'vue';
-import axios from 'axios';
-import KontenPpidForm from './KontenPpidForm.vue';
-import BasePopUp from '../../../components/pop-up/BasePopUp.vue';
+import { ref, computed, onMounted, nextTick } from "vue";
+import axios from "axios";
+import KontenPpidForm from "./KontenPpidForm.vue";
+import BasePopUp from "../../../components/pop-up/BasePopUp.vue";
 
 const kontenList = ref([]);
 const kategoriList = ref([]);
@@ -155,15 +184,15 @@ const popUpEntity = ref("Konten PPID");
 const popUpMessage = ref("");
 const kontenToDeleteId = ref(null);
 
-const getToken = () => localStorage.getItem('access_token');
+const getToken = () => localStorage.getItem("access_token");
 
 // Computed property untuk statistik
 const kontenBulanIni = computed(() => {
   const bulanIni = new Date();
   bulanIni.setDate(1);
   bulanIni.setHours(0, 0, 0, 0);
-  
-  return kontenList.value.filter(konten => {
+
+  return kontenList.value.filter((konten) => {
     const tanggalPublikasi = new Date(konten.tanggal_publikasi);
     return tanggalPublikasi >= bulanIni;
   }).length;
@@ -171,21 +200,29 @@ const kontenBulanIni = computed(() => {
 
 const fetchKontenData = async () => {
   try {
-    const response = await axios.get('http://localhost:5000/api/konten-ppid');
+    const response = await axios.get("http://localhost:5000/api/konten-ppid");
     kontenList.value = response.data;
   } catch (err) {
-    console.error('Gagal memuat data konten PPID:', err);
-    openPopUp("error", "fetch", err.response?.data?.error || "Gagal memuat data konten PPID.");
+    console.error("Gagal memuat data konten PPID:", err);
+    openPopUp(
+      "error",
+      "fetch",
+      err.response?.data?.error || "Gagal memuat data konten PPID."
+    );
   }
 };
 
 const fetchKategoriData = async () => {
   try {
-    const response = await axios.get('http://localhost:5000/api/kategori-ppid');
+    const response = await axios.get("http://localhost:5000/api/kategori-ppid");
     kategoriList.value = response.data;
   } catch (err) {
-    console.error('Gagal memuat data kategori PPID:', err);
-    openPopUp("error", "fetch", err.response?.data?.error || "Gagal memuat data kategori PPID.");
+    console.error("Gagal memuat data kategori PPID:", err);
+    openPopUp(
+      "error",
+      "fetch",
+      err.response?.data?.error || "Gagal memuat data kategori PPID."
+    );
   }
 };
 
@@ -193,7 +230,7 @@ const openKontenForm = (konten = null) => {
   isEditingKonten.value = !!konten;
   if (konten) {
     // Memuat data awal untuk form edit
-    formKonten.value = { 
+    formKonten.value = {
       ...konten,
       id_kategori_ppid: konten.kategoriPPID?.id_kategori_ppid,
       file_pdf_ppid: null, // Reset file input
@@ -203,31 +240,31 @@ const openKontenForm = (konten = null) => {
     // Data awal untuk form tambah baru
     formKonten.value = {
       id_konten_ppid: null,
-      judul_konten: '',
-      deskripsi_konten: '',
-      id_kategori_ppid: '',
+      judul_konten: "",
+      deskripsi_konten: "",
+      id_kategori_ppid: "",
       gambar_sampul: null,
       file_pdf_path: null,
     };
   }
   formKontenOpen.value = true;
-  
+
   // Prevent body scroll
-  document.body.style.overflow = 'hidden';
-  document.body.style.position = 'fixed';
-  document.body.style.width = '100%';
+  document.body.style.overflow = "hidden";
+  document.body.style.position = "fixed";
+  document.body.style.width = "100%";
 };
 
 const closeKontenForm = () => {
   formKontenOpen.value = false;
   formKonten.value = null;
   isEditingKonten.value = false;
-  
+
   // Restore body scroll
-  document.body.style.overflow = '';
-  document.body.style.position = '';
-  document.body.style.width = '';
-  
+  document.body.style.overflow = "";
+  document.body.style.position = "";
+  document.body.style.width = "";
+
   fetchKontenData();
   fetchKategoriData();
 };
@@ -237,16 +274,17 @@ const handleSaveKonten = async (formData) => {
     const token = getToken();
     const config = {
       headers: {
-        'Content-Type': 'multipart/form-data',
-        Authorization: `Bearer ${token}`
-      }
+        "Content-Type": "multipart/form-data",
+        Authorization: `Bearer ${token}`,
+      },
     };
-    await axios.post('http://localhost:5000/api/konten-ppid', formData, config);
+    await axios.post("http://localhost:5000/api/konten-ppid", formData, config);
     openPopUp("success", "create");
     closeKontenForm();
   } catch (err) {
-    const errorMessage = err.response?.data?.error || 'Gagal menyimpan konten PPID.';
-    console.error('Gagal menyimpan konten PPID:', errorMessage);
+    const errorMessage =
+      err.response?.data?.error || "Gagal menyimpan konten PPID.";
+    console.error("Gagal menyimpan konten PPID:", errorMessage);
     openPopUp("error", "create", errorMessage);
   }
 };
@@ -254,20 +292,25 @@ const handleSaveKonten = async (formData) => {
 const handleUpdateKonten = async (formData) => {
   try {
     const token = getToken();
-    const id = formData.get('id_konten_ppid');
+    const id = formData.get("id_konten_ppid");
     const config = {
       headers: {
-        'Content-Type': 'multipart/form-data',
-        Authorization: `Bearer ${token}`
-      }
+        "Content-Type": "multipart/form-data",
+        Authorization: `Bearer ${token}`,
+      },
     };
-    
-    await axios.put(`http://localhost:5000/api/konten-ppid/${id}`, formData, config);
+
+    await axios.put(
+      `http://localhost:5000/api/konten-ppid/${id}`,
+      formData,
+      config
+    );
     openPopUp("success", "update");
     closeKontenForm();
   } catch (err) {
-    const errorMessage = err.response?.data?.error || 'Gagal memperbarui konten PPID.';
-    console.error('Gagal memperbarui konten PPID:', errorMessage);
+    const errorMessage =
+      err.response?.data?.error || "Gagal memperbarui konten PPID.";
+    console.error("Gagal memperbarui konten PPID:", errorMessage);
     openPopUp("error", "update", errorMessage);
   }
 };
@@ -285,14 +328,18 @@ const handleDeleteConfirmed = async () => {
 
   try {
     const token = getToken();
-    await axios.delete(`http://localhost:5000/api/konten-ppid/${kontenToDeleteId.value}`, {
-      headers: { Authorization: `Bearer ${token}` }
-    });
+    await axios.delete(
+      `http://localhost:5000/api/konten-ppid/${kontenToDeleteId.value}`,
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    );
     openPopUp("success", "delete");
     fetchKontenData();
   } catch (err) {
-    const errorMessage = err.response?.data?.error || "Gagal menghapus konten PPID.";
-    console.error('Gagal menghapus konten PPID:', errorMessage);
+    const errorMessage =
+      err.response?.data?.error || "Gagal menghapus konten PPID.";
+    console.error("Gagal menghapus konten PPID:", errorMessage);
     openPopUp("error", "delete", errorMessage);
   } finally {
     kontenToDeleteId.value = null;
@@ -311,13 +358,21 @@ const closePopUp = () => {
 };
 
 const formatDate = (dateString) => {
-  const options = { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' };
-  return new Date(dateString).toLocaleDateString('id-ID', options);
+  const options = {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  };
+  return new Date(dateString).toLocaleDateString("id-ID", options);
 };
 
 const getParentCategoryName = (parentId) => {
-  const parent = kategoriList.value.find(k => k.id_kategori_ppid === parentId);
-  return parent ? parent.nama_kategori : 'Tidak ditemukan';
+  const parent = kategoriList.value.find(
+    (k) => k.id_kategori_ppid === parentId
+  );
+  return parent ? parent.nama_kategori : "Tidak ditemukan";
 };
 
 onMounted(() => {
@@ -606,7 +661,7 @@ onMounted(() => {
   margin-left: 0.5rem;
 }
 .mt-4 {
-    margin-top: 1.5rem;
+  margin-top: 1.5rem;
 }
 
 /* Form Overlay Styles */
@@ -641,7 +696,7 @@ onMounted(() => {
 
 /* Prevent background interaction */
 .form-overlay::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: 0;
@@ -657,39 +712,39 @@ onMounted(() => {
     flex-direction: column;
     gap: 1rem;
   }
-  
+
   .action-bar {
     width: 100%;
     justify-content: center;
   }
-  
+
   .stats-container {
     grid-template-columns: 1fr;
   }
-  
+
   .table-header {
     flex-direction: column;
     align-items: flex-start;
     gap: 1rem;
   }
-  
+
   .table-count {
     align-self: flex-start;
   }
-  
+
   .category-display {
     align-items: flex-start;
   }
-  
+
   .actions {
     flex-direction: column;
     gap: 0.5rem;
   }
-  
+
   .form-overlay {
     padding: 1rem;
   }
-  
+
   .form-overlay .form-card {
     max-width: 100%;
   }
@@ -699,19 +754,19 @@ onMounted(() => {
   .main-title {
     font-size: 1.5rem;
   }
-  
+
   .stats-container {
     gap: 1rem;
   }
-  
+
   .stat-card {
     padding: 1rem;
   }
-  
+
   .stat-content h3 {
     font-size: 1.5rem;
   }
-  
+
   .category-badge {
     font-size: 0.75rem;
     padding: 0.3rem 0.6rem;

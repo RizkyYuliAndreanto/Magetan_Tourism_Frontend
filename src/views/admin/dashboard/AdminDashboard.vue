@@ -1,13 +1,18 @@
 <template>
   <div class="admin-dashboard-container">
     <div class="header-container">
-      <h2 class="page-title">Dashboard Utama</h2>
+      <h2 class="page-title">
+        <i class="fas fa-tachometer-alt"></i>
+        Dashboard Admin
+      </h2>
       <p class="page-subtitle">
-        Ringkasan statistik dan aktivitas terbaru dari semua konten.
+        Selamat datang di panel administrasi Magetan Tourism. Pantau dan kelola
+        semua konten website Anda dari sini.
       </p>
     </div>
 
     <div v-if="error" class="error-banner">
+      <i class="fas fa-exclamation-triangle"></i>
       {{ error }}
       <div v-if="error.includes('Sesi login')" class="error-actions">
         <button @click="goToLogin" class="login-button">
@@ -17,15 +22,8 @@
       </div>
     </div>
 
-    <div class="stats-grid">
-      <DashboardCard
-        v-for="stat in statsData"
-        :key="stat.title"
-        :title="stat.title"
-        :value="stat.value"
-        :icon="stat.icon"
-        :color="stat.color" />
-    </div>
+    <!-- Content Overview Component -->
+    <ContentOverview />
 
     <div class="recent-activity">
       <div class="activity-header">
@@ -63,60 +61,12 @@
 
 <script setup>
 import { ref, onMounted } from "vue";
-import DashboardCard from "./DashboardCard.vue";
+import ContentOverview from "./ContentOverview.vue";
 import axios from "axios";
 
-const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
-const loading = ref(true);
 const error = ref(null);
-const autoRefresh = ref(null);
-
-const statsData = ref([
-  {
-    title: "Total Berita",
-    value: 0,
-    icon: "fas fa-newspaper",
-    color: "#007bff",
-  },
-  {
-    title: "Total Destinasi",
-    value: 0,
-    icon: "fas fa-map-marker-alt",
-    color: "#17a2b8",
-  },
-  {
-    title: "Total Event",
-    value: 0,
-    icon: "fas fa-calendar-alt",
-    color: "#28a745",
-  },
-  { title: "Total UMKM", value: 0, icon: "fas fa-store", color: "#ffc107" },
-  { title: "Total Sejarah", value: 0, icon: "fas fa-book", color: "#6c757d" },
-  { title: "Total Media", value: 0, icon: "fas fa-images", color: "#dc3545" },
-]);
-
+const loading = ref(false);
 const recentActivity = ref([]);
-
-function formatTime(ts) {
-  try {
-    const date = new Date(ts);
-    return date.toLocaleString("id-ID", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  } catch {
-    return ts;
-  }
-}
-
-// Function untuk refresh data
-function refreshDashboard() {
-  console.log("🔄 Refreshing dashboard...");
-  loadDashboard();
-}
 
 // Function untuk redirect ke login
 function goToLogin() {
@@ -125,285 +75,225 @@ function goToLogin() {
   // router.push('/admin/login');
 }
 
-async function loadDashboard() {
+// Function untuk refresh dashboard
+function refreshDashboard() {
   loading.value = true;
-  error.value = null;
+  fetchRecentActivity();
+  setTimeout(() => {
+    loading.value = false;
+    console.log("Dashboard refreshed");
+  }, 1000);
+}
+
+// Function untuk fetch aktivitas terbaru
+const fetchRecentActivity = async () => {
   try {
-    console.log("🔄 Loading dashboard data...");
-
-    // Get auth token from localStorage
-    const token = localStorage.getItem("token");
-    const authHeaders = token ? { Authorization: `Bearer ${token}` } : {};
-
-    console.log("🔑 Using auth token:", token ? "Present" : "Missing");
-
-    let summaryRes, activityRes;
-
-    try {
-      // Try to load both summary and activity
-      [summaryRes, activityRes] = await Promise.all([
-        axios.get(`${backendUrl}/api/dashboard/summary`, {
-          headers: authHeaders,
-        }),
-        axios.get(`${backendUrl}/api/dashboard/activity`, {
-          params: { limit: 10 },
-          headers: authHeaders,
-        }),
-      ]);
-    } catch (authError) {
-      console.warn(
-        "⚠️ Auth failed, trying summary only:",
-        authError.response?.status
-      );
-
-      if (authError.response?.status === 401) {
-        // If auth fails, try to get at least summary without auth
-        try {
-          summaryRes = await axios.get(`${backendUrl}/api/dashboard/summary`);
-          activityRes = { data: { data: [] } }; // Empty activity data
-          console.log("ℹ️ Loaded summary without auth, activity unavailable");
-        } catch (summaryError) {
-          throw authError; // Re-throw original auth error
-        }
-      } else {
-        throw authError; // Re-throw non-auth errors
-      }
-    }
-
-    console.log("✅ Data loaded successfully:", {
-      summaryRes: summaryRes.data,
-      activityRes: activityRes.data,
-    });
-
-    const t = summaryRes.data?.totals || summaryRes.data || {};
-    const totals = {
-      berita: t.berita ?? 0,
-      destinasi: t.destinasi ?? 0,
-      event: t.event ?? 0,
-      umkm: t.umkm ?? 0,
-      sejarah: t.sejarah ?? 0,
-      media: t.media ?? 0,
-    };
-    statsData.value = [
+    // Simulasi data aktivitas terbaru
+    // Pada implementasi nyata, ini akan mengambil data dari API log aktivitas
+    const mockActivities = [
       {
-        title: "Total Berita",
-        value: totals.berita,
-        icon: "fas fa-newspaper",
-        color: "#007bff",
+        id: 1,
+        type: "create",
+        iconClass: "fas fa-plus",
+        message: "Menambahkan destinasi wisata baru: Candi Penataran",
+        timestamp: "2 menit yang lalu",
       },
       {
-        title: "Total Destinasi",
-        value: totals.destinasi,
-        icon: "fas fa-map-marker-alt",
-        color: "#17a2b8",
+        id: 2,
+        type: "update",
+        iconClass: "fas fa-edit",
+        message: "Memperbarui informasi berita: Festival Budaya Magetan 2025",
+        timestamp: "15 menit yang lalu",
       },
       {
-        title: "Total Event",
-        value: totals.event,
-        icon: "fas fa-calendar-alt",
-        color: "#28a745",
+        id: 3,
+        type: "upload",
+        iconClass: "fas fa-upload",
+        message: "Mengunggah 5 foto ke galeri media",
+        timestamp: "30 menit yang lalu",
       },
       {
-        title: "Total UMKM",
-        value: totals.umkm,
-        icon: "fas fa-store",
-        color: "#ffc107",
+        id: 4,
+        type: "create",
+        iconClass: "fas fa-calendar-plus",
+        message: "Membuat event baru: Workshop Batik Tradisional",
+        timestamp: "1 jam yang lalu",
       },
       {
-        title: "Total Sejarah",
-        value: totals.sejarah,
-        icon: "fas fa-book",
-        color: "#6c757d",
+        id: 5,
+        type: "delete",
+        iconClass: "fas fa-trash",
+        message: "Menghapus pengumuman yang sudah kedaluwarsa",
+        timestamp: "2 jam yang lalu",
       },
       {
-        title: "Total Media",
-        value: totals.media,
-        icon: "fas fa-images",
-        color: "#dc3545",
+        id: 6,
+        type: "update",
+        iconClass: "fas fa-user-edit",
+        message: "Memperbarui struktur anggota organisasi",
+        timestamp: "3 jam yang lalu",
       },
     ];
 
-    const logs = activityRes.data?.data ?? activityRes.data ?? [];
-    console.log("📋 Processing activity logs:", logs);
-
-    recentActivity.value = logs.map((a, idx) => {
-      // Handle berbagai format action/type dari backend
-      const rawType = (a.type || a.action || "").toString().toLowerCase();
-      const typeMap = {
-        create: "create",
-        add: "create",
-        update: "update",
-        edit: "update",
-        delete: "delete",
-        remove: "delete",
-        login: "update", // Login ditampilkan sebagai update
-      };
-      const mapped = typeMap[rawType] || "update";
-
-      const iconMap = {
-        create: "fas fa-plus",
-        update: "fas fa-edit",
-        delete: "fas fa-trash-alt",
-        login: "fas fa-sign-in-alt",
-      };
-
-      // Ambil nama admin dari berbagai field yang mungkin ada
-      const actor = a.actor || a.admin || a.user || "Admin";
-
-      // Ambil target entity dan nama
-      const target = a.entity || a.module || a.target || "konten";
-      const name = a.entityName || a.title || a.name || "";
-
-      // Generate message berdasarkan action
-      let message = "";
-      let finalType = mapped;
-      let finalIconClass = iconMap[mapped];
-
-      if (rawType === "login") {
-        message = `${actor} login ke sistem`;
-        finalType = "login";
-        finalIconClass = iconMap.login;
-      } else {
-        const actionWord =
-          mapped === "create"
-            ? "menambahkan"
-            : mapped === "delete"
-            ? "menghapus"
-            : "memperbarui";
-        message = `${actor} ${actionWord} ${target}${
-          name ? `: "${name}"` : ""
-        }`;
-      }
-
-      return {
-        id: a.id || idx,
-        type: finalType,
-        message,
-        timestamp: formatTime(
-          a.createdAt || a.timestamp || new Date().toISOString()
-        ),
-        iconClass: finalIconClass,
-      };
-    });
-  } catch (e) {
-    console.error("❌ Dashboard loading error:", e);
-    if (e.response) {
-      // Server responded with error status
-      if (e.response.status === 401) {
-        error.value = "Sesi login telah berakhir. Silakan login kembali.";
-        // Optional: redirect to login
-        // router.push('/admin/login');
-      } else {
-        error.value = `Server error: ${e.response.status} - ${
-          e.response.data?.message || "Unknown error"
-        }`;
-      }
-    } else if (e.request) {
-      // Request was made but no response received
-      error.value =
-        "Tidak dapat terhubung ke server. Pastikan backend berjalan di port 5000.";
-    } else {
-      // Something else happened
-      error.value = `Error: ${e.message}`;
-    }
-  } finally {
-    loading.value = false;
+    // Simulasi delay API call
+    await new Promise((resolve) => setTimeout(resolve, 500));
+    recentActivity.value = mockActivities;
+  } catch (error) {
+    console.error("Error fetching recent activity:", error);
+    recentActivity.value = [];
   }
-}
+};
 
+// Check auth status dan load initial data
 onMounted(() => {
-  loadDashboard();
-
-  // Auto refresh setiap 5 menit (opsional)
-  autoRefresh.value = setInterval(() => {
-    console.log("🔄 Auto refreshing dashboard...");
-    loadDashboard();
-  }, 5 * 60 * 1000); // 5 minutes
-});
-
-// Cleanup interval when component unmounts
-import { onUnmounted } from "vue";
-onUnmounted(() => {
-  if (autoRefresh.value) {
-    clearInterval(autoRefresh.value);
+  const token = localStorage.getItem("access_token");
+  if (!token) {
+    error.value = "Sesi login telah berakhir. Silakan login kembali.";
+  } else {
+    // Load aktivitas terbaru
+    fetchRecentActivity();
   }
 });
 </script>
 
 <style scoped>
+/* =========== Dashboard Admin Template Konsisten =========== */
+
 .admin-dashboard-container {
   padding: 2rem;
-  /* Mengubah background menjadi putih cerah */
-  background-color: #f8f9fa;
+  background-color: #f8fafc;
   min-height: 100vh;
-  margin-top: 80px;
 }
 
 .header-container {
-  margin-bottom: 2rem;
-  padding-bottom: 1rem;
-  /* Menyesuaikan border untuk kontras yang lebih baik */
-  border-bottom: 1px solid #dee2e6;
+  margin-bottom: 2.5rem;
+  text-align: left;
+  margin-top: 80px;
+  border-bottom: 1px solid #e2e8f0;
+  padding-bottom: 1.5rem;
 }
 
 .page-title {
   font-size: 2rem;
-  font-weight: 700;
-  color: #212529; /* Teks lebih gelap agar jelas */
-  margin-bottom: 0.5rem;
+  font-weight: 600;
+  color: #1e293b;
+  margin: 0 0 0.5rem 0;
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+}
+
+.page-title i {
+  color: #3b82f6;
+  font-size: 1.75rem;
 }
 
 .page-subtitle {
   font-size: 1rem;
-  color: #6c757d;
+  color: #64748b;
   margin: 0;
+  line-height: 1.5;
+  max-width: 700px;
+  font-weight: 400;
 }
 
-.stats-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 1.5rem;
-  margin-bottom: 3rem;
+.error-banner {
+  background: #fef2f2;
+  color: #991b1b;
+  border: 1px solid #fecaca;
+  border-left: 4px solid #dc2626;
+  padding: 1rem 1.5rem;
+  border-radius: 8px;
+  margin-bottom: 2rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.error-banner i {
+  font-size: 1.25rem;
+}
+
+.error-actions {
+  margin-left: auto;
+  display: flex;
+  gap: 0.75rem;
+}
+
+.login-button {
+  background: #3b82f6;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.25rem;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: background-color 0.2s ease;
+}
+
+.login-button:hover {
+  background: #2563eb;
+}
+
+/* Recent Activity Styles */
+.recent-activity {
+  background: #ffffff;
+  padding: 1.75rem;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  margin-top: 2rem;
 }
 
 .activity-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 1.5rem;
+  margin-bottom: 1.25rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid #f1f5f9;
 }
 
 .section-title {
-  font-size: 1.5rem;
-  color: #212529; /* Teks lebih gelap */
-  margin: 0;
+  font-size: 1.125rem;
   font-weight: 600;
-}
-
-.refresh-button {
-  background: #007bff;
-  color: white;
-  border: none;
-  padding: 0.75rem 1.5rem;
-  border-radius: 8px;
-  font-size: 0.875rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.3s ease;
+  color: #1e293b;
+  margin: 0;
   display: flex;
   align-items: center;
   gap: 0.5rem;
 }
 
+.section-title::before {
+  content: "�";
+  font-size: 1.1rem;
+}
+
+.refresh-button {
+  background: #059669;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: background-color 0.2s ease;
+}
+
 .refresh-button:hover:not(:disabled) {
-  background: #0056b3;
-  transform: translateY(-2px);
+  background: #047857;
 }
 
 .refresh-button:disabled {
-  background: #6c757d;
+  opacity: 0.5;
   cursor: not-allowed;
-  transform: none;
 }
 
 .activity-card-list {
@@ -412,103 +302,180 @@ onUnmounted(() => {
   gap: 1rem;
 }
 
-.error-banner {
-  background: #ffe8e8;
-  color: #c43b3b;
-  border: 1px solid #f4bcbc;
-  padding: 0.75rem 1rem;
-  border-radius: 8px;
-  margin-bottom: 1rem;
-  position: relative;
-}
-
-.error-actions {
-  margin-top: 1rem;
-  display: flex;
-  gap: 0.5rem;
-}
-
-.login-button {
-  background: #007bff;
-  color: white;
-  border: none;
-  padding: 0.5rem 1rem;
-  border-radius: 4px;
-  font-size: 0.875rem;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  transition: background 0.3s ease;
-}
-
-.login-button:hover {
-  background: #0056b3;
-}
-
 .activity-loading,
 .activity-empty {
-  background: #ffffff;
-  border: 1px dashed #e9ecef;
+  text-align: center;
+  padding: 2rem;
   color: #6c757d;
-  padding: 0.75rem 1rem;
-  border-radius: 8px;
+  font-style: italic;
 }
 
 .activity-card {
   display: flex;
-  align-items: center; /* Mengubah align-items agar ikon dan konten sejajar di tengah */
+  align-items: center;
   gap: 1rem;
-  padding: 1.25rem; /* Padding lebih besar */
-  background-color: #ffffff; /* Latar belakang card putih */
-  border-radius: 12px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08); /* Bayangan lebih jelas */
-  border: 1px solid #e9ecef; /* Border lembut */
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  padding: 0.875rem 1rem;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
 }
 
 .activity-card:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+  background: #f1f5f9;
+  border-color: #cbd5e1;
 }
 
 .activity-icon {
-  width: 45px; /* Ukuran ikon sedikit lebih besar */
-  height: 45px;
-  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: white;
-  font-size: 1.1rem;
+  font-size: 0.875rem;
   flex-shrink: 0;
+  color: white;
 }
 
 .activity-icon.create {
-  background-color: #28a745;
+  background: #3b82f6;
 }
+
 .activity-icon.update {
-  background-color: #ffc107;
+  background: #1e40af;
 }
+
 .activity-icon.delete {
-  background-color: #dc3545;
+  background: #64748b;
 }
-.activity-icon.login {
-  background-color: #17a2b8;
+
+.activity-icon.upload {
+  background: #2563eb;
 }
 
 .activity-content {
-  flex-grow: 1;
+  flex: 1;
+  min-width: 0;
 }
 
 .activity-message {
-  margin: 0;
+  margin: 0 0 0.25rem 0;
+  color: #1e293b;
   font-weight: 500;
-  color: #212529; /* Teks lebih gelap */
+  line-height: 1.4;
+  font-size: 0.875rem;
 }
 
 .activity-timestamp {
-  font-size: 0.85rem;
-  color: #adb5bd; /* Warna abu-abu yang lebih halus */
+  font-size: 0.75rem;
+  color: #64748b;
+  font-weight: 400;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .admin-dashboard-container {
+    padding: 1.25rem;
+  }
+
+  .header-container {
+    text-align: center;
+    margin-bottom: 2rem;
+    padding-bottom: 1.25rem;
+  }
+
+  .page-title {
+    font-size: 1.75rem;
+    justify-content: center;
+  }
+
+  .page-title i {
+    font-size: 1.5rem;
+  }
+
+  .page-subtitle {
+    font-size: 0.9375rem;
+    text-align: center;
+  }
+
+  .error-banner {
+    flex-direction: column;
+    text-align: center;
+    gap: 1rem;
+  }
+
+  .error-actions {
+    margin-left: 0;
+    justify-content: center;
+  }
+
+  .recent-activity {
+    padding: 1.5rem;
+    margin-top: 1.5rem;
+  }
+
+  .activity-header {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: stretch;
+  }
+
+  .section-title {
+    text-align: center;
+  }
+
+  .refresh-button {
+    align-self: center;
+  }
+
+  .activity-card {
+    padding: 0.75rem;
+    gap: 0.875rem;
+  }
+
+  .activity-icon {
+    width: 32px;
+    height: 32px;
+    font-size: 0.8125rem;
+  }
+
+  .activity-message {
+    font-size: 0.8125rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .admin-dashboard-container {
+    padding: 1rem;
+  }
+
+  .header-container {
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+  }
+
+  .page-title {
+    font-size: 1.5rem;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .page-subtitle {
+    font-size: 0.875rem;
+  }
+
+  .recent-activity {
+    padding: 1.25rem;
+  }
+
+  .activity-header {
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+  }
+
+  .section-title {
+    font-size: 1rem;
+  }
 }
 </style>
