@@ -25,9 +25,26 @@ import CarouselDestinasi from "../components/home/CarouselDestinasi.vue";
 import KebudayaanHero from "../components/home/KebudayaanHero.vue";
 import EventSection from "../components/home/EventSection.vue";
 import EkonomiKreatifSection from "../components/home/EkonomiKreatifSection.vue";
+import { onMounted } from "vue";
+
 // Catatan: Anda tidak perlu mengimpor TrendingNews dan InstagramCard lagi
 // karena keduanya sudah menjadi bagian dari NewsGrid.vue
 
+onMounted(() => {
+  // Debug scroll issues
+  console.log("HomeView mounted - Debug Scroll");
+  console.log("document.body.overflow:", document.body.style.overflow);
+  console.log(
+    "html overflow-y:",
+    window.getComputedStyle(document.documentElement).overflowY
+  );
+  console.log(
+    "body overflow-y:",
+    window.getComputedStyle(document.body).overflowY
+  );
+  console.log("document height:", document.documentElement.scrollHeight);
+  console.log("window innerHeight:", window.innerHeight);
+});
 </script>
 
 <style scoped>
@@ -39,6 +56,7 @@ import EkonomiKreatifSection from "../components/home/EkonomiKreatifSection.vue"
   padding-top: 80px; /* Padding untuk navbar fixed */
   background-color: var(--off-white);
   color: var(--text-color-dark);
+  overflow-y: auto;
 }
 
 main {

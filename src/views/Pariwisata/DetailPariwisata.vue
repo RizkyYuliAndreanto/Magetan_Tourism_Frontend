@@ -770,3 +770,8 @@ watch(destinasi, (val) => {
   }
 }
 </style>
+<style scoped>
+.detail-destinasi-page {
+  overflow-y: auto;
+}
+</style>

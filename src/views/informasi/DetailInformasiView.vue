@@ -808,3 +808,8 @@ onMounted(() => {
   }
 }
 </style>
+<style scoped>
+.detail-informasi-view {
+  overflow-y: auto;
+}
+</style>

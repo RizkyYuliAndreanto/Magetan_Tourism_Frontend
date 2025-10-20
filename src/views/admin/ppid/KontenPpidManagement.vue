@@ -72,9 +72,6 @@
           <i class="fas fa-list"></i>
           Daftar Konten PPID
         </h3>
-        <div class="table-count">
-          Total: <strong>{{ kontenList.length }}</strong> konten
-        </div>
       </div>
       <div class="table-responsive">
         <table class="data-table">
@@ -382,14 +379,40 @@ onMounted(() => {
 </script>
 
 <style scoped>
-/* ========== Styling yang diselaraskan dengan KategoriPpidManagement ========== */
+/* ========== Styling yang diselaraskan dengan NewsManagement Template ========== */
 /* Header Section */
 .header-section {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 2rem;
+  border-radius: 16px;
+  margin-bottom: 2rem;
+  color: white;
+  position: relative;
+  overflow: hidden;
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: 2rem;
   gap: 2rem;
+}
+
+.header-section::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.1) 0%,
+    rgba(255, 255, 255, 0.05) 100%
+  );
+  pointer-events: none;
+}
+
+.header-section > * {
+  position: relative;
+  z-index: 1;
 }
 
 .header-info {
@@ -397,9 +420,9 @@ onMounted(() => {
 }
 
 .main-title {
-  font-size: 1.75rem;
+  font-size: 2rem;
   font-weight: 700;
-  color: #212529;
+  color: white;
   margin: 0 0 0.5rem 0;
   display: flex;
   align-items: center;
@@ -407,15 +430,16 @@ onMounted(() => {
 }
 
 .main-title i {
-  color: #007bff;
-  font-size: 1.5rem;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 1.75rem;
 }
 
 .subtitle {
   font-size: 1rem;
-  color: #6c757d;
+  color: rgba(255, 255, 255, 0.9);
   margin: 0;
-  line-height: 1.5;
+  line-height: 1.6;
+  max-width: 600px;
 }
 
 .action-bar {
@@ -558,9 +582,12 @@ onMounted(() => {
   background-color: #f8f9fa;
   color: #495057;
   font-weight: 600;
-  font-size: 0.85rem;
+  font-size: 0.875rem;
   text-transform: uppercase;
   letter-spacing: 0.05em;
+  position: sticky;
+  top: 0;
+  z-index: 10;
 }
 
 .data-table th i {
@@ -568,20 +595,33 @@ onMounted(() => {
   margin-right: 0.5rem;
   font-size: 0.8rem;
 }
-.data-table td {
-  color: #212529;
+
+.data-table tbody tr {
+  transition: all 0.2s ease;
+  border-left: 3px solid transparent;
 }
+
+.data-table tbody tr:hover {
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border-left: 3px solid #667eea;
+  transform: translateX(2px);
+}
+
+.data-table td {
+  color: #495057;
+  font-size: 0.9rem;
+}
+
 .data-table tr:last-child td {
   border-bottom: none;
 }
-.data-table tr:hover {
-  background-color: #f1f3f5;
-}
+
 .no-data-found {
   text-align: center;
   font-style: italic;
-  color: #888;
-  padding: 2rem;
+  color: #6c757d;
+  padding: 3rem;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
 }
 .actions {
   display: flex;

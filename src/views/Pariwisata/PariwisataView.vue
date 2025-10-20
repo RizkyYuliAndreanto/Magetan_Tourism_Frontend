@@ -1978,3 +1978,8 @@ onUnmounted(() => {
   }
 }
 </style>
+<style scoped>
+.pariwisata-page {
+  overflow-y: auto;
+}
+</style>

@@ -1220,3 +1220,8 @@ watch(
   }
 }
 </style>
+<style scoped>
+.informasi-view {
+  overflow-y: auto;
+}
+</style>

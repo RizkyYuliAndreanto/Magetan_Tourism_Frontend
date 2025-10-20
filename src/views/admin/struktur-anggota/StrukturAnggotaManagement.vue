@@ -3,10 +3,10 @@
     <!-- Header Section -->
     <div class="header-section">
       <div class="header-info">
-        <h1 class="main-title">
+        <h2 class="main-title">
           <i class="fas fa-users"></i>
           Data Struktur Anggota
-        </h1>
+        </h2>
         <p class="subtitle">
           Kelola struktur anggota organisasi dinas pariwisata Magetan termasuk
           informasi jabatan, foto, dan urutan tampilan dalam struktur
@@ -16,7 +16,7 @@
       <div class="action-bar">
         <button
           v-if="!formAnggotaOpen"
-          class="action-button add-button"
+          class="action-button create-button"
           @click="openAnggotaForm()">
           <i class="fas fa-plus-circle"></i> Tambah Anggota Baru
         </button>
@@ -329,11 +329,37 @@ onMounted(() => {
 
 /* Header Section */
 .header-section {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 2rem;
+  border-radius: 16px;
+  margin-bottom: 2rem;
+  color: white;
+  position: relative;
+  overflow: hidden;
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: 2rem;
   gap: 2rem;
+}
+
+.header-section::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.1) 0%,
+    rgba(255, 255, 255, 0.05) 100%
+  );
+  pointer-events: none;
+}
+
+.header-section > * {
+  position: relative;
+  z-index: 1;
 }
 
 .header-info {
@@ -341,9 +367,9 @@ onMounted(() => {
 }
 
 .main-title {
-  font-size: 1.75rem;
+  font-size: 2rem;
   font-weight: 700;
-  color: #212529;
+  color: white;
   margin: 0 0 0.5rem 0;
   display: flex;
   align-items: center;
@@ -351,15 +377,16 @@ onMounted(() => {
 }
 
 .main-title i {
-  color: #007bff;
-  font-size: 1.5rem;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 1.75rem;
 }
 
 .subtitle {
   font-size: 1rem;
-  color: #6c757d;
+  color: rgba(255, 255, 255, 0.9);
   margin: 0;
-  line-height: 1.5;
+  line-height: 1.6;
+  max-width: 600px;
 }
 
 .action-bar {
@@ -446,6 +473,15 @@ onMounted(() => {
 .action-button:hover {
   transform: translateY(-1px);
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+.create-button {
+  background-color: #007bff;
+}
+
+.create-button:hover {
+  background-color: #0069d9;
+  box-shadow: 0 6px 16px rgba(0, 123, 255, 0.2);
 }
 
 .add-button {

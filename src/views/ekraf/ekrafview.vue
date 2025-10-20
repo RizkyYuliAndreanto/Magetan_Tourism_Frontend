@@ -185,9 +185,11 @@
                     {{ item.website_umkm }}
                   </a>
                 </div>
-                
+
                 <!-- Operational Hours Section -->
-                <div v-if="item.jam_operasional || item.hari_operasional" class="operational-hours">
+                <div
+                  v-if="item.jam_operasional || item.hari_operasional"
+                  class="operational-hours">
                   <div class="operational-header">
                     <span class="operational-icon">⏰</span>
                     <span class="operational-title">Jam Operasional</span>
@@ -195,11 +197,15 @@
                   <div class="operational-content">
                     <div v-if="item.hari_operasional" class="operational-item">
                       <span class="day-icon">�</span>
-                      <span class="operational-text">{{ item.hari_operasional }}</span>
+                      <span class="operational-text">{{
+                        item.hari_operasional
+                      }}</span>
                     </div>
                     <div v-if="item.jam_operasional" class="operational-item">
                       <span class="time-icon">�</span>
-                      <span class="operational-text">{{ item.jam_operasional }}</span>
+                      <span class="operational-text">{{
+                        item.jam_operasional
+                      }}</span>
                     </div>
                   </div>
                 </div>
@@ -221,9 +227,9 @@
                     <span class="tag-icon">🏷️</span>
                     {{ item.kategoriUMKM?.nama_kategori }}
                   </span>
-                  
+
                   <!-- Hashtags -->
-                  <span 
+                  <span
                     v-for="hashtag in parseHashtags(item.hastag_umkm)"
                     :key="hashtag"
                     class="feature-tag hashtag-tag">
@@ -546,13 +552,13 @@ const handleImageError = (event: Event) => {
 
 const parseHashtags = (hashtagString: string | undefined): string[] => {
   if (!hashtagString) return [];
-  
+
   // Split by common separators and clean up
   return hashtagString
     .split(/[,;|\s]+/)
-    .map(tag => tag.trim())
-    .filter(tag => tag.length > 0)
-    .map(tag => tag.startsWith('#') ? tag : `#${tag}`);
+    .map((tag) => tag.trim())
+    .filter((tag) => tag.length > 0)
+    .map((tag) => (tag.startsWith("#") ? tag : `#${tag}`));
 };
 
 const cardHover = (event: Event) => {
@@ -1544,7 +1550,11 @@ onBeforeUnmount(() => {
 
 /* Operational Hours Styling */
 .operational-hours {
-  background: linear-gradient(135deg, rgba(16, 185, 129, 0.08) 0%, rgba(5, 150, 105, 0.05) 100%);
+  background: linear-gradient(
+    135deg,
+    rgba(16, 185, 129, 0.08) 0%,
+    rgba(5, 150, 105, 0.05) 100%
+  );
   border: 1px solid rgba(16, 185, 129, 0.2);
   border-radius: 12px;
   padding: 12px;
@@ -1645,7 +1655,7 @@ onBeforeUnmount(() => {
   );
   color: #be185d;
   border: 1px solid rgba(236, 72, 153, 0.2);
-  font-family: 'Courier New', monospace;
+  font-family: "Courier New", monospace;
 }
 
 .hashtag-tag:hover {
@@ -2241,5 +2251,10 @@ onBeforeUnmount(() => {
     padding: 0.65rem 1.5rem;
     font-size: 0.9rem;
   }
+}
+</style>
+<style scoped>
+.ekraf-page {
+  overflow-y: auto;
 }
 </style>

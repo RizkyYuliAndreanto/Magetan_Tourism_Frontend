@@ -130,7 +130,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, onUnmounted } from "vue";
 import { useRouter } from "vue-router";
 import axios from "axios";
 
@@ -213,6 +213,10 @@ const closeImageModal = () => {
 onMounted(() => {
   window.scrollTo({ top: 0, behavior: "smooth" });
   fetchPpidData();
+});
+
+onUnmounted(() => {
+  document.body.style.overflow = "auto";
 });
 </script>
 
@@ -556,5 +560,10 @@ onMounted(() => {
     flex-direction: column;
     align-items: flex-start;
   }
+}
+</style>
+<style scoped>
+.detail-page-container {
+  overflow-y: auto;
 }
 </style>

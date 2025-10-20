@@ -413,3 +413,8 @@ onMounted(() => {
   }
 }
 </style>
+<style scoped>
+.detail-page-container {
+  overflow-y: auto;
+}
+</style>
