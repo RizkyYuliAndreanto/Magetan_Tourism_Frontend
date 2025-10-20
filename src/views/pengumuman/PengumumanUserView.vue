@@ -370,3 +370,8 @@ onMounted(() => {
   }
 }
 </style>
+<style scoped>
+.pengumuman-view-user {
+  overflow-y: auto;
+}
+</style>

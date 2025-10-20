@@ -5,19 +5,39 @@
       <form @submit.prevent="handleRegister" class="auth-form">
         <div class="form-group">
           <label for="nama_lengkap" class="form-label">Full Name</label>
-          <input type="text" id="nama_lengkap" v-model="nama_lengkap" class="form-input" required>
+          <input
+            type="text"
+            id="nama_lengkap"
+            v-model="nama_lengkap"
+            class="form-input"
+            required />
         </div>
         <div class="form-group">
           <label for="email" class="form-label">Email Address</label>
-          <input type="email" id="email" v-model="email" class="form-input" required>
+          <input
+            type="email"
+            id="email"
+            v-model="email"
+            class="form-input"
+            required />
         </div>
         <div class="form-group">
           <label for="username" class="form-label">Username</label>
-          <input type="text" id="username" v-model="username" class="form-input" required>
+          <input
+            type="text"
+            id="username"
+            v-model="username"
+            class="form-input"
+            required />
         </div>
         <div class="form-group">
           <label for="password" class="form-label">Password</label>
-          <input type="password" id="password" v-model="password" class="form-input" required>
+          <input
+            type="password"
+            id="password"
+            v-model="password"
+            class="form-input"
+            required />
         </div>
         <button type="submit" class="auth-button">Sign Up</button>
       </form>
@@ -29,36 +49,38 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
-import axios from 'axios';
-import { useRouter } from 'vue-router';
+import { ref } from "vue";
+import axios from "axios";
+import { useRouter } from "vue-router";
 
-const nama_lengkap = ref('');
-const email = ref('');
-const username = ref('');
-const password = ref('');
+const nama_lengkap = ref("");
+const email = ref("");
+const username = ref("");
+const password = ref("");
 const router = useRouter();
 
 const handleRegister = async () => {
   try {
     // Endpoint backend untuk pendaftaran adalah POST /register
     // Backend mengharapkan username, password, nama_lengkap, dan email
-    const response = await axios.post('http://localhost:5000/api/auth/register', {
-      nama_lengkap: nama_lengkap.value,
-      email: email.value,
-      username: username.value,
-      password: password.value,
-    });
+    const response = await axios.post(
+      "http://localhost:5000/api/auth/register",
+      {
+        nama_lengkap: nama_lengkap.value,
+        email: email.value,
+        username: username.value,
+        password: password.value,
+      }
+    );
 
-    console.log('Pendaftaran berhasil:', response.data);
-    alert('Pendaftaran berhasil! Silakan login.');
-    router.push('/login');
-    
+    console.log("Pendaftaran berhasil:", response.data);
+    alert("Pendaftaran berhasil! Silakan login.");
+    router.push("/login");
   } catch (error) {
-    console.error('Pendaftaran gagal:', error.response?.data || error.message);
-    
+    console.error("Pendaftaran gagal:", error.response?.data || error.message);
+
     // Tangani error spesifik dari backend (misalnya, username/email sudah ada)
-    alert(error.response?.data?.error || 'Pendaftaran gagal');
+    alert(error.response?.data?.error || "Pendaftaran gagal");
   }
 };
 </script>
@@ -157,5 +179,10 @@ const handleRegister = async () => {
 
 .auth-link a:hover {
   text-decoration: underline;
+}
+</style>
+<style scoped>
+.auth-view {
+  overflow-y: auto;
 }
 </style>

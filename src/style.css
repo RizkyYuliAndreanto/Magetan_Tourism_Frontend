@@ -2,52 +2,78 @@
 
 /* Reset CSS Dasar */
 * {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
 
 /* Variabel CSS Global untuk Warna */
 :root {
-    /* Palet Warna Biru & Putih Ceria dengan Aksen Transparan */
-    --primary-blue: #1589C6; /* Biru utama yang cerah dan menonjol */
-    --secondary-blue: #70D6FF; /* Biru langit yang lebih muda dan ceria */
-    --pure-white: #FFFFFF; /* Putih murni untuk latar belakang dan teks */
-    --off-white: #F4F9F9; /* Putih pucat/abu-abu muda untuk variasi latar belakang */
+  /* Palet Warna Biru & Putih Ceria dengan Aksen Transparan */
+  --primary-blue: #1589c6; /* Biru utama yang cerah dan menonjol */
+  --secondary-blue: #70d6ff; /* Biru langit yang lebih muda dan ceria */
+  --pure-white: #ffffff; /* Putih murni untuk latar belakang dan teks */
+  --off-white: #f4f9f9; /* Putih pucat/abu-abu muda untuk variasi latar belakang */
 
-    /* Warna Teks */
-    --text-color-dark: #333333; /* Untuk teks di atas latar belakang terang */
-    --text-color-light: #F0F0F0; /* Untuk teks di atas latar belakang gelap */
-    --text-color-muted: #555555; /* Untuk teks sekunder/deskripsi di latar belakang terang */
+  /* Warna Teks */
+  --text-color-dark: #333333; /* Untuk teks di atas latar belakang terang */
+  --text-color-light: #f0f0f0; /* Untuk teks di atas latar belakang gelap */
+  --text-color-muted: #555555; /* Untuk teks sekunder/deskripsi di latar belakang terang */
 
-    /* Aksen Transparan (gelap untuk kontras pada latar belakang terang) */
-    --navbar-bg-transparent: rgba(0, 0, 0, 0.4); /* Latar belakang navbar hitam transparan, agar teks putih kontras */
-    --hero-overlay-transparent: rgba(0, 0, 0, 0.3); /* Overlay hero hitam transparan, agar teks putih kontras */
-    --footer-bg-transparent: rgba(0, 0, 0, 0.7); /* Latar belakang footer hitam transparan yang lebih pekat */
+  /* Aksen Transparan (gelap untuk kontras pada latar belakang terang) */
+  --navbar-bg-transparent: rgba(
+    0,
+    0,
+    0,
+    0.4
+  ); /* Latar belakang navbar hitam transparan, agar teks putih kontras */
+  --hero-overlay-transparent: rgba(
+    0,
+    0,
+    0,
+    0.3
+  ); /* Overlay hero hitam transparan, agar teks putih kontras */
+  --footer-bg-transparent: rgba(
+    0,
+    0,
+    0,
+    0.7
+  ); /* Latar belakang footer hitam transparan yang lebih pekat */
 
-    /* Elemen Lain */
-    --border-subtle: rgba(0, 0, 0, 0.1); /* Border tipis untuk elemen terang */
-    --border-light-transparent: rgba(255, 255, 255, 0.2); /* Border tipis untuk elemen gelap */
-    --search-input-bg: rgba(255, 255, 255, 0.15); /* Background input search transparan putih */
-    --hover-darken-blue: #127cb8; /* Sedikit lebih gelap dari primary-blue untuk efek hover */
-    --box-shadow-light: rgba(0, 0, 0, 0.1); /* Bayangan elemen terang */
-    --box-shadow-medium: rgba(0, 0, 0, 0.15); /* Bayangan elemen terang sedang */
+  /* Elemen Lain */
+  --border-subtle: rgba(0, 0, 0, 0.1); /* Border tipis untuk elemen terang */
+  --border-light-transparent: rgba(
+    255,
+    255,
+    255,
+    0.2
+  ); /* Border tipis untuk elemen gelap */
+  --search-input-bg: rgba(
+    255,
+    255,
+    255,
+    0.15
+  ); /* Background input search transparan putih */
+  --hover-darken-blue: #127cb8; /* Sedikit lebih gelap dari primary-blue untuk efek hover */
+  --box-shadow-light: rgba(0, 0, 0, 0.1); /* Bayangan elemen terang */
+  --box-shadow-medium: rgba(0, 0, 0, 0.15); /* Bayangan elemen terang sedang */
 }
 
 /* Gaya Dasar HTML dan Body */
-html, body {
-    height: 100%;
-    margin: 0;
-    font-family: Arial, sans-serif;
-    background-color: var(--off-white);
-    color: var(--text-color-dark);
-    overflow-x: hidden;
+html,
+body {
+  min-height: 100%;
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background-color: var(--off-white);
+  color: var(--text-color-dark);
+  overflow-x: hidden;
 }
 
 /* Pengaturan Aplikasi Vue Utama */
 #app {
-    min-height: 100vh;
-    width: 100%;
-    display: flex;
-    flex-direction: column;
+  min-height: 100vh;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
 }

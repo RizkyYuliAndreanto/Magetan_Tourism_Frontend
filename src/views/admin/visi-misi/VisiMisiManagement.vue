@@ -3,10 +3,10 @@
     <!-- Header Section -->
     <div class="header-section">
       <div class="header-info">
-        <h1 class="main-title">
+        <h2 class="main-title">
           <i class="fas fa-flag"></i>
           Data Visi & Misi
-        </h1>
+        </h2>
         <p class="subtitle">
           Kelola visi dan misi dinas pariwisata Magetan untuk memberikan arah
           strategis dalam pengembangan pariwisata daerah.
@@ -15,7 +15,7 @@
       <div class="action-bar">
         <button
           v-if="!visiMisiData"
-          class="action-button add-button"
+          class="action-button create-button"
           @click="openForm()">
           <i class="fas fa-plus-circle"></i> Tambah Visi Misi
         </button>
@@ -96,17 +96,17 @@
       </div>
     </div>
 
-    <div v-else-if="!visiMisiData" class="table-container card">
+    <div v-else class="no-data-card card">
       <div class="empty-state">
-        <i class="fas fa-flag"></i>
-        <h3>Belum Ada Visi & Misi</h3>
-        <p>
-          Mulai tambahkan visi dan misi dinas pariwisata untuk memberikan arah
-          strategis pengembangan wisata Magetan.
+        <div class="empty-icon">
+          <i class="fas fa-flag"></i>
+        </div>
+        <h3 class="empty-title">Belum Ada Visi & Misi</h3>
+        <p class="empty-description">
+          Belum ada data Visi & Misi yang tersimpan. Klik tombol "Tambah Visi &
+          Misi" di atas untuk menambahkan visi dan misi dinas pariwisata untuk
+          memberikan arah strategis pengembangan wisata Magetan.
         </p>
-        <button class="action-button add-button" @click="openForm()">
-          <i class="fas fa-plus-circle"></i> Tambah Visi Misi Pertama
-        </button>
       </div>
     </div>
 
@@ -268,60 +268,160 @@ onMounted(() => {
 </script>
 
 <style scoped>
-/* =========== Perubahan Styling untuk Konsistensi =========== */
+/* ========== Styling yang diselaraskan dengan NewsManagement Template ========== */
+
+/* Header Section */
+.header-section {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 2rem;
+  border-radius: 16px;
+  margin-bottom: 2rem;
+  color: white;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 2rem;
+}
+
+.header-section::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.1) 0%,
+    rgba(255, 255, 255, 0.05) 100%
+  );
+  pointer-events: none;
+}
+
+.header-section > * {
+  position: relative;
+  z-index: 1;
+}
+
+.header-info {
+  flex: 1;
+}
+
+.main-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: white;
+  margin: 0 0 0.5rem 0;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.main-title i {
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 1.75rem;
+}
+
+.subtitle {
+  font-size: 1rem;
+  color: rgba(255, 255, 255, 0.9);
+  margin: 0;
+  line-height: 1.6;
+  max-width: 600px;
+}
 
 .action-bar {
   display: flex;
   justify-content: flex-end;
-  margin-bottom: 1.5rem;
+  align-items: center;
 }
+
+/* Action Buttons */
 .action-button {
-  padding: 0.75rem 1.5rem;
-  border-radius: 8px;
+  padding: 0.875rem 1.75rem;
+  border-radius: 10px;
   border: none;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   color: white;
   display: flex;
   align-items: center;
   gap: 0.5rem;
   font-size: 0.9rem;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-}
-.create-button {
-  background-color: #007bff;
-}
-.create-button:hover {
-  background-color: #0069d9;
-  box-shadow: 0 6px 16px rgba(0, 123, 255, 0.2);
-}
-.edit-button {
-  background-color: #ffc107;
-}
-.edit-button:hover {
-  background-color: #e0a800;
-  box-shadow: 0 6px 16px rgba(255, 193, 7, 0.2);
+  text-decoration: none;
+  outline: none;
+  position: relative;
+  overflow: hidden;
 }
 
+.create-button {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  box-shadow: 0 4px 15px rgba(59, 130, 246, 0.2);
+  border: 1px solid #2563eb;
+}
+
+.create-button:hover {
+  background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.2),
+    0 4px 6px -2px rgba(59, 130, 246, 0.1);
+}
+
+.edit-button {
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  box-shadow: 0 4px 15px rgba(245, 158, 11, 0.2);
+  border: 1px solid #d97706;
+}
+
+.edit-button:hover {
+  background: linear-gradient(135deg, #d97706 0%, #b45309 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 10px 15px -3px rgba(245, 158, 11, 0.2),
+    0 4px 6px -2px rgba(245, 158, 11, 0.1);
+}
+
+/* Cards */
 .form-card.card,
 .preview-container.card,
 .no-data-card.card {
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(0, 0, 0, 0.05);
   padding: 2rem;
-  border: 1px solid #e0e6ed;
-  border-radius: 12px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
-  background-color: #ffffff;
+  position: relative;
+  overflow: hidden;
+}
+
+.form-card.card::before,
+.preview-container.card::before,
+.no-data-card.card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.1) 0%,
+    rgba(255, 255, 255, 0.05) 100%
+  );
+  pointer-events: none;
 }
 
 .form-title,
 .preview-title {
   font-size: 1.5rem;
   font-weight: 700;
-  color: #212529;
+  color: #1e293b;
   margin-bottom: 1rem;
   padding-bottom: 1rem;
-  border-bottom: 1px solid #e9ecef;
+  border-bottom: 2px solid #e2e8f0;
+  position: relative;
 }
 
 .preview-content {
@@ -389,82 +489,75 @@ onMounted(() => {
   font-style: italic;
 }
 
-/* Header Section */
-.header-section {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 2rem;
-  gap: 2rem;
-}
-
-.header-info {
-  flex: 1;
-}
-
-.main-title {
-  font-size: 1.75rem;
-  font-weight: 700;
-  color: #212529;
-  margin: 0 0 0.5rem 0;
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-}
-
-.main-title i {
-  color: #007bff;
-  font-size: 1.5rem;
-}
-
-.subtitle {
-  font-size: 1rem;
-  color: #6c757d;
-  margin: 0;
-  line-height: 1.5;
-}
-
 /* Stats Section */
 .stats-container {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
   gap: 1.5rem;
   margin-bottom: 2rem;
 }
 
 .stat-card {
-  background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
-  color: white;
+  background: white;
   padding: 1.5rem;
   border-radius: 12px;
-  box-shadow: 0 4px 15px rgba(0, 123, 255, 0.2);
   display: flex;
   align-items: center;
   gap: 1rem;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  position: relative;
+  overflow: hidden;
+}
+
+.stat-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.1) 0%,
+    rgba(255, 255, 255, 0.05) 100%
+  );
+  pointer-events: none;
 }
 
 .stat-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(0, 123, 255, 0.3);
+  transform: translateY(-3px) scale(1.02);
+}
+
+.stat-card:nth-child(1) {
+  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+  color: white;
+  box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+}
+
+.stat-card:nth-child(1):hover {
+  box-shadow: 0 8px 25px rgba(59, 130, 246, 0.4);
 }
 
 .stat-card:nth-child(2) {
-  background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%);
-  box-shadow: 0 4px 15px rgba(40, 167, 69, 0.2);
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+  box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
 }
 
 .stat-card:nth-child(2):hover {
-  box-shadow: 0 8px 25px rgba(40, 167, 69, 0.3);
+  box-shadow: 0 8px 25px rgba(16, 185, 129, 0.4);
 }
 
 .stat-card:nth-child(3) {
-  background: linear-gradient(135deg, #ffc107 0%, #e0a800 100%);
-  box-shadow: 0 4px 15px rgba(255, 193, 7, 0.2);
+  background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+  color: white;
+  box-shadow: 0 4px 15px rgba(139, 92, 246, 0.3);
 }
 
 .stat-card:nth-child(3):hover {
-  box-shadow: 0 8px 25px rgba(255, 193, 7, 0.3);
+  box-shadow: 0 8px 25px rgba(139, 92, 246, 0.4);
 }
 
 .stat-icon {
@@ -479,42 +572,40 @@ onMounted(() => {
 }
 
 .stat-content p {
-  font-size: 0.9rem;
-  margin: 0.25rem 0 0 0;
+  margin: 0;
   opacity: 0.9;
-}
-
-.add-button {
-  background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
-}
-
-.edit-button {
-  background: linear-gradient(135deg, #ffc107 0%, #e0a800 100%);
+  font-weight: 500;
 }
 
 /* Enhanced Empty State */
 .empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
   text-align: center;
   padding: 3rem 2rem;
+}
+
+.empty-icon {
+  font-size: 4rem;
   color: #6c757d;
-}
-
-.empty-state i {
-  font-size: 3rem;
   margin-bottom: 1rem;
-  color: #dee2e6;
 }
 
-.empty-state h3 {
-  font-size: 1.25rem;
-  margin-bottom: 0.5rem;
+.empty-title {
+  font-size: 1.5rem;
   font-weight: 600;
+  color: #495057;
+  margin: 0;
 }
 
-.empty-state p {
-  margin-bottom: 1.5rem;
-  opacity: 0.8;
-  font-style: normal;
+.empty-description {
+  color: #6c757d;
+  font-style: italic;
+  max-width: 500px;
+  line-height: 1.6;
+  margin: 0;
 }
 
 /* Responsive Design */

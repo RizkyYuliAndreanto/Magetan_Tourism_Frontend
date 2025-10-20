@@ -381,3 +381,8 @@ onMounted(() => {
   }
 }
 </style>
+<style scoped>
+.event-detail-page {
+  overflow-y: auto;
+}
+</style>

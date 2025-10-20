@@ -1661,3 +1661,8 @@ onMounted(() => {
   }
 }
 </style>
+<style scoped>
+.event-view-user {
+  overflow-y: auto;
+}
+</style>

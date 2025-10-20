@@ -25,7 +25,7 @@
       <DashboardCard
         title="Destinasi Wisata"
         :value="stats.destinasi"
-        icon="fas fa-map-marked-alt"
+        icon="map-pin"
         variant="primary"
         :subtitle="`${stats.destinasiAktif} aktif dari ${stats.destinasi} total`"
         :trend="getDestinationTrend()"
@@ -36,8 +36,8 @@
       <DashboardCard
         title="Berita & Artikel"
         :value="stats.berita"
-        icon="fas fa-newspaper"
-        variant="primary"
+        icon="file-text"
+        variant="info"
         :subtitle="`${stats.beritaBulanIni} berita bulan ini`"
         :trend="getNewsTrend()"
         :trend-direction="
@@ -47,8 +47,8 @@
       <DashboardCard
         title="Event & Kegiatan"
         :value="stats.event"
-        icon="fas fa-calendar-check"
-        variant="primary"
+        icon="calendar"
+        variant="warning"
         :subtitle="`${stats.eventAktif} event aktif`"
         :trend="getEventTrend()"
         :trend-direction="
@@ -58,8 +58,8 @@
       <DashboardCard
         title="Akomodasi"
         :value="stats.akomodasi"
-        icon="fas fa-hotel"
-        variant="primary"
+        icon="home"
+        variant="success"
         :subtitle="`Rating rata-rata: ${stats.ratingAkomodasi}`"
         :trend="getAccommodationTrend()"
         :trend-direction="
@@ -69,8 +69,8 @@
       <DashboardCard
         title="UMKM & Produk"
         :value="stats.umkm"
-        icon="fas fa-shopping-bag"
-        variant="primary"
+        icon="shopping-bag"
+        variant="warning"
         :subtitle="`${stats.umkmVerified} terverifikasi`"
         :trend="getUmkmTrend()"
         :trend-direction="
@@ -80,8 +80,8 @@
       <DashboardCard
         title="Media Galeri"
         :value="stats.mediaGaleri"
-        icon="fas fa-photo-video"
-        variant="primary"
+        icon="image"
+        variant="info"
         :subtitle="`${stats.mediaGambar} gambar, ${stats.mediaVideo} video`"
         :trend="getMediaTrend()"
         :trend-direction="
@@ -94,8 +94,8 @@
       <DashboardCard
         title="Budaya Daerah"
         :value="stats.budaya"
-        icon="fas fa-landmark"
-        variant="primary"
+        icon="book-open"
+        variant="success"
         :subtitle="`${stats.budayaAktif} budaya aktif`"
         :trend="getCultureTrend()"
         :trend-direction="
@@ -105,8 +105,8 @@
       <DashboardCard
         title="Pengumuman"
         :value="stats.pengumuman"
-        icon="fas fa-megaphone"
-        variant="primary"
+        icon="bell"
+        variant="warning"
         :subtitle="`${stats.pengumumanAktif} pengumuman aktif`"
         :trend="getAnnouncementTrend()"
         :trend-direction="
@@ -116,8 +116,8 @@
       <DashboardCard
         title="Konten PPID"
         :value="stats.ppid"
-        icon="fas fa-file-contract"
-        variant="primary"
+        icon="info"
+        variant="info"
         :subtitle="`${stats.ppidAktif} konten aktif`"
         :trend="getPpidTrend()"
         :trend-direction="
@@ -127,8 +127,8 @@
       <DashboardCard
         title="Struktur Anggota"
         :value="stats.strukturAnggota"
-        icon="fas fa-users-cog"
-        variant="primary"
+        icon="users"
+        variant="success"
         :subtitle="`${stats.strukturAnggotaAktif} anggota aktif`"
         :trend="getStrukturAnggotaTrend()"
         :trend-direction="
@@ -141,8 +141,8 @@
       <DashboardCard
         title="Struktur Organisasi"
         :value="stats.strukturOrganisasi ? '1' : '0'"
-        icon="fas fa-project-diagram"
-        variant="primary"
+        icon="building"
+        variant="info"
         :subtitle="stats.strukturOrganisasi ? 'Sudah diatur' : 'Belum diatur'"
         :trend="getStrukturOrganisasiTrend()"
         trend-direction="neutral" />
@@ -150,50 +150,11 @@
       <DashboardCard
         title="Visi & Misi"
         :value="stats.visiMisi ? '1' : '0'"
-        icon="fas fa-bullseye"
-        variant="primary"
+        icon="info"
+        variant="warning"
         :subtitle="stats.visiMisi ? 'Sudah diatur' : 'Belum diatur'"
         :trend="getVisiMisiTrend()"
         trend-direction="neutral" />
-    </div>
-
-    <!-- Quick Actions -->
-    <div class="quick-actions">
-      <h4 class="actions-title">Aksi Cepat</h4>
-      <div class="actions-grid">
-        <router-link to="/admin/destinasi" class="action-card">
-          <i class="fas fa-map-marked-alt"></i>
-          <span>Tambah Destinasi</span>
-        </router-link>
-        <router-link to="/admin/berita" class="action-card">
-          <i class="fas fa-newspaper"></i>
-          <span>Tulis Berita</span>
-        </router-link>
-        <router-link to="/admin/event" class="action-card">
-          <i class="fas fa-calendar-check"></i>
-          <span>Buat Event</span>
-        </router-link>
-        <router-link to="/admin/media-galeri" class="action-card">
-          <i class="fas fa-photo-video"></i>
-          <span>Upload Media</span>
-        </router-link>
-        <router-link to="/admin/ppid" class="action-card">
-          <i class="fas fa-file-contract"></i>
-          <span>Kelola PPID</span>
-        </router-link>
-        <router-link to="/admin/struktur-anggota" class="action-card">
-          <i class="fas fa-users-cog"></i>
-          <span>Struktur Anggota</span>
-        </router-link>
-        <router-link to="/admin/budaya" class="action-card">
-          <i class="fas fa-landmark"></i>
-          <span>Tambah Budaya</span>
-        </router-link>
-        <router-link to="/admin/akomodasi" class="action-card">
-          <i class="fas fa-hotel"></i>
-          <span>Kelola Akomodasi</span>
-        </router-link>
-      </div>
     </div>
   </div>
 </template>
@@ -614,62 +575,24 @@ onMounted(async () => {
 
 .stats-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-  gap: 1.25rem;
-  margin-bottom: 2.5rem;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+  margin-bottom: 2rem;
 }
 
-.quick-actions {
-  background: #ffffff;
-  padding: 1.75rem;
-  border-radius: 8px;
-  border: 1px solid #e2e8f0;
+/* Responsive Grid Layout */
+@media (max-width: 1200px) {
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.25rem;
+  }
 }
 
-.actions-title {
-  font-size: 1.125rem;
-  font-weight: 600;
-  color: #1e293b;
-  margin: 0 0 1.25rem 0;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  border-bottom: 1px solid #f1f5f9;
-  padding-bottom: 0.75rem;
-}
-
-.actions-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 0.875rem;
-}
-
-.action-card {
-  display: flex;
-  align-items: center;
-  gap: 0.875rem;
-  padding: 0.875rem 1rem;
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
-  border-radius: 6px;
-  text-decoration: none;
-  color: #475569;
-  font-weight: 500;
-  font-size: 0.875rem;
-  transition: all 0.2s ease;
-}
-
-.action-card:hover {
-  background: #3b82f6;
-  color: white;
-  border-color: #3b82f6;
-  text-decoration: none;
-}
-
-.action-card i {
-  font-size: 1.125rem;
-  width: 20px;
-  text-align: center;
+@media (max-width: 768px) {
+  .stats-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
 }
 
 /* Loading State */
@@ -681,10 +604,11 @@ onMounted(async () => {
 }
 
 .loading-card {
-  background: #ffffff;
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
   padding: 1.75rem;
-  border-radius: 8px;
-  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  border: 1.5px solid #e2e8f0;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
   display: flex;
   align-items: center;
   gap: 1.25rem;
@@ -767,15 +691,6 @@ onMounted(async () => {
     grid-template-columns: 1fr;
     gap: 1rem;
   }
-
-  .actions-grid {
-    grid-template-columns: 1fr;
-    gap: 0.75rem;
-  }
-
-  .quick-actions {
-    padding: 1.5rem;
-  }
 }
 
 @media (max-width: 480px) {
@@ -792,14 +707,6 @@ onMounted(async () => {
 
   .overview-subtitle {
     font-size: 0.875rem;
-  }
-
-  .quick-actions {
-    padding: 1.25rem;
-  }
-
-  .actions-title {
-    font-size: 1rem;
   }
 }
 </style>

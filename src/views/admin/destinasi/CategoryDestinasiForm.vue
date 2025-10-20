@@ -1,94 +1,155 @@
 <template>
-  <div class="form-card">
-    <div class="form-header">
-      <h3 class="form-title">
-        {{ isEditing ? "Edit Kategori" : "Tambah Kategori Baru" }}
-      </h3>
-      <button class="close-form-btn" @click="$emit('close-form')">
-        <i class="fas fa-times"></i>
-      </button>
-    </div>
-    <form @submit.prevent="submitForm" class="form-container">
-      <div class="form-group">
-        <label for="nama_kategori">Nama Kategori</label>
-        <input
-          type="text"
-          id="nama_kategori"
-          v-model="formData.nama_kategori"
-          class="form-input"
-          required />
+  <!-- Modal Backdrop -->
+  <div class="modal-backdrop" @click.self="$emit('close-form')">
+    <!-- Modal Container -->
+    <div class="modal-container">
+      <div class="modal-header">
+        <h3 class="modal-title">
+          <i class="fas fa-tags"></i>
+          {{
+            isEditing
+              ? "Edit Kategori Destinasi"
+              : "Tambah Kategori Destinasi Baru"
+          }}
+        </h3>
+        <button class="close-modal-btn" @click="$emit('close-form')">
+          <svg
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
       </div>
-      <div class="form-group">
-        <label for="deskripsi_kategori">Deskripsi Kategori</label>
-        <textarea
-          id="deskripsi_kategori"
-          v-model="formData.deskripsi_kategori"
-          class="form-input"
-          rows="3"></textarea>
-      </div>
-      <div class="form-group">
-        <label for="sampul_kategori">Sampul Kategori</label>
-        <div class="file-drop-area" @dragover.prevent @drop="handleDropFile">
-          <div class="file-drop-content">
-            <template v-if="!previewImage">
+      <!-- Modal Body -->
+      <div class="modal-body">
+        <form @submit.prevent="submitForm" class="category-form">
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="nama_kategori" class="form-label">
+                <i class="fas fa-tag"></i>
+                Nama Kategori
+                <span class="required">*</span>
+              </label>
+              <input
+                type="text"
+                id="nama_kategori"
+                v-model="formData.nama_kategori"
+                class="form-input"
+                placeholder="Masukkan nama kategori destinasi"
+                required />
+            </div>
+
+            <div class="form-group">
+              <label for="deskripsi_kategori" class="form-label">
+                <i class="fas fa-align-left"></i>
+                Deskripsi Kategori
+              </label>
+              <textarea
+                id="deskripsi_kategori"
+                v-model="formData.deskripsi_kategori"
+                class="form-textarea"
+                rows="4"
+                placeholder="Masukkan deskripsi kategori destinasi"></textarea>
+            </div>
+
+            <div class="form-group">
+              <label for="sampul_kategori" class="form-label">
+                <i class="fas fa-image"></i>
+                Sampul Kategori
+              </label>
+              <div
+                class="file-upload-area"
+                @dragover.prevent
+                @drop="handleDropFile">
+                <div v-if="!previewImage" class="upload-placeholder">
+                  <svg
+                    class="upload-icon"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="17,8 12,3 7,8"></polyline>
+                    <line x1="12" y1="3" x2="12" y2="15"></line>
+                  </svg>
+                  <p class="upload-text">
+                    Drag & drop gambar di sini atau
+                    <label for="sampul_kategori" class="upload-link"
+                      >pilih file</label
+                    >
+                  </p>
+                  <p class="upload-hint">PNG, JPG, atau JPEG (Max. 2MB)</p>
+                  <input
+                    type="file"
+                    id="sampul_kategori"
+                    @change="handleFileChange"
+                    class="file-input"
+                    accept="image/*" />
+                </div>
+                <div v-else class="image-preview-container">
+                  <img
+                    :src="previewImage"
+                    alt="Preview Sampul"
+                    class="preview-image" />
+                  <button
+                    type="button"
+                    class="remove-image-btn"
+                    @click="removeImage">
+                    <svg
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2">
+                      <line x1="18" y1="6" x2="6" y2="18"></line>
+                      <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Modal Footer -->
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              @click="$emit('close-form')">
               <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="24"
-                height="24"
+                width="16"
+                height="16"
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                class="feather feather-upload-cloud file-icon">
-                <polyline points="16 16 12 12 8 16"></polyline>
-                <line x1="12" y1="12" x2="12" y2="21"></line>
-                <path
-                  d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"></path>
-                <polyline points="16 16 12 12 8 16"></polyline>
+                stroke-width="2">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
               </svg>
-              <span class="file-message"
-                >Drag file ke sini atau
-                <label for="sampul_kategori" class="file-link"
-                  >browse</label
-                ></span
-              >
-              <input
-                type="file"
-                id="sampul_kategori"
-                @change="handleFileChange"
-                class="file-input"
-                accept="image/*" />
-            </template>
-            <template v-else>
-              <div class="image-preview-main">
-                <img
-                  :src="previewImage"
-                  alt="Sampul Kategori"
-                  class="hero-image-preview" />
-                <button
-                  type="button"
-                  class="cancel-image-btn"
-                  @click="removeImage">
-                  Hapus Gambar
-                </button>
-              </div>
-            </template>
+              Batal
+            </button>
+            <button type="submit" class="btn btn-primary">
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2">
+                <path d="m9 12 2 2 4-4"></path>
+                <path d="M21 12c-1 0-3-1-3-3s2-3 3-3 3 1 3 3-2 3-3 3"></path>
+                <path d="M3 12c1 0 3-1 3-3s-2-3-3-3-3 1-3 3 2 3 3 3"></path>
+              </svg>
+              {{ isEditing ? "Update Kategori" : "Simpan Kategori" }}
+            </button>
           </div>
-        </div>
+        </form>
       </div>
-
-      <div class="form-actions">
-        <button type="submit" class="action-button save-button">Simpan</button>
-        <button
-          type="button"
-          class="action-button cancel-button"
-          @click="$emit('close-form')">
-          Batal
-        </button>
-      </div>
-    </form>
+    </div>
   </div>
 </template>
 
@@ -167,203 +228,307 @@ const submitForm = () => {
 </script>
 
 <style scoped>
-.form-card {
-  background-color: #ffffff;
-  padding: 1.5rem;
-  border-radius: 12px;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
-  margin-top: 1rem;
-  border: 1px solid #dee2e6;
-}
-.form-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding-bottom: 1rem;
-  border-bottom: 1px solid #dee2e6;
-  margin-bottom: 1rem;
-}
-.form-title {
-  font-size: 1.3rem;
-  font-weight: 600;
-  color: #343a40;
-  margin: 0;
-}
-.close-form-btn {
-  background: none;
-  border: none;
-  color: #6c757d;
-  cursor: pointer;
-  font-size: 1.25rem;
-  padding: 0.25rem;
-  transition: all 0.3s ease;
-}
-.close-form-btn:hover {
-  color: #dc3545;
-}
-.form-container {
-  padding-top: 1rem;
-}
-.form-group label {
-  display: block;
-  font-size: 0.9rem;
-  font-weight: 600;
-  color: #343a40;
-  margin-bottom: 0.5rem;
-}
-.form-input {
-  width: 100%;
-  padding: 0.8rem;
-  border-radius: 8px;
-  border: 1px solid #dee2e6;
-  background-color: #f8f9fa;
-  color: #343a40;
-  font-size: 0.95rem;
-  transition: all 0.3s ease;
-}
-.form-input:focus {
-  outline: none;
-  border-color: #007bff;
-  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
-}
-textarea.form-input {
-  min-height: 100px;
-  resize: vertical;
-}
-.form-actions {
-  display: flex;
-  gap: 0.8rem;
-  justify-content: flex-end;
-  margin-top: 1.5rem;
-  padding-top: 1rem;
-  border-top: 1px solid #dee2e6;
-}
-.save-button {
-  background-color: #007bff;
-  color: white;
-  padding: 0.6rem 1.2rem;
-  border-radius: 12px;
-  border: none;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 0.9rem;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-}
-.save-button:hover {
-  background-color: #0069d9;
-  transform: translateY(-2px);
-}
-.cancel-button {
-  background-color: #6c757d;
-  color: white;
-  padding: 0.6rem 1.2rem;
-  border-radius: 12px;
-  border: none;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 0.9rem;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-}
-.cancel-button:hover {
-  background-color: #5a6268;
-  transform: translateY(-2px);
-}
-.file-drop-area {
-  border: 1px dashed #e2e8f0;
-  border-radius: 8px;
-  padding: 1.5rem;
-  text-align: center;
-  cursor: pointer;
-  position: relative;
-  transition: all 0.2s ease;
-  background-color: #f8fafc;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 120px;
-}
-.file-drop-area:hover {
-  border-color: #2563eb;
-  background-color: #f0f7ff;
-}
-.file-drop-content {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  width: 100%;
-  height: 100%;
-}
-.file-icon {
-  width: 2rem;
-  height: 2rem;
-  color: #2563eb;
-  margin-bottom: 0.5rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.file-message {
-  font-size: 0.95rem;
-  color: #64748b;
-  text-align: center;
-  width: 100%;
-}
-.file-link {
-  color: #2563eb;
-  text-decoration: underline;
-  cursor: pointer;
-}
-.file-input {
-  opacity: 0;
-  position: absolute;
+/* Modal Styles */
+.modal-backdrop {
+  position: fixed;
   top: 0;
   left: 0;
-  width: 100%;
-  height: 100%;
-  cursor: pointer;
-  z-index: 10;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  backdrop-filter: blur(2px);
 }
-.image-preview-main {
+
+.modal-container {
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+  width: min(600px, 90vw);
+  max-height: 85vh;
+  overflow: hidden;
+  transform: scale(1);
+  transition: all 0.3s ease;
+}
+
+.modal-header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.modal-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.modal-title i {
+  font-size: 1.1rem;
+}
+
+.close-modal-btn {
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  border-radius: 8px;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: white;
+  transition: all 0.2s ease;
+}
+
+.close-modal-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: rotate(90deg);
+}
+
+.modal-body {
+  padding: 0;
+  max-height: calc(85vh - 140px);
+  overflow-y: auto;
+}
+
+.category-form {
+  padding: 2rem;
+}
+
+.form-grid {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.form-label {
+  font-weight: 600;
+  color: #374151;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.95rem;
+}
+
+.form-label i {
+  color: #667eea;
+  font-size: 0.9rem;
+}
+
+.required {
+  color: #ef4444;
+  font-weight: bold;
+}
+
+.form-input,
+.form-textarea {
+  border: 2px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 0.875rem 1rem;
+  font-size: 0.95rem;
+  transition: all 0.2s ease;
+  background: #fafafa;
+}
+
+.form-input:focus,
+.form-textarea:focus {
+  outline: none;
+  border-color: #667eea;
+  background: white;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.form-textarea {
+  resize: vertical;
+  min-height: 100px;
+  line-height: 1.5;
+}
+
+/* File Upload Styles */
+.file-upload-area {
+  border: 2px dashed #d1d5db;
+  border-radius: 12px;
+  padding: 2rem;
+  text-align: center;
+  background: #fafafa;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.file-upload-area:hover {
+  border-color: #667eea;
+  background: #f8faff;
+}
+
+.upload-placeholder {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 1rem;
 }
-.hero-image-preview {
-  max-width: 320px;
-  max-height: 220px;
-  border-radius: 8px;
-  box-shadow: 0 2px 12px rgba(0, 123, 255, 0.08);
-  background: #fff;
-  object-fit: contain;
-  display: block;
-  margin: 0 auto;
+
+.upload-icon {
+  width: 48px;
+  height: 48px;
+  color: #9ca3af;
+  transition: color 0.2s ease;
 }
-.cancel-image-btn {
+
+.file-upload-area:hover .upload-icon {
+  color: #667eea;
+}
+
+.upload-text {
+  font-size: 1rem;
+  color: #374151;
+  margin: 0;
+}
+
+.upload-link {
+  color: #667eea;
+  text-decoration: underline;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.upload-link:hover {
+  color: #5a67d8;
+}
+
+.upload-hint {
+  font-size: 0.85rem;
+  color: #6b7280;
+  margin: 0;
+}
+
+.file-input {
+  display: none;
+}
+
+.image-preview-container {
+  position: relative;
+  display: inline-block;
+}
+
+.preview-image {
+  max-width: 200px;
+  max-height: 150px;
+  object-fit: cover;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.remove-image-btn {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background: #ef4444;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.remove-image-btn:hover {
+  background: #dc2626;
+  transform: scale(1.1);
+}
+
+.remove-image-btn svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* Modal Footer */
+.modal-footer {
+  background: #f9fafb;
+  padding: 1.5rem 2rem;
+  border-top: 1px solid #e5e7eb;
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+}
+
+.btn {
+  padding: 0.75rem 1.5rem;
+  border-radius: 10px;
+  font-weight: 500;
+  font-size: 0.95rem;
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  background: #6c757d;
-  color: #fff;
-  border: none;
-  border-radius: 6px;
-  padding: 0.5rem 1rem;
   cursor: pointer;
-  font-size: 0.9rem;
-  transition: background 0.2s;
-  margin-top: 0.5rem;
+  transition: all 0.2s ease;
+  border: none;
 }
-.cancel-image-btn:hover {
-  background: #5a6268;
+
+.btn-secondary {
+  background: #f3f4f6;
+  color: #374151;
+  border: 1px solid #d1d5db;
+}
+
+.btn-secondary:hover {
+  background: #e5e7eb;
+  transform: translateY(-1px);
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.btn-primary:hover {
+  box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
+  transform: translateY(-2px);
+}
+
+.btn svg {
+  flex-shrink: 0;
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .modal-container {
+    width: 95vw;
+    margin: 1rem;
+    max-height: 90vh;
+  }
+
+  .modal-header,
+  .category-form,
+  .modal-footer {
+    padding: 1rem;
+  }
+
+  .modal-footer {
+    flex-direction: column;
+  }
+
+  .btn {
+    justify-content: center;
+  }
 }
 </style>

@@ -23,7 +23,6 @@
       </div>
     </div>
 
-    <!-- Form Overlay -->
     <div v-if="formBeritaOpen" class="form-overlay">
       <div class="form-card card">
         <NewsForm
@@ -76,20 +75,17 @@
             <i class="fas fa-list"></i>
             Daftar Berita
           </h3>
-          <div class="table-count">
-            Total: <strong>{{ beritaList.length }}</strong> berita
-          </div>
         </div>
         <div class="table-responsive">
           <table class="data-table">
             <thead>
               <tr>
-                <th><i class="fas fa-hashtag"></i> ID</th>
-                <th><i class="fas fa-newspaper"></i> Judul</th>
-                <th><i class="fas fa-tag"></i> Kategori</th>
-                <th><i class="fas fa-user"></i> Admin</th>
-                <th><i class="fas fa-calendar"></i> Tanggal Publikasi</th>
-                <th><i class="fas fa-cogs"></i> Aksi</th>
+                <th>ID</th>
+                <th>Judul</th>
+                <th>Kategori</th>
+                <th>Admin</th>
+                <th>Tanggal Publikasi</th>
+                <th>Aksi</th>
               </tr>
             </thead>
             <tbody>
@@ -97,7 +93,12 @@
                 <td colspan="6" class="no-data-found">
                   <div class="empty-state">
                     <i class="fas fa-newspaper"></i>
-                    <p>Belum ada berita yang tersedia.</p>
+                    <h3>Belum Ada Data Berita</h3>
+                    <p>
+                      Mulai tambahkan artikel berita dan informasi terkini untuk
+                      memberikan update kepada pengunjung tentang pariwisata
+                      Magetan.
+                    </p>
                     <small
                       >Klik tombol "Tambah Berita Baru" untuk membuat berita
                       pertama.</small
@@ -149,7 +150,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, nextTick } from "vue";
+import { ref, computed, onMounted, onUnmounted, nextTick } from "vue";
 import axios from "axios";
 import NewsForm from "./NewsForm.vue";
 import BasePopUp from "../../../components/pop-up/BasePopUp.vue";
@@ -310,10 +311,12 @@ const closeBeritaForm = () => {
   editingBeritaGallery.value = [];
   isEditingBerita.value = false;
 
-  // Restore body scroll
+  // Restore body scroll with extra safety
   document.body.style.overflow = "";
   document.body.style.position = "";
   document.body.style.width = "";
+  document.body.style.top = "";
+  document.body.style.left = "";
 
   fetchBeritaData();
 };
@@ -441,52 +444,67 @@ const formatDate = (dateString) => {
 };
 
 onMounted(() => {
+  // Ensure body scroll is always restored on page load
+  document.body.style.overflow = "";
+  document.body.style.position = "";
+  document.body.style.width = "";
+  document.body.style.top = "";
+  document.body.style.left = "";
+
   fetchBeritaData();
   fetchKategoriData();
+});
+
+onUnmounted(() => {
+  // Clean up any remaining body styles when component is destroyed
+  document.body.style.overflow = "";
+  document.body.style.position = "";
+  document.body.style.width = "";
+  document.body.style.top = "";
+  document.body.style.left = "";
 });
 </script>
 
 <style scoped>
-/* ========== Styling yang diselaraskan dengan PPID Management ========== */
 /* Header Section */
 .header-section {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 2rem;
+  border-radius: 12px;
+  margin-bottom: 2rem;
+  color: white;
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 2rem;
-  gap: 2rem;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  gap: 1.5rem;
 }
 
-.header-info {
-  flex: 1;
-}
-
-.main-title {
-  font-size: 1.75rem;
+.header-info .main-title {
+  font-size: 1.8rem;
   font-weight: 700;
-  color: #212529;
   margin: 0 0 0.5rem 0;
   display: flex;
   align-items: center;
   gap: 0.75rem;
 }
 
-.main-title i {
-  color: #007bff;
-  font-size: 1.5rem;
+.header-info .main-title i {
+  font-size: 1.6rem;
 }
 
-.subtitle {
+.header-info .subtitle {
   font-size: 1rem;
-  color: #6c757d;
+  opacity: 0.9;
   margin: 0;
   line-height: 1.5;
+  max-width: 600px;
 }
 
 .action-bar {
   display: flex;
-  justify-content: flex-end;
-  align-items: center;
+  gap: 1rem;
+  flex-shrink: 0;
 }
 
 /* Stats Section */
@@ -498,38 +516,47 @@ onMounted(() => {
 }
 
 .stat-card {
-  background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
-  color: white;
+  background: white;
   padding: 1.5rem;
   border-radius: 12px;
-  box-shadow: 0 4px 15px rgba(0, 123, 255, 0.2);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
   display: flex;
   align-items: center;
   gap: 1rem;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  position: relative;
+  overflow: hidden;
+  border-left: 4px solid transparent;
 }
 
-.stat-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(0, 123, 255, 0.3);
+.stat-card:nth-child(1) {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
 }
 
 .stat-card:nth-child(2) {
-  background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%);
-  box-shadow: 0 4px 15px rgba(40, 167, 69, 0.2);
-}
-
-.stat-card:nth-child(2):hover {
-  box-shadow: 0 8px 25px rgba(40, 167, 69, 0.3);
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  color: white;
 }
 
 .stat-card:nth-child(3) {
-  background: linear-gradient(135deg, #ffc107 0%, #e0a800 100%);
-  box-shadow: 0 4px 15px rgba(255, 193, 7, 0.2);
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+  color: white;
 }
 
-.stat-card:nth-child(3):hover {
-  box-shadow: 0 8px 25px rgba(255, 193, 7, 0.3);
+.stat-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.1);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.stat-card:hover::before {
+  opacity: 1;
 }
 
 .stat-icon {
@@ -600,44 +627,79 @@ onMounted(() => {
   color: #007bff;
 }
 
-.table-count {
-  font-size: 0.9rem;
-  color: #6c757d;
-  font-weight: 500;
+.table-responsive {
+  overflow-x: auto;
+  max-width: 100%;
+  padding: 1.5rem;
+  background: white;
+  -webkit-overflow-scrolling: touch;
 }
+
+.table-responsive::-webkit-scrollbar {
+  height: 8px;
+}
+
+.table-responsive::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 4px;
+}
+
+.table-responsive::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, #cbd5e1 0%, #94a3b8 100%);
+  border-radius: 4px;
+}
+
+.table-responsive::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, #94a3b8 0%, #64748b 100%);
+}
+
 .data-table {
   width: 100%;
   border-collapse: collapse;
   min-width: 600px;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
+
 .data-table th,
 .data-table td {
-  padding: 1rem 1.5rem;
+  padding: 0.875rem 1.25rem;
   text-align: left;
-  border-bottom: 1px solid #e9ecef;
+  border-bottom: 1px solid #e5e7eb;
 }
+
 .data-table th {
-  background-color: #f8f9fa;
-  color: #495057;
+  background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+  color: #374151;
   font-weight: 600;
-  font-size: 0.85rem;
+  font-size: 0.875rem;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.025em;
+  position: sticky;
+  top: 0;
+  z-index: 1;
 }
 
 .data-table th i {
-  color: #007bff;
+  color: #3b82f6;
   margin-right: 0.5rem;
   font-size: 0.8rem;
 }
+
 .data-table td {
-  color: #212529;
+  color: #1f2937;
+  background-color: #ffffff;
 }
+
 .data-table tr:last-child td {
   border-bottom: none;
 }
-.data-table tr:hover {
-  background-color: #f1f3f5;
+
+.data-table tbody tr:hover {
+  background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
+  transform: translateY(-1px);
+  transition: all 0.2s ease-in-out;
 }
 .no-data-found {
   text-align: center;
@@ -651,67 +713,86 @@ onMounted(() => {
   flex-direction: column;
   align-items: center;
   gap: 1rem;
-  padding: 2rem;
+  padding: 3rem 2rem;
 }
 
 .empty-state i {
-  font-size: 3rem;
-  color: #007bff;
+  font-size: 4rem;
+  color: #3b82f6;
   opacity: 0.5;
 }
 
-.empty-state p {
-  font-size: 1.1rem;
-  color: #495057;
+.empty-state h3 {
+  font-size: 1.5rem;
+  color: #1f2937;
   margin: 0;
-  font-weight: 500;
+  font-weight: 600;
+}
+
+.empty-state p {
+  font-size: 1rem;
+  color: #6b7280;
+  margin: 0;
+  text-align: center;
+  line-height: 1.6;
+  max-width: 400px;
 }
 
 .empty-state small {
-  color: #6c757d;
-  font-size: 0.9rem;
+  color: #9ca3af;
+  font-size: 0.875rem;
   text-align: center;
   max-width: 300px;
 }
 .actions {
   display: flex;
-  gap: 0.5rem;
+  gap: 0.375rem;
 }
 .actions .action-button {
-  padding: 0.6rem;
-  width: 2.2rem;
-  height: 2.2rem;
-  border-radius: 50%;
+  padding: 0.5rem;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 0.375rem;
   display: flex;
   align-items: center;
   justify-content: center;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  font-size: 0.875rem;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 .actions .edit-button {
-  background-color: #ffc107;
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
   color: white;
-  box-shadow: 0 2px 8px rgba(255, 193, 7, 0.2);
 }
+
 .actions .edit-button:hover {
-  background-color: #e0a800;
-  box-shadow: 0 4px 12px rgba(255, 193, 7, 0.3);
+  background: linear-gradient(135deg, #d97706 0%, #b45309 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
 }
+
 .actions .delete-button {
-  background-color: #dc3545;
-  box-shadow: 0 2px 8px rgba(220, 53, 69, 0.2);
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  color: white;
 }
+
 .actions .delete-button:hover {
-  background-color: #c82333;
-  box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+  background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
 }
 .category-badge {
   display: inline-block;
-  padding: 0.3rem 0.7rem;
-  border-radius: 20px;
-  background-color: #28a745;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
   color: white;
-  font-size: 0.8rem;
-  font-weight: 500;
+  font-size: 0.75rem;
+  font-weight: 600;
   white-space: nowrap;
+  box-shadow: 0 1px 2px rgba(16, 185, 129, 0.2);
 }
 
 /* Form Overlay Styles */
@@ -776,10 +857,6 @@ onMounted(() => {
     flex-direction: column;
     align-items: flex-start;
     gap: 1rem;
-  }
-
-  .table-count {
-    align-self: flex-start;
   }
 
   .actions {

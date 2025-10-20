@@ -2726,3 +2726,8 @@ onMounted(() => {
   }
 }
 </style>
+<style scoped>
+.budaya-view-user {
+  overflow-y: auto;
+}
+</style>

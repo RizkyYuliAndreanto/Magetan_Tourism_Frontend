@@ -1533,3 +1533,8 @@ onUnmounted(() => {
   }
 }
 </style>
+<style scoped>
+.detail-budaya-view {
+  overflow-y: auto;
+}
+</style>

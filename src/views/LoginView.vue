@@ -5,11 +5,21 @@
       <form @submit.prevent="handleLogin" class="auth-form">
         <div class="form-group">
           <label for="identifier" class="form-label">Username or Email</label>
-          <input type="text" id="identifier" v-model="identifier" class="form-input" required>
+          <input
+            type="text"
+            id="identifier"
+            v-model="identifier"
+            class="form-input"
+            required />
         </div>
         <div class="form-group">
           <label for="password" class="form-label">Password</label>
-          <input type="password" id="password" v-model="password" class="form-input" required>
+          <input
+            type="password"
+            id="password"
+            v-model="password"
+            class="form-input"
+            required />
         </div>
         <button type="submit" class="auth-button">Log In</button>
       </form>
@@ -24,35 +34,37 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
-import axios from 'axios';
-import { useRouter } from 'vue-router';
+import { ref } from "vue";
+import axios from "axios";
+import { useRouter } from "vue-router";
 
-const identifier = ref('');
-const password = ref('');
+const identifier = ref("");
+const password = ref("");
 const router = useRouter();
 
 const handleLogin = async () => {
   try {
     // Endpoint backend untuk login adalah POST /login
     // Backend mengharapkan identifier (username/email) dan password
-    const response = await axios.post('http://localhost:5000/api/auth/login', {
+    const response = await axios.post("http://localhost:5000/api/auth/login", {
       identifier: identifier.value,
       password: password.value,
     });
-    
-    console.log('Login berhasil:', response.data);
-    
+
+    console.log("Login berhasil:", response.data);
+
     // Simpan token dan data admin di localStorage
-    localStorage.setItem('access_token', response.data.token);
-    localStorage.setItem('user', JSON.stringify(response.data.admin));
+    localStorage.setItem("access_token", response.data.token);
+    localStorage.setItem("user", JSON.stringify(response.data.admin));
 
     // Arahkan ke dashboard admin setelah login berhasil
-    router.push('/admin');
-    
+    router.push("/admin");
   } catch (error) {
-    console.error('Login gagal:', error.response?.data || error.message);
-    alert(error.response?.data?.error || 'Login gagal. Periksa kembali identifier dan password Anda.');
+    console.error("Login gagal:", error.response?.data || error.message);
+    alert(
+      error.response?.data?.error ||
+        "Login gagal. Periksa kembali identifier dan password Anda."
+    );
   }
 };
 </script>
@@ -151,5 +163,10 @@ const handleLogin = async () => {
 
 .auth-link a:hover {
   text-decoration: underline;
+}
+</style>
+<style scoped>
+.auth-view {
+  overflow-y: auto;
 }
 </style>
