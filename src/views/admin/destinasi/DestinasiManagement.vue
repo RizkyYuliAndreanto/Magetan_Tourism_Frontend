@@ -846,7 +846,7 @@ onMounted(() => {
   backdrop-filter: blur(4px);
   display: flex;
   justify-content: center;
-  align-items: center;
+  align-items: flex-start;
   z-index: 9999;
   overflow-y: auto;
   padding: 2rem;
@@ -857,8 +857,6 @@ onMounted(() => {
   position: relative;
   max-width: 900px;
   width: 100%;
-  max-height: 90vh;
-  overflow-y: auto;
   margin: auto;
   z-index: 10000;
   box-shadow: 0 25px 80px rgba(0, 0, 0, 0.3);

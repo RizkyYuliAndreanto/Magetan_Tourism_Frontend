@@ -205,7 +205,7 @@ const handleDeleteConfirmed = async () => {
       }
     );
     openPopUp("success", "delete");
-    fetchBeritaData();
+    await fetchBeritaData(); // Refresh data after successful delete
   } catch (err) {
     console.error("Gagal menghapus berita:", err.response?.data);
     openPopUp(
@@ -318,7 +318,8 @@ const closeBeritaForm = () => {
   document.body.style.top = "";
   document.body.style.left = "";
 
-  fetchBeritaData();
+  // Refresh data hanya dipanggil dari method yang membutuhkan
+  // fetchBeritaData(); // Dihapus dari sini karena sudah dipanggil dari method update/create
 };
 
 const handleSaveBerita = async (formData, galleryFiles) => {
@@ -359,6 +360,9 @@ const handleSaveBerita = async (formData, galleryFiles) => {
     }
     openPopUp("success", "create");
     closeBeritaForm();
+
+    // Refresh data after successful create
+    await fetchBeritaData();
   } catch (err) {
     console.error("Gagal menyimpan berita:", err.response?.data);
     openPopUp(
@@ -379,23 +383,274 @@ const handleUpdateBerita = async (
     const token = localStorage.getItem("access_token");
     const id = formData.get("id_berita");
 
+    console.log(
+      "🔄 [NewsManagement] Starting atomic update berita with media..."
+    );
+    console.log("📥 [NewsManagement] Received parameters:");
+    console.log("📥 [NewsManagement] - Berita ID:", id);
+    console.log(
+      "📥 [NewsManagement] - New gallery files count:",
+      galleryFiles?.length || 0
+    );
+    console.log(
+      "📥 [NewsManagement] - Deleted gallery IDs count:",
+      deletedGalleryIds?.length || 0
+    );
+    console.log("📥 [NewsManagement] - Deleted gallery IDs array:", [
+      ...(deletedGalleryIds || []),
+    ]);
+    console.log(
+      "📥 [NewsManagement] - deletedGalleryIds type:",
+      typeof deletedGalleryIds
+    );
+    console.log(
+      "📥 [NewsManagement] - deletedGalleryIds is array:",
+      Array.isArray(deletedGalleryIds)
+    );
+
+    // Prepare media operations untuk endpoint baru
+    const existingUpdates = [];
+
+    // Extract existing gallery updates dari formData
+    for (let [key, value] of formData.entries()) {
+      if (key === "existing_gallery_updates") {
+        try {
+          const updateItem = JSON.parse(value);
+          // Pastikan item memiliki id_media_galeri
+          if (updateItem.id_media_galeri) {
+            existingUpdates.push({
+              id: updateItem.id_media_galeri, // Pastikan menggunakan 'id', bukan 'id_media_galeri'
+              deskripsi_file: updateItem.deskripsi_file || "",
+              urutan_tampil: updateItem.urutan_tampil || 1,
+            });
+          }
+        } catch (parseError) {
+          console.error("Error parsing existing gallery update:", parseError);
+        }
+      }
+    }
+
+    // Get current media untuk determine keep operations
+    let currentMediaIds = [];
+    try {
+      const mediaResponse = await axios.get(
+        `http://localhost:5000/api/media-galeri/by-content?id_konten=${id}&tipe_konten=berita`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      currentMediaIds = mediaResponse.data.map((m) => m.id_media_galeri);
+      console.log("📋 Current media IDs fetched:", currentMediaIds);
+    } catch (err) {
+      console.warn(
+        "Could not fetch current media, proceeding without keep operations"
+      );
+    }
+
+    // Filter out null, undefined, dan empty values dari deletedGalleryIds
+    const validDeletedIds = (deletedGalleryIds || [])
+      .filter((id) => id != null && id !== undefined && id !== "" && !isNaN(id))
+      .map((id) => parseInt(id)); // Pastikan integer
+
+    // Determine media operations
+    const keepIds = currentMediaIds.filter(
+      (id) => !validDeletedIds.includes(id)
+    );
+
+    const mediaOperations = {
+      keep: keepIds,
+      update: existingUpdates, // Ini sekarang sudah memiliki format { id, deskripsi_file, urutan_tampil }
+      delete: validDeletedIds,
+    };
+
+    console.log("📋 Media operations prepared:", {
+      totalCurrent: currentMediaIds.length,
+      keep: keepIds.length,
+      update: existingUpdates.length,
+      delete: validDeletedIds.length,
+      deleteIds: validDeletedIds,
+    });
+
+    // Create new FormData for atomic endpoint
+    const atomicFormData = new FormData();
+
+    // Add berita data (exclude media-related fields)
+    for (let [key, value] of formData.entries()) {
+      if (
+        !key.startsWith("existing_gallery_updates") &&
+        !key.startsWith("media_galeri_files")
+      ) {
+        atomicFormData.append(key, value);
+      }
+    }
+
+    // Add media operations
+    atomicFormData.append("media_operations", JSON.stringify(mediaOperations));
+
+    // Add new gallery files
+    if (galleryFiles && galleryFiles.length > 0) {
+      galleryFiles.forEach((galleryItem, index) => {
+        atomicFormData.append("media_galeri_files", galleryItem.file);
+        atomicFormData.append(
+          `media_deskripsi_${index}`,
+          galleryItem.deskripsi || ""
+        );
+        atomicFormData.append(
+          `media_urutan_${index}`,
+          galleryItem.urutan || 100 + index
+        );
+      });
+    }
+
+    console.log("📤 Sending atomic update request...");
+    console.log("Media operations:", mediaOperations);
+
+    // Send atomic update request to new endpoint
+    const response = await axios.put(
+      `http://localhost:5000/api/berita/${id}/with-media`,
+      atomicFormData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+          Authorization: `Bearer ${token}`,
+        },
+        timeout: 60000, // 60 seconds timeout untuk file upload
+      }
+    );
+
+    console.log("✅ Atomic update completed successfully!");
+    console.log("📊 Media operations stats:", response.data.media_stats);
+
+    openPopUp("success", "update");
+    closeBeritaForm();
+
+    // Refresh data
+    await fetchBeritaData();
+  } catch (err) {
+    console.error(
+      "❌ Atomic update failed:",
+      err.response?.data || err.message
+    );
+
+    // Fallback ke method lama jika endpoint baru gagal
+    if (
+      err.response?.status === 404 &&
+      err.response?.data?.error?.includes("Not Found")
+    ) {
+      console.log("🔄 Falling back to legacy update method...");
+      await handleUpdateBeritaLegacy(formData, galleryFiles, deletedGalleryIds);
+    } else {
+      openPopUp(
+        "error",
+        "update",
+        err.response?.data?.error || "Gagal memperbarui berita."
+      );
+    }
+  }
+};
+
+// Legacy method sebagai fallback
+const handleUpdateBeritaLegacy = async (
+  formData,
+  galleryFiles,
+  deletedGalleryIds
+) => {
+  try {
+    const token = localStorage.getItem("access_token");
+    const id = formData.get("id_berita");
+
+    console.log("🔄 Using legacy update method...");
+
+    // 1. Update berita terlebih dahulu
     await axios.put(`http://localhost:5000/api/berita/${id}`, formData, {
       headers: {
         "Content-Type": "multipart/form-data",
         Authorization: `Bearer ${token}`,
       },
     });
+    console.log("Berita berhasil diupdate");
 
+    // 2. Update existing gallery files (jika ada perubahan deskripsi/urutan)
+    const existingGalleryUpdates = [];
+    for (let [key, value] of formData.entries()) {
+      if (key === "existing_gallery_updates") {
+        try {
+          existingGalleryUpdates.push(JSON.parse(value));
+        } catch (parseError) {
+          console.error("Error parsing existing gallery update:", parseError);
+        }
+      }
+    }
+
+    if (existingGalleryUpdates.length > 0) {
+      console.log("Mengupdate media galeri yang ada:", existingGalleryUpdates);
+      await Promise.all(
+        existingGalleryUpdates.map(async (update) => {
+          try {
+            await axios.patch(
+              `http://localhost:5000/api/media-galeri/${update.id_media_galeri}/data`,
+              {
+                deskripsi_file: update.deskripsi_file || "",
+                urutan_tampil: update.urutan_tampil || 1,
+              },
+              {
+                headers: {
+                  "Content-Type": "application/json",
+                  Authorization: `Bearer ${token}`,
+                },
+              }
+            );
+            console.log(
+              `Media galeri ${update.id_media_galeri} berhasil diupdate`
+            );
+          } catch (updateError) {
+            console.error(
+              `Gagal mengupdate media galeri ${update.id_media_galeri}:`,
+              updateError
+            );
+          }
+        })
+      );
+    }
+
+    // 3. Hapus media galeri yang dipilih menggunakan batch delete
+    if (deletedGalleryIds && deletedGalleryIds.length > 0) {
+      console.log("Menghapus media galeri (batch):", deletedGalleryIds);
+      try {
+        await axios.delete("http://localhost:5000/api/media-galeri/batch", {
+          data: { mediaIds: deletedGalleryIds },
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        console.log(
+          `${deletedGalleryIds.length} media galeri berhasil dihapus`
+        );
+      } catch (deleteError) {
+        console.error("Gagal menghapus media galeri batch:", deleteError);
+      }
+    }
+
+    // 4. Tambah media galeri baru (jika ada)
     if (galleryFiles && galleryFiles.length > 0) {
+      console.log(
+        "Menambah media galeri baru:",
+        galleryFiles.length,
+        "file(s)"
+      );
       const galleryFormData = new FormData();
       galleryFormData.append("id_konten", id);
       galleryFormData.append("tipe_konten", "berita");
-      galleryFiles.forEach((galleryItem) => {
+      galleryFiles.forEach((galleryItem, index) => {
         galleryFormData.append("media_galeri_files", galleryItem.file);
         galleryFormData.append("deskripsi_file", galleryItem.deskripsi || "");
         galleryFormData.append("jenis_file", galleryItem.jenis_file);
         galleryFormData.append("urutan_tampil", galleryItem.urutan);
       });
+
       await axios.post(
         "http://localhost:5000/api/media-galeri",
         galleryFormData,
@@ -406,24 +661,13 @@ const handleUpdateBerita = async (
           },
         }
       );
+      console.log("Media galeri baru berhasil ditambahkan");
     }
 
-    if (deletedGalleryIds && deletedGalleryIds.length > 0) {
-      await Promise.all(
-        deletedGalleryIds.map(async (mediaId) => {
-          await axios.delete(
-            `http://localhost:5000/api/media-galeri/${mediaId}`,
-            {
-              headers: { Authorization: `Bearer ${token}` },
-            }
-          );
-        })
-      );
-    }
     openPopUp("success", "update");
     closeBeritaForm();
   } catch (err) {
-    console.error("Gagal memperbarui berita:", err.response?.data);
+    console.error("Gagal memperbarui berita (legacy):", err.response?.data);
     openPopUp(
       "error",
       "update",
@@ -806,7 +1050,7 @@ onUnmounted(() => {
   backdrop-filter: blur(4px);
   display: flex;
   justify-content: center;
-  align-items: center;
+  align-items: flex-start;
   z-index: 9999;
   overflow-y: auto;
   padding: 2rem;
@@ -817,8 +1061,6 @@ onUnmounted(() => {
   position: relative;
   max-width: 900px;
   width: 100%;
-  max-height: 90vh;
-  overflow-y: auto;
   margin: auto;
   z-index: 10000;
   box-shadow: 0 25px 80px rgba(0, 0, 0, 0.3);

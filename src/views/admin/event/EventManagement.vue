@@ -779,26 +779,27 @@ onMounted(() => {
   position: fixed;
   top: 0;
   left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.6);
   backdrop-filter: blur(4px);
   display: flex;
-  align-items: center;
   justify-content: center;
-  z-index: 1000;
-  padding: 1rem;
+  align-items: flex-start;
+  z-index: 9999;
+  overflow-y: auto;
+  padding: 2rem;
+  box-sizing: border-box;
 }
 
-.form-card {
-  background: white;
-  border-radius: 16px;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1),
-    0 10px 10px -5px rgba(0, 0, 0, 0.04);
-  max-width: 90vw;
-  max-height: 90vh;
-  overflow-y: auto;
-  animation: slideInUp 0.3s ease-out;
+.form-overlay .form-card {
+  position: relative;
+  max-width: 900px;
+  width: 100%;
+  margin: auto;
+  z-index: 10000;
+  box-shadow: 0 25px 80px rgba(0, 0, 0, 0.3);
+  border: 2px solid rgba(255, 255, 255, 0.1);
 }
 
 @keyframes slideInUp {

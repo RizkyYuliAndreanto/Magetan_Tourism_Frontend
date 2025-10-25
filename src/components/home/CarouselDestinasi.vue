@@ -196,6 +196,8 @@ const TRANSITION_DURATION = 0.8;
 let touchStartX = 0;
 let touchStartY = 0;
 
+// Remove background sync as we're using pure gradient now
+
 // Sample destinations data (replace with API call)
 const defaultDestinations = [
   {
@@ -715,10 +717,58 @@ const handleKeydown = (event) => {
   }
 };
 
+// Removed background sync functions - using pure gradient approach
+
+// Enhanced transition effects on scroll
+const initializeTransitionEffects = () => {
+  const observer = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          // Enhanced animation when section comes into view
+          entry.target.classList.add("section-visible");
+
+          // Trigger enhanced wave animation
+          const waveElement = entry.target.querySelector(
+            ".premium-tourism-section::before"
+          );
+          if (waveElement) {
+            waveElement.style.animationDelay = "0s";
+            waveElement.style.animationDuration = "6s";
+          }
+        } else {
+          entry.target.classList.remove("section-visible");
+        }
+      });
+    },
+    {
+      threshold: 0.1,
+      rootMargin: "50px 0px -50px 0px",
+    }
+  );
+
+  nextTick(() => {
+    const section = document.querySelector(".premium-tourism-section");
+    if (section) {
+      observer.observe(section);
+    }
+  });
+
+  return observer;
+};
+
 // Lifecycle hooks
 onMounted(() => {
   fetchDestinations();
   window.addEventListener("keydown", handleKeydown);
+
+  // Initialize enhanced transition effects
+  const observer = initializeTransitionEffects();
+
+  // Store observer for cleanup
+  onUnmounted(() => {
+    observer.disconnect();
+  });
 });
 
 onUnmounted(() => {
@@ -776,17 +826,87 @@ watch(currentIndex, (newIndex, oldIndex) => {
 .premium-tourism-section {
   position: relative;
   min-height: 650px;
-  padding: 64px 32px;
+  padding: 20px 32px 64px 32px;
+  margin-top: -40px;
   background: linear-gradient(
     135deg,
-    #f8fafc 0%,
-    #e0f2fe 25%,
-    #bae6fd 50%,
-    #7dd3fc 75%,
-    #38bdf8 100%
+    rgba(186, 230, 253, 0.95) 0%,
+    rgba(147, 197, 253, 0.9) 25%,
+    rgba(96, 165, 250, 0.85) 50%,
+    rgba(59, 130, 246, 0.8) 75%,
+    rgba(37, 99, 235, 0.75) 100%
   );
   overflow: hidden;
   font-family: "Inter", "SF Pro Display", sans-serif;
+  z-index: 5;
+  transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+/* Dynamic background overlay for better photo-to-gradient transition */
+.premium-tourism-section::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 120px;
+  background: linear-gradient(
+    to bottom,
+    transparent 0%,
+    rgba(255, 255, 255, 0.1) 30%,
+    rgba(248, 250, 254, 0.4) 60%,
+    rgba(248, 250, 254, 0.7) 80%,
+    #ffffff 100%
+  );
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* Enhanced state when section is visible */
+.premium-tourism-section.section-visible {
+  transform: translateY(0);
+}
+
+.premium-tourism-section.section-visible::before {
+  animation-play-state: running;
+}
+
+.premium-tourism-section.section-visible .premium-header {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+.premium-tourism-section::before {
+  content: "";
+  position: absolute;
+  top: -15px;
+  left: 0;
+  right: 0;
+  height: 60px;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 60'%3E%3Cpath d='M0,35 C300,50 600,10 900,40 C1000,50 1100,25 1200,35 L1200,0 L0,0 Z' fill='rgba(186,230,253,0.9)'/%3E%3C/svg%3E")
+    no-repeat center top;
+  background-size: cover;
+  z-index: 2;
+  pointer-events: none;
+  animation: complementaryWave 12s ease-in-out infinite alternate;
+}
+
+.premium-tourism-section::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 120px;
+  background: linear-gradient(
+    to bottom,
+    transparent 0%,
+    rgba(255, 255, 255, 0.3) 40%,
+    rgba(248, 250, 254, 0.7) 70%,
+    #ffffff 100%
+  );
+  z-index: 10;
+  pointer-events: none;
 }
 
 /* ===== IMMERSIVE BACKGROUND ELEMENTS ===== */
@@ -902,9 +1022,10 @@ watch(currentIndex, (newIndex, oldIndex) => {
 /* ===== PREMIUM HEADER ===== */
 .premium-header {
   position: relative;
-  z-index: 10;
+  z-index: 20;
   text-align: center;
   margin-bottom: 3rem;
+  padding-top: 80px;
 }
 
 .premium-title {
@@ -1002,7 +1123,7 @@ watch(currentIndex, (newIndex, oldIndex) => {
 /* ===== PREMIUM CAROUSEL CONTAINER ===== */
 .premium-carousel-container {
   position: relative;
-  z-index: 10;
+  z-index: 20;
   max-width: 1600px;
   margin: 0 auto;
 }
@@ -1841,5 +1962,21 @@ watch(currentIndex, (newIndex, oldIndex) => {
 .pagination-indicator:focus {
   outline: 3px solid #3b82f6;
   outline-offset: 2px;
+}
+
+/* ===== TRANSITION ANIMATIONS ===== */
+@keyframes complementaryWave {
+  0% {
+    transform: translateX(3px) scaleX(1.005);
+    opacity: 0.8;
+  }
+  50% {
+    transform: translateX(0px) scaleX(1);
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(-3px) scaleX(1.005);
+    opacity: 0.8;
+  }
 }
 </style>

@@ -145,7 +145,9 @@
             </div>
             <div class="contact-content">
               <span class="contact-label">Email</span>
-              <span class="contact-detail">informasiwisatamagetan@gmail.com</span>
+              <span class="contact-detail"
+                >informasiwisatamagetan@gmail.com</span
+              >
             </div>
           </li>
         </ul>
@@ -220,6 +222,9 @@
   margin-top: auto;
   overflow: hidden;
   animation: footerReveal 0.8s ease-out;
+  width: 100%;
+  display: block;
+  clear: both;
 }
 
 @keyframes footerReveal {

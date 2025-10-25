@@ -53,13 +53,25 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  padding-top: 80px; /* Padding untuk navbar fixed */
-  background-color: var(--off-white);
+  padding-top: 60px;
+  background: linear-gradient(180deg, #f8fafc 0%, #e0f2fe 50%, #bae6fd 100%);
   color: var(--text-color-dark);
   overflow-y: auto;
 }
 
 main {
   flex-grow: 1;
+  position: relative;
+}
+
+/* Smooth section transitions */
+main > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* Ensure seamless flow between sections */
+main > *:not(:first-child) {
+  margin-top: 0;
 }
 </style>

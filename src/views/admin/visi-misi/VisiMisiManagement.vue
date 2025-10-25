@@ -59,54 +59,59 @@
       </div>
     </div>
 
-    <div v-if="formOpen" class="form-card card">
-      <VisiMisiForm
-        :is-editing="!!visiMisiData"
-        :initial-data="formVisiMisi"
-        @close-form="closeForm"
-        @save-visi-misi="handleSave"
-        @update-visi-misi="handleUpdate" />
-    </div>
-
-    <div v-else-if="visiMisiData" class="preview-container card">
-      <h3 class="preview-title">Pratinjau Visi Misi</h3>
-      <div class="preview-content">
-        <div v-if="visiMisiData.deskripsi" class="preview-section">
-          <h4 class="preview-subtitle">Deskripsi</h4>
-          <p>{{ visiMisiData.deskripsi }}</p>
-        </div>
-        <div v-if="visiMisiData.visi_misi_file_path" class="preview-section">
-          <h4 class="preview-subtitle">File Visi Misi</h4>
-          <div class="file-preview-area">
-            <img
-              v-if="visiMisiData.tipe_file_visi_misi === 'gambar'"
-              :src="getFilePath(visiMisiData.visi_misi_file_path)"
-              alt="Visi Misi File"
-              class="file-thumbnail" />
-            <a
-              v-else-if="visiMisiData.tipe_file_visi_misi === 'pdf'"
-              :href="getFilePath(visiMisiData.visi_misi_file_path)"
-              target="_blank"
-              class="pdf-link">
-              <i class="fas fa-file-pdf pdf-icon"></i>
-              <span>Lihat PDF</span>
-            </a>
-          </div>
-        </div>
+    <!-- Form Overlay -->
+    <div v-if="formOpen" class="form-overlay">
+      <div class="form-card card">
+        <VisiMisiForm
+          :is-editing="!!visiMisiData"
+          :initial-data="formVisiMisi"
+          @close-form="closeForm"
+          @save-visi-misi="handleSave"
+          @update-visi-misi="handleUpdate" />
       </div>
     </div>
 
-    <div v-else class="no-data-card card">
-      <div class="empty-state">
-        <div class="empty-icon">
-          <i class="fas fa-flag"></i>
+    <div v-else>
+      <div v-if="visiMisiData" class="preview-container card">
+        <h3 class="preview-title">Pratinjau Visi Misi</h3>
+        <div class="preview-content">
+          <div v-if="visiMisiData.deskripsi" class="preview-section">
+            <h4 class="preview-subtitle">Deskripsi</h4>
+            <p>{{ visiMisiData.deskripsi }}</p>
+          </div>
+          <div v-if="visiMisiData.visi_misi_file_path" class="preview-section">
+            <h4 class="preview-subtitle">File Visi Misi</h4>
+            <div class="file-preview-area">
+              <img
+                v-if="visiMisiData.tipe_file_visi_misi === 'gambar'"
+                :src="getFilePath(visiMisiData.visi_misi_file_path)"
+                alt="Visi Misi File"
+                class="file-thumbnail" />
+              <a
+                v-else-if="visiMisiData.tipe_file_visi_misi === 'pdf'"
+                :href="getFilePath(visiMisiData.visi_misi_file_path)"
+                target="_blank"
+                class="pdf-link">
+                <i class="fas fa-file-pdf pdf-icon"></i>
+                <span>Lihat PDF</span>
+              </a>
+            </div>
+          </div>
         </div>
-        <h3 class="empty-title">Belum Ada Visi & Misi</h3>
-        <p class="empty-description">
-          Belum ada data Visi & Misi yang tersimpan. Klik tombol "Tambah Visi &
-          Misi" di atas untuk menambahkan visi dan misi dinas pariwisata untuk
-          memberikan arah strategis pengembangan wisata Magetan.
-        </p>
+      </div>
+
+      <div v-else class="no-data-card card">
+        <div class="empty-state">
+          <div class="empty-icon">
+            <i class="fas fa-flag"></i>
+          </div>
+          <h3 class="empty-title">Belum Ada Visi & Misi</h3>
+          <p class="empty-description">
+            Belum ada data Visi & Misi yang tersimpan. Klik tombol "Tambah Visi
+            & Misi" di atas untuk menambahkan visi dan misi dinas pariwisata
+            untuk memberikan arah strategis pengembangan wisata Magetan.
+          </p>
+        </div>
       </div>
     </div>
 
@@ -606,6 +611,45 @@ onMounted(() => {
   max-width: 500px;
   line-height: 1.6;
   margin: 0;
+}
+
+/* Form Overlay */
+.form-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  z-index: 9999;
+  overflow-y: auto;
+  padding: 2rem;
+  box-sizing: border-box;
+}
+
+.form-overlay .form-card {
+  position: relative;
+  max-width: 900px;
+  width: 100%;
+  margin: auto;
+  z-index: 10000;
+  box-shadow: 0 25px 80px rgba(0, 0, 0, 0.3);
+  border: 2px solid rgba(255, 255, 255, 0.1);
+}
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
 /* Responsive Design */

@@ -441,16 +441,75 @@ const viewMoreNews = () => {
 
 <style scoped>
 .news-grid-section {
-  padding: 40px 20px;
-  background-color: #fff;
-  max-width: 1200px;
-  margin: 0 auto;
+  padding: 80px 0 60px 0;
+  background: linear-gradient(
+    180deg,
+    #e0f0ff 0%,
+    #f0f6fe 15%,
+    #ffffff 30%,
+    #f8faff 50%,
+    #e8f2ff 70%,
+    #f0f6fe 85%,
+    #f0f6fe 100%
+  );
+  width: 100%;
+  position: relative;
+  margin-top: -80px;
+  overflow: hidden;
+}
+
+/* Transisi halus dari EkrafSection */
+.news-grid-section::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 100px;
+  background: linear-gradient(
+    to bottom,
+    rgba(248, 250, 255, 0.3) 0%,
+    rgba(240, 246, 254, 0.2) 30%,
+    rgba(224, 240, 255, 0.1) 60%,
+    transparent 100%
+  );
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* Transisi halus ke GallerySection */
+.news-grid-section::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: -100px;
+  right: -100px;
+  width: calc(100% + 200px);
+  height: 180px;
+  background: linear-gradient(
+    to bottom,
+    transparent 0%,
+    rgba(240, 246, 254, 0.1) 10%,
+    rgba(240, 246, 254, 0.3) 20%,
+    rgba(240, 246, 254, 0.5) 35%,
+    rgba(240, 246, 254, 0.7) 50%,
+    rgba(240, 246, 254, 0.85) 65%,
+    rgba(240, 246, 254, 0.95) 80%,
+    #f0f6fe 100%
+  );
+  z-index: 1;
+  pointer-events: none;
 }
 
 .main-news-grid {
   display: flex;
   flex-direction: column;
   gap: 40px;
+  position: relative;
+  z-index: 2;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
 }
 
 /* Trending News Grid */
@@ -463,15 +522,35 @@ const viewMoreNews = () => {
 }
 
 .news-popular-card {
-  background-color: #f4f4f4;
+  background: linear-gradient(
+    135deg,
+    rgba(240, 246, 254, 0.9) 0%,
+    rgba(232, 242, 254, 0.8) 50%,
+    rgba(248, 249, 250, 0.9) 100%
+  );
   border-radius: 12px;
+  border: 2px solid rgba(30, 58, 138, 0.08);
   overflow: hidden;
   position: relative;
   min-height: 260px;
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 8px 25px rgba(30, 58, 138, 0.1);
+  backdrop-filter: blur(10px);
+  transition: all 0.3s ease;
+}
+
+.news-popular-card:hover {
+  border-color: rgba(30, 58, 138, 0.15);
+  box-shadow: 0 12px 35px rgba(30, 58, 138, 0.15);
+  transform: translateY(-2px);
+  background: linear-gradient(
+    135deg,
+    rgba(240, 246, 254, 0.95) 0%,
+    rgba(232, 242, 254, 0.9) 50%,
+    rgba(248, 249, 250, 0.95) 100%
+  );
 }
 .news-popular-card .news-image {
   width: 100%;
@@ -513,19 +592,34 @@ const viewMoreNews = () => {
   gap: 18px;
 }
 .trending-card {
-  background-color: #f4f4f4;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.9) 0%,
+    rgba(248, 250, 252, 0.8) 50%,
+    rgba(240, 246, 254, 0.7) 100%
+  );
+  border: 1px solid rgba(30, 58, 138, 0.05);
   border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 4px 15px rgba(30, 58, 138, 0.08);
+  backdrop-filter: blur(5px);
   overflow: hidden;
   display: flex;
   flex-direction: column;
   text-decoration: none;
   color: inherit;
-  transition: transform 0.2s ease;
+  transition: all 0.3s ease;
   min-height: 120px;
 }
 .trending-card:hover {
-  transform: translateY(-5px);
+  transform: translateY(-3px);
+  border-color: rgba(30, 58, 138, 0.12);
+  box-shadow: 0 8px 25px rgba(30, 58, 138, 0.12);
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.95) 0%,
+    rgba(248, 250, 252, 0.9) 50%,
+    rgba(240, 246, 254, 0.8) 100%
+  );
 }
 .trending-card .card-image {
   width: 100%;
@@ -554,17 +648,39 @@ const viewMoreNews = () => {
 
 /* Latest News Cards */
 .latest-news-cards {
-  background-color: #fff;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.85) 0%,
+    rgba(248, 250, 252, 0.75) 30%,
+    rgba(240, 246, 254, 0.65) 70%,
+    rgba(232, 242, 254, 0.7) 100%
+  );
+  border: 2px solid rgba(30, 58, 138, 0.06);
   border-radius: 12px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
-  padding: 18px;
+  box-shadow: 0 8px 25px rgba(30, 58, 138, 0.1);
+  backdrop-filter: blur(10px);
+  padding: 20px;
   display: flex;
   flex-direction: column;
+  transition: all 0.3s ease;
+}
+
+.latest-news-cards:hover {
+  border-color: rgba(30, 58, 138, 0.1);
+  box-shadow: 0 12px 35px rgba(30, 58, 138, 0.12);
+  transform: translateY(-1px);
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.9) 0%,
+    rgba(248, 250, 252, 0.8) 30%,
+    rgba(240, 246, 254, 0.75) 70%,
+    rgba(232, 242, 254, 0.8) 100%
+  );
 }
 .latest-news-cards .card-subtitle {
   font-weight: 600;
   font-size: 1.1rem;
-  color: #222;
+  color: #1e3a8a;
   margin-bottom: 12px;
   text-transform: uppercase;
   letter-spacing: 1px;
@@ -576,19 +692,34 @@ const viewMoreNews = () => {
   gap: 14px;
 }
 .news-card-item {
-  background-color: #f4f4f4;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.8) 0%,
+    rgba(248, 250, 252, 0.7) 50%,
+    rgba(240, 246, 254, 0.6) 100%
+  );
+  border: 1px solid rgba(30, 58, 138, 0.04);
   border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 3px 12px rgba(30, 58, 138, 0.06);
+  backdrop-filter: blur(5px);
   overflow: hidden;
   display: flex;
   flex-direction: column;
   text-decoration: none;
   color: inherit;
-  transition: transform 0.2s ease;
+  transition: all 0.3s ease;
   min-height: 100px;
 }
 .news-card-item:hover {
-  transform: translateY(-5px);
+  transform: translateY(-2px);
+  border-color: rgba(30, 58, 138, 0.08);
+  box-shadow: 0 6px 20px rgba(30, 58, 138, 0.1);
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.9) 0%,
+    rgba(248, 250, 252, 0.8) 50%,
+    rgba(240, 246, 254, 0.7) 100%
+  );
 }
 .card-image {
   width: 100%;
@@ -609,16 +740,38 @@ const viewMoreNews = () => {
 
 /* Instagram Card */
 .instagram-card-wrapper {
-  background-color: #f4f4f4;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.85) 0%,
+    rgba(248, 250, 252, 0.75) 30%,
+    rgba(240, 246, 254, 0.65) 70%,
+    rgba(232, 242, 254, 0.7) 100%
+  );
+  border: 2px solid rgba(30, 58, 138, 0.06);
   position: relative;
   border-radius: 12px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 8px 25px rgba(30, 58, 138, 0.1);
+  backdrop-filter: blur(10px);
   overflow: hidden;
   min-height: 340px;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 0;
+  transition: all 0.3s ease;
+}
+
+.instagram-card-wrapper:hover {
+  border-color: rgba(30, 58, 138, 0.1);
+  box-shadow: 0 12px 35px rgba(30, 58, 138, 0.12);
+  transform: translateY(-1px);
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.9) 0%,
+    rgba(248, 250, 252, 0.8) 30%,
+    rgba(240, 246, 254, 0.75) 70%,
+    rgba(232, 242, 254, 0.8) 100%
+  );
 }
 
 .instagram-card-wrapper::before {
@@ -663,18 +816,25 @@ const viewMoreNews = () => {
 .section-title-text {
   font-size: 1.25rem;
   font-weight: 700;
-  color: #111;
+  color: #1e3a8a;
   letter-spacing: 1px;
   margin-right: 12px;
   position: relative;
   z-index: 2;
-  background: #fff;
-  padding-bottom: 2px;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.9) 0%,
+    rgba(248, 250, 252, 0.8) 100%
+  );
+  backdrop-filter: blur(5px);
+  padding: 4px 8px;
+  border-radius: 6px;
+  border: 1px solid rgba(30, 58, 138, 0.05);
 }
 .section-title-line {
   flex: 1;
   height: 4px;
-  background: #111;
+  background: #1e3a8a;
   border-radius: 2px;
   margin-left: 0;
   margin-top: 0.2em;

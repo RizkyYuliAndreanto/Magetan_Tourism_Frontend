@@ -54,69 +54,74 @@
       </div>
     </div>
 
-    <div v-if="formAnggotaOpen" class="form-card card">
-      <StrukturAnggotaForm
-        :is-editing="isEditingAnggota"
-        :initial-data="formAnggota"
-        @close-form="closeAnggotaForm"
-        @save-anggota="handleSaveAnggota"
-        @update-anggota="handleUpdateAnggota" />
+    <!-- Form Overlay -->
+    <div v-if="formAnggotaOpen" class="form-overlay">
+      <div class="form-card card">
+        <StrukturAnggotaForm
+          :is-editing="isEditingAnggota"
+          :initial-data="formAnggota"
+          @close-form="closeAnggotaForm"
+          @save-anggota="handleSaveAnggota"
+          @update-anggota="handleUpdateAnggota" />
+      </div>
     </div>
 
-    <div v-else class="table-container card">
-      <div class="table-responsive">
-        <table class="table">
-          <thead>
-            <tr>
-              <th><i class="fas fa-hashtag"></i>ID</th>
-              <th><i class="fas fa-user"></i>Nama Anggota</th>
-              <th><i class="fas fa-user-tie"></i>Jabatan</th>
-              <th><i class="fas fa-sort-numeric-up"></i>Urutan</th>
-              <th><i class="fas fa-user-shield"></i>Admin Pengelola</th>
-              <th><i class="fas fa-cogs"></i>Aksi</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-if="anggotaList.length === 0">
-              <td colspan="6">
-                <div class="empty-state">
-                  <i class="fas fa-users"></i>
-                  <h3>Belum Ada Anggota</h3>
-                  <p>
-                    Mulai tambahkan anggota struktur organisasi untuk melengkapi
-                    profil dinas pariwisata Magetan.
-                  </p>
+    <div v-else>
+      <div class="table-container card">
+        <div class="table-responsive">
+          <table class="table">
+            <thead>
+              <tr>
+                <th><i class="fas fa-hashtag"></i>ID</th>
+                <th><i class="fas fa-user"></i>Nama Anggota</th>
+                <th><i class="fas fa-user-tie"></i>Jabatan</th>
+                <th><i class="fas fa-sort-numeric-up"></i>Urutan</th>
+                <th><i class="fas fa-user-shield"></i>Admin Pengelola</th>
+                <th><i class="fas fa-cogs"></i>Aksi</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-if="anggotaList.length === 0">
+                <td colspan="6">
+                  <div class="empty-state">
+                    <i class="fas fa-users"></i>
+                    <h3>Belum Ada Anggota</h3>
+                    <p>
+                      Mulai tambahkan anggota struktur organisasi untuk
+                      melengkapi profil dinas pariwisata Magetan.
+                    </p>
+                    <button
+                      class="action-button add-button"
+                      @click="openAnggotaForm()">
+                      <i class="fas fa-plus-circle"></i> Tambah Anggota Pertama
+                    </button>
+                  </div>
+                </td>
+              </tr>
+              <tr v-for="anggota in anggotaList" :key="anggota.id_anggota">
+                <td>{{ anggota.id_anggota }}</td>
+                <td>{{ anggota.nama_anggota }}</td>
+                <td>{{ anggota.jabatan }}</td>
+                <td>{{ anggota.urutan_tampilan }}</td>
+                <td>{{ anggota.adminPengelola.username }}</td>
+                <td class="actions">
                   <button
-                    class="action-button add-button"
-                    @click="openAnggotaForm()">
-                    <i class="fas fa-plus-circle"></i> Tambah Anggota Pertama
+                    class="action-button edit-button"
+                    @click="openAnggotaForm(anggota)"
+                    title="Edit">
+                    <i class="fas fa-edit"></i>
                   </button>
-                </div>
-              </td>
-            </tr>
-            <tr v-for="anggota in anggotaList" :key="anggota.id_anggota">
-              <td>{{ anggota.id_anggota }}</td>
-              <td>{{ anggota.nama_anggota }}</td>
-              <td>{{ anggota.jabatan }}</td>
-              <td>{{ anggota.urutan_tampilan }}</td>
-              <td>{{ anggota.adminPengelola.username }}</td>
-              <td class="actions">
-                <button
-                  class="action-button edit-button"
-                  @click="openAnggotaForm(anggota)"
-                  title="Edit">
-                  <i class="fas fa-edit"></i>
-                </button>
-                <button
-                  class="action-button delete-button"
-                  @click="showDeleteConfirm(anggota.id_anggota)"
-                  title="Hapus">
-                  <i class="fas fa-trash-alt"></i>
-                </button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+                  <button
+                    class="action-button delete-button"
+                    @click="showDeleteConfirm(anggota.id_anggota)"
+                    title="Hapus">
+                    <i class="fas fa-trash-alt"></i>
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
 
@@ -588,6 +593,45 @@ onMounted(() => {
 .actions .delete-button:hover {
   background-color: #c82333;
   box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+}
+
+/* Form Overlay */
+.form-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  z-index: 9999;
+  overflow-y: auto;
+  padding: 2rem;
+  box-sizing: border-box;
+}
+
+.form-overlay .form-card {
+  position: relative;
+  max-width: 900px;
+  width: 100%;
+  margin: auto;
+  z-index: 10000;
+  box-shadow: 0 25px 80px rgba(0, 0, 0, 0.3);
+  border: 2px solid rgba(255, 255, 255, 0.1);
+}
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
 /* Responsive Design */

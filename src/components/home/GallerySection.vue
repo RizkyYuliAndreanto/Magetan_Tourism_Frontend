@@ -31,8 +31,14 @@ let autoSlideInterval = null;
 let isAnimating = false;
 
 const gridAreas = [
-  "area1", "area2", "area3", "area4",
-  "area5", "area6", "area7", "area8",
+  "area1",
+  "area2",
+  "area3",
+  "area4",
+  "area5",
+  "area6",
+  "area7",
+  "area8",
 ];
 
 const updateVisibleImages = async () => {
@@ -80,7 +86,8 @@ const updateVisibleImages = async () => {
 
 const nextSlide = () => {
   if (galleryImages.value.length <= MAX_VISIBLE) return;
-  currentIndex.value = (currentIndex.value + MAX_VISIBLE) % galleryImages.value.length;
+  currentIndex.value =
+    (currentIndex.value + MAX_VISIBLE) % galleryImages.value.length;
 };
 
 const startAutoSlide = () => {
@@ -125,20 +132,70 @@ watch(currentIndex, updateVisibleImages);
 </script>
 
 <style scoped>
-/* CSS sama seperti punyamu, tidak diubah */
+/* ===== CONSISTENT COLOR VARIABLES ===== */
+:root {
+  --royal-blue: #1e3a8a;
+  --gold-accent: #d4af37;
+  --pearl-white: #ffffff;
+  --ivory-white: #f8f9fa;
+  --premium-shadow: 0 20px 40px rgba(30, 58, 138, 0.15);
+}
+
 .gallery-section {
-  padding: 48px 20px;
-  background: linear-gradient(135deg, #f7f7f7, #ececec);
+  padding: 120px 32px 80px 32px;
+  background: linear-gradient(
+    180deg,
+    #f0f6fe 0%,
+    #eef4fd 3%,
+    #ecf2fc 7%,
+    #e8f0fb 12%,
+    #e4edfa 18%,
+    #e0ebf9 25%,
+    #dce8f8 33%,
+    rgba(30, 58, 138, 0.08) 42%,
+    rgba(30, 58, 138, 0.12) 55%,
+    rgba(30, 58, 138, 0.15) 68%,
+    rgba(30, 58, 138, 0.18) 82%,
+    rgba(30, 58, 138, 0.22) 100%
+  );
   text-align: center;
   overflow: hidden;
+  position: relative;
+  margin-top: -80px;
+}
+
+/* Transisi menerima dari NewsGrid */
+.gallery-section::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 180px;
+  background: linear-gradient(
+    to bottom,
+    #f0f6fe 0%,
+    rgba(240, 246, 254, 0.95) 12%,
+    rgba(240, 246, 254, 0.85) 25%,
+    rgba(240, 246, 254, 0.7) 40%,
+    rgba(240, 246, 254, 0.5) 60%,
+    rgba(240, 246, 254, 0.25) 80%,
+    transparent 100%
+  );
+  z-index: 1;
+  pointer-events: none;
 }
 
 .section-title {
-  font-size: 2.2rem;
+  font-size: 2.8rem;
   font-weight: 700;
-  margin-bottom: 32px;
-  color: #222;
-  font-family: "Segoe UI", Arial, sans-serif;
+  margin-bottom: 40px;
+  color: var(--royal-blue);
+  text-shadow: 0 4px 15px rgba(30, 58, 138, 0.3);
+  font-family: "Playfair Display", serif;
+  letter-spacing: -1px;
+  position: relative;
+  z-index: 2;
 }
 
 .gallery-masonry {
@@ -151,23 +208,27 @@ watch(currentIndex, updateVisibleImages);
   grid-template-rows: 200px 200px 200px;
   gap: 12px;
   margin: 0 auto;
+  position: relative;
+  z-index: 2;
 }
 
 .gallery-item {
   overflow: hidden;
-  border-radius: 12px;
-  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.07);
-  background: #e3e3e3;
+  border-radius: 16px;
+  box-shadow: var(--premium-shadow);
+  background: var(--ivory-white);
   display: flex;
   align-items: stretch;
   justify-content: stretch;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  transition: all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   cursor: pointer;
+  border: 1px solid rgba(212, 175, 55, 0.2);
 }
 
 .gallery-item:hover {
   transform: translateY(-8px) scale(1.03);
-  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 30px 60px rgba(30, 58, 138, 0.25);
+  border-color: var(--gold-accent);
 }
 
 .gallery-image {
@@ -182,14 +243,30 @@ watch(currentIndex, updateVisibleImages);
   transform: scale(1.1);
 }
 
-.area1 { grid-area: area1; }
-.area2 { grid-area: area2; }
-.area3 { grid-area: area3; }
-.area4 { grid-area: area4; }
-.area5 { grid-area: area5; }
-.area6 { grid-area: area6; }
-.area7 { grid-area: area7; }
-.area8 { grid-area: area8; }
+.area1 {
+  grid-area: area1;
+}
+.area2 {
+  grid-area: area2;
+}
+.area3 {
+  grid-area: area3;
+}
+.area4 {
+  grid-area: area4;
+}
+.area5 {
+  grid-area: area5;
+}
+.area6 {
+  grid-area: area6;
+}
+.area7 {
+  grid-area: area7;
+}
+.area8 {
+  grid-area: area8;
+}
 
 @media (max-width: 900px) {
   .gallery-masonry {

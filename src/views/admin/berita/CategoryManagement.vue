@@ -668,9 +668,9 @@ onMounted(() => {
   backdrop-filter: blur(4px);
   display: flex;
   justify-content: center;
-  align-items: center;
+  
   z-index: 9999;
-  overflow-y: auto;
+  align-items: flex-start;
   padding: 2rem;
   box-sizing: border-box;
 }

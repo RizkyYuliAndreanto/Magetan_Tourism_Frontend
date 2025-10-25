@@ -265,7 +265,9 @@ export default {
 text-xl
 <style scoped>
 .ekonomi-kreatif-section {
-  padding: 64px 32px;
+  position: relative;
+  margin-top: -40px;
+  padding: 80px 32px 64px 32px;
   background-color: #e0e0e0;
   background-image: linear-gradient(
       rgba(255, 255, 255, 0.5),
@@ -279,6 +281,42 @@ text-xl
   display: flex;
   align-items: center;
   justify-content: center;
+  z-index: 5;
+}
+
+/* Top wave transition dari EventSection */
+.ekonomi-kreatif-section::before {
+  content: "";
+  position: absolute;
+  top: -15px;
+  left: 0;
+  right: 0;
+  height: 60px;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 60'%3E%3Cpath d='M0,35 C300,50 600,10 900,40 C1000,50 1100,25 1200,35 L1200,0 L0,0 Z' fill='%23ffffff'/%3E%3C/svg%3E")
+    no-repeat center top;
+  background-size: cover;
+  z-index: 2;
+  pointer-events: none;
+}
+
+/* Bottom transition ke NewsGrid - gradasi halus ke biru NewsGrid */
+.ekonomi-kreatif-section::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 80px;
+  background: linear-gradient(
+    to bottom,
+    transparent 0%,
+    rgba(255, 255, 255, 0.1) 25%,
+    rgba(248, 250, 255, 0.3) 50%,
+    rgba(240, 246, 254, 0.6) 75%,
+    #e0f0ff 100%
+  );
+  z-index: 6;
+  pointer-events: none;
 }
 
 .ekonomi-kreatif-container {
@@ -354,7 +392,7 @@ text-xl
 .kategori-card.portrait-card:hover {
   box-shadow: 0 12px 32px rgba(0, 0, 0, 0.16);
   transform: translateY(-6px) scale(1.05);
-  border-color: #007bff;
+  border-color: #d4af37;
 }
 
 .kategori-card.portrait-card:hover .card-image {
@@ -436,7 +474,7 @@ text-xl
 .section-title {
   font-size: 3rem;
   font-weight: 700;
-  color: #222;
+  color: #1e3a8a;
   line-height: 1.1;
   text-align: center;
   margin: 0 0 20px 0;
@@ -658,5 +696,21 @@ text-xl
 }
 .nav-right {
   right: -24px;
+}
+
+/* Wave animation */
+@keyframes complementaryWave {
+  0% {
+    transform: translateX(3px) scaleX(1.005);
+    opacity: 0.9;
+  }
+  50% {
+    transform: translateX(0px) scaleX(1);
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(-3px) scaleX(1.005);
+    opacity: 0.9;
+  }
 }
 </style>

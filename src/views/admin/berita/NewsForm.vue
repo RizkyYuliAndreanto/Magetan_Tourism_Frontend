@@ -458,6 +458,18 @@ watch(
     initialGalleryFiles.value = props.galleryList ? [...props.galleryList] : [];
     galleryFiles.value = [];
     deletedGalleryIds.value = [];
+
+    // DEBUG: Cek struktur data gallery
+    console.log(
+      "🔍 [NewsForm] Gallery data structure:",
+      initialGalleryFiles.value[0]
+    );
+    if (initialGalleryFiles.value.length > 0) {
+      console.log(
+        "🔍 [NewsForm] Available keys:",
+        Object.keys(initialGalleryFiles.value[0])
+      );
+    }
   },
   { immediate: true }
 );
@@ -526,6 +538,25 @@ const removeGalleryFile = (index) => {
 };
 
 const removeExistingGalleryFile = (id) => {
+  console.log("🗑️ [NewsForm] removeExistingGalleryFile called with ID:", id);
+  console.log("🗑️ [NewsForm] ID type:", typeof id);
+  console.log("🗑️ [NewsForm] Current deletedGalleryIds before:", [
+    ...deletedGalleryIds.value,
+  ]);
+  console.log(
+    "🗑️ [NewsForm] Current initialGalleryFiles before:",
+    initialGalleryFiles.value.length
+  );
+
+  // DEBUG: Cek semua gallery files dan field ID mereka
+  initialGalleryFiles.value.forEach((file, index) => {
+    console.log(`🔍 Gallery ${index}:`, {
+      id_media_galeri: file.id_media_galeri,
+      id: file.id,
+      path_file: file.path_file,
+    });
+  });
+
   if (
     confirm(
       "Apakah Anda yakin ingin menghapus file galeri ini? Perubahan akan disimpan saat Anda memperbarui berita."
@@ -535,6 +566,24 @@ const removeExistingGalleryFile = (id) => {
       (file) => file.id_media_galeri !== id
     );
     deletedGalleryIds.value.push(id);
+
+    console.log("✅ [NewsForm] Media marked for deletion. ID added:", id);
+    console.log("✅ [NewsForm] Current deletedGalleryIds after:", [
+      ...deletedGalleryIds.value,
+    ]);
+    console.log(
+      "✅ [NewsForm] Remaining initialGalleryFiles:",
+      initialGalleryFiles.value.length
+    );
+
+    // TEMPORARY DEBUG ALERT - Hapus setelah selesai debugging
+    alert(
+      `DEBUG: Media ID ${id} (type: ${typeof id}) ditambahkan ke delete list. Total yang akan dihapus: ${
+        deletedGalleryIds.value.length
+      }`
+    );
+  } else {
+    console.log("❌ [NewsForm] User cancelled deletion");
   }
 };
 
@@ -592,6 +641,27 @@ const submitForm = () => {
         })
       );
     });
+
+    console.log("📤 [NewsForm] Emitting update-berita with:");
+    console.log(
+      "📤 [NewsForm] - New gallery files:",
+      galleryFiles.value.length
+    );
+    console.log("📤 [NewsForm] - Deleted gallery IDs:", [
+      ...deletedGalleryIds.value,
+    ]);
+    console.log(
+      "📤 [NewsForm] - Remaining initial gallery files:",
+      initialGalleryFiles.value.length
+    );
+
+    // TEMPORARY DEBUG ALERT - Hapus setelah selesai debugging
+    alert(
+      `DEBUG SUBMIT: Akan menghapus ${
+        deletedGalleryIds.value.length
+      } media galeri dengan IDs: [${deletedGalleryIds.value.join(", ")}]`
+    );
+
     emit(
       "update-berita",
       submitData,

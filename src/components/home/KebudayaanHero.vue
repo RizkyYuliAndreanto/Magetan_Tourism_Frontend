@@ -267,8 +267,6 @@ import dewisri2 from "@/assets/dewisri2.jpg";
 import dewisri3 from "@/assets/dewisri3.jpg";
 import dewisri4 from "@/assets/dewisri4.jpg";
 
-
-
 // Register GSAP plugins
 gsap.registerPlugin(ScrollTrigger);
 
@@ -353,9 +351,22 @@ const resumeCagarSlideshow = () => {
 };
 
 onMounted(() => {
-  // Start slideshows
-  startObjekSlideshow();
-  startCagarSlideshow();
+  // Set initial states untuk semua elemen animasi SEBELUM memulai animasi
+  gsap.set(".premium-culture-card", { opacity: 0, x: 0, rotationY: 0 });
+  gsap.set(".cultural-pattern-overlay", { opacity: 0, scale: 0.8 });
+  gsap.set(".corner", { opacity: 0, scale: 0 });
+  gsap.set(".cultural-badge", { opacity: 0, y: -20 });
+  gsap.set(".cultural-image", { opacity: 0, scale: 1.1 });
+  gsap.set(".premium-title", { opacity: 0, y: 30 });
+  gsap.set(".premium-subtitle", { opacity: 0, y: 20 });
+  gsap.set(".premium-description", { opacity: 0, y: 25 });
+  gsap.set(".premium-button", { opacity: 0, y: 30 });
+
+  // Start slideshows setelah delay kecil
+  setTimeout(() => {
+    startObjekSlideshow();
+    startCagarSlideshow();
+  }, 500);
 
   // Premium header animation with cultural elegance
   const tl = gsap.timeline();
@@ -388,100 +399,164 @@ onMounted(() => {
       "-=0.4"
     );
 
-  // Premium cards staggered entrance animation
-  gsap.from(objekCardRef.value, {
-    opacity: 0,
-    x: -100,
-    rotationY: -15,
-    duration: 1.2,
-    delay: 0.5,
-    ease: "power3.out",
+  // Premium cards staggered entrance animation dengan perbaikan timing
+  const cardsTimeline = gsap.timeline({
     scrollTrigger: {
-      trigger: objekCardRef.value,
+      trigger: ".premium-cards-container",
       start: "top 80%",
+      end: "bottom 20%",
       toggleActions: "play none none reverse",
+      refreshPriority: -1,
+      invalidateOnRefresh: true,
     },
   });
 
-  gsap.from(cagarCardRef.value, {
-    opacity: 0,
-    x: 100,
-    rotationY: 15,
-    duration: 1.2,
-    delay: 0.7,
-    ease: "power3.out",
+  // Objek card animation
+  cardsTimeline.fromTo(
+    objekCardRef.value,
+    {
+      opacity: 0,
+      x: -100,
+      rotationY: -15,
+    },
+    {
+      opacity: 1,
+      x: 0,
+      rotationY: 0,
+      duration: 1.2,
+      ease: "power3.out",
+    }
+  );
+
+  // Cagar card animation dengan delay yang lebih teratur
+  cardsTimeline.fromTo(
+    cagarCardRef.value,
+    {
+      opacity: 0,
+      x: 100,
+      rotationY: 15,
+    },
+    {
+      opacity: 1,
+      x: 0,
+      rotationY: 0,
+      duration: 1.2,
+      ease: "power3.out",
+    },
+    "-=0.8"
+  );
+
+  // Content elements animation dengan timeline terpisah
+  const contentTimeline = gsap.timeline({
     scrollTrigger: {
-      trigger: cagarCardRef.value,
-      start: "top 80%",
+      trigger: ".premium-cards-container",
+      start: "top 70%",
+      end: "bottom 20%",
       toggleActions: "play none none reverse",
+      refreshPriority: 0,
+      invalidateOnRefresh: true,
     },
   });
 
   // Cultural pattern overlay animation
-  gsap.fromTo(
-    ".cultural-pattern-overlay",
+  contentTimeline.to(".cultural-pattern-overlay", {
+    opacity: 1,
+    scale: 1,
+    duration: 1.2,
+    ease: "power2.out",
+    stagger: 0.1,
+  });
+
+  // Frame corners animation
+  contentTimeline.to(
+    ".corner",
     {
-      opacity: 0,
-      scale: 0.8,
+      opacity: 0.8,
+      scale: 1,
+      duration: 0.8,
+      ease: "back.out(1.7)",
+      stagger: 0.05,
     },
+    "-=0.8"
+  );
+
+  // Cultural images entrance
+  contentTimeline.to(
+    ".cultural-image",
     {
       opacity: 1,
       scale: 1,
-      duration: 2,
+      duration: 1.0,
       ease: "power2.out",
-      stagger: 0.3,
-      scrollTrigger: {
-        trigger: ".premium-cards-container",
-        start: "top 70%",
-        toggleActions: "play none none reverse",
-      },
-    }
+      stagger: 0.1,
+    },
+    "-=0.6"
   );
 
-  // Frame corners animation
-  gsap.from(".corner", {
-    opacity: 0,
-    scale: 0,
-    duration: 0.6,
-    ease: "back.out(1.7)",
-    stagger: 0.1,
-    delay: 1,
-    scrollTrigger: {
-      trigger: ".premium-cards-container",
-      start: "top 70%",
-      toggleActions: "play none none reverse",
-    },
-  });
-
   // Cultural badges entrance
-  gsap.from(".cultural-badge", {
-    opacity: 0,
-    y: -20,
-    duration: 0.8,
-    ease: "power2.out",
-    stagger: 0.2,
-    delay: 1.2,
-    scrollTrigger: {
-      trigger: ".premium-cards-container",
-      start: "top 70%",
-      toggleActions: "play none none reverse",
+  contentTimeline.to(
+    ".cultural-badge",
+    {
+      opacity: 1,
+      y: 0,
+      duration: 0.8,
+      ease: "power2.out",
+      stagger: 0.1,
     },
-  });
+    "-=0.5"
+  );
 
-  // Cultural images entrance animation
-  gsap.from(".cultural-image", {
-    opacity: 0,
-    scale: 1.2,
-    duration: 1.2,
-    ease: "power2.out",
-    stagger: 0.3,
-    delay: 0.8,
-    scrollTrigger: {
-      trigger: ".premium-cards-container",
-      start: "top 70%",
-      toggleActions: "play none none reverse",
+  // Premium titles animation
+  contentTimeline.to(
+    ".premium-title",
+    {
+      opacity: 1,
+      y: 0,
+      duration: 0.8,
+      ease: "power2.out",
+      stagger: 0.1,
     },
-  });
+    "-=0.4"
+  );
+
+  // Premium subtitles animation
+  contentTimeline.to(
+    ".premium-subtitle",
+    {
+      opacity: 1,
+      y: 0,
+      duration: 0.7,
+      ease: "power2.out",
+      stagger: 0.1,
+    },
+    "-=0.5"
+  );
+
+  // Premium descriptions animation
+  contentTimeline.to(
+    ".premium-description",
+    {
+      opacity: 1,
+      y: 0,
+      duration: 0.8,
+      ease: "power2.out",
+      stagger: 0.1,
+    },
+    "-=0.4"
+  );
+
+  // Premium buttons animation
+  contentTimeline.to(
+    ".premium-button",
+    {
+      opacity: 1,
+      y: 0,
+      duration: 0.8,
+      ease: "power2.out",
+      stagger: 0.1,
+    },
+    "-=0.3"
+  );
 
   // Image overlay elements animation
   gsap.set(".image-overlay", { opacity: 0 });
@@ -498,10 +573,17 @@ onMounted(() => {
     repeat: -1,
     stagger: 0.5,
   });
+
+  // Force refresh ScrollTrigger setelah semua animasi di-setup
+  setTimeout(() => {
+    ScrollTrigger.refresh();
+  }, 100);
 });
 
 onUnmounted(() => {
   stopSlideshows();
+  // Cleanup ScrollTrigger instances untuk mencegah memory leak
+  ScrollTrigger.getAll().forEach((trigger) => trigger.kill());
 });
 </script>
 
@@ -577,22 +659,31 @@ onUnmounted(() => {
       rgba(212, 175, 55, 0.015) 35px,
       rgba(212, 175, 55, 0.015) 40px
     ),
-    /* Main Gradient */
+    /* Main Gradient - untuk transisi seamless ke Event Section */
       linear-gradient(
         180deg,
         #ffffff 0%,
-        #fefefe 15%,
-        #f8fafe 35%,
-        #f0f6fe 60%,
-        #e8f2fe 80%,
-        rgba(30, 58, 138, 0.08) 100%
+        #fefefe 10%,
+        #f8fafe 20%,
+        #f0f6fe 30%,
+        #e8f2fe 40%,
+        #e6f2ff 50%,
+        #bae6fd 60%,
+        #7dd3fc 70%,
+        #38bdf8 80%,
+        #0ea5e9 90%,
+        #0ea5e9 100%
       );
 
-  padding: 100px 2rem 80px 2rem;
+  padding: 60px 2rem 60px 2rem;
+  margin-top: -40px;
+  margin-bottom: 0;
   font-family: "Playfair Display", "Georgia", "Times New Roman", serif;
   color: var(--charcoal);
   overflow: hidden;
-  min-height: 100vh;
+  min-height: 90vh;
+  border-bottom: none;
+  z-index: 5;
 }
 
 .cultural-heritage-section::before {
@@ -637,6 +728,16 @@ onUnmounted(() => {
   pointer-events: none;
 }
 
+/* Pattern overlay */
+.cultural-heritage-section .premium-header,
+.cultural-heritage-section .premium-cards-container {
+  position: relative;
+  z-index: 5;
+}
+
+/* Transisi dihilangkan untuk menghindari overlap dengan Event Section */
+
+/* Add a subtle texture overlay - TANPA elemen kuning */
 .cultural-heritage-section::after {
   content: "";
   position: absolute;
@@ -645,52 +746,12 @@ onUnmounted(() => {
   right: 0;
   bottom: 0;
   background-image: 
-    /* Subtle Batik Pattern Overlay */ url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120' viewBox='0 0 120 120'%3E%3Cg fill='none' stroke='%231e3a8a' stroke-width='0.5' opacity='0.08'%3E%3Cpath d='M60,10 Q80,30 60,50 Q40,30 60,10' /%3E%3Cpath d='M10,60 Q30,40 50,60 Q30,80 10,60' /%3E%3Cpath d='M110,60 Q90,80 70,60 Q90,40 110,60' /%3E%3Cpath d='M60,110 Q40,90 60,70 Q80,90 60,110' /%3E%3Ccircle cx='60' cy='60' r='25' /%3E%3C/g%3E%3C/svg%3E"),
-    /* Secondary Pattern */
-      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80' viewBox='0 0 80 80'%3E%3Cg fill='%23d4af37' opacity='0.03'%3E%3Cpath d='M20,20 L60,20 L60,60 L20,60 Z' fill='none' stroke='%23d4af37' stroke-width='0.5' /%3E%3Cpath d='M30,30 Q40,20 50,30 Q40,40 30,30' /%3E%3C/g%3E%3C/svg%3E");
-
-  background-size: 200px 200px, 150px 150px;
-  background-position: 0 0, 75px 75px;
+    /* Subtle Batik Pattern Overlay - hanya biru */ url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120' viewBox='0 0 120 120'%3E%3Cg fill='none' stroke='%231e3a8a' stroke-width='0.5' opacity='0.08'%3E%3Cpath d='M60,10 Q80,30 60,50 Q40,30 60,10' /%3E%3Cpath d='M10,60 Q30,40 50,60 Q30,80 10,60' /%3E%3Cpath d='M110,60 Q90,80 70,60 Q90,40 110,60' /%3E%3Cpath d='M60,110 Q40,90 60,70 Q80,90 60,110' /%3E%3Ccircle cx='60' cy='60' r='25' /%3E%3C/g%3E%3C/svg%3E");
+  background-size: 200px 200px;
+  background-position: 0 0;
   z-index: 1;
   pointer-events: none;
-  opacity: 0.4;
-}
-
-/* Add a subtle texture overlay */
-.cultural-heritage-section .premium-header,
-.cultural-heritage-section .premium-cards-container {
-  position: relative;
-  z-index: 5;
-}
-
-/* Tourism Silhouettes */
-.cultural-heritage-section .premium-header::after {
-  content: "";
-  position: absolute;
-  top: 50%;
-  left: 8%;
-  transform: translateY(-50%);
-  width: 60px;
-  height: 80px;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 80'%3E%3Cpath d='M5,70 Q15,45 30,50 Q45,35 55,70 L55,75 L5,75 Z' fill='%231e3a8a' opacity='0.15'/%3E%3Cpath d='M20,50 Q25,40 30,50 Q35,40 40,50' stroke='%231e3a8a' stroke-width='1' fill='none' opacity='0.1'/%3E%3C/svg%3E");
-  background-size: contain;
-  background-repeat: no-repeat;
-  z-index: 2;
-  opacity: 0.6;
-}
-
-.cultural-heritage-section .premium-cards-container::before {
-  content: "";
-  position: absolute;
-  top: 20%;
-  right: 5%;
-  width: 80px;
-  height: 60px;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 60'%3E%3Cpath d='M10,45 L20,25 L30,35 L40,20 L50,30 L60,15 L70,40 L70,50 L10,50 Z' fill='%231e3a8a' opacity='0.12'/%3E%3Crect x='25' y='25' width='30' height='20' fill='none' stroke='%231e3a8a' stroke-width='0.5' opacity='0.08'/%3E%3Cpath d='M35,25 L40,20 L45,25' stroke='%231e3a8a' stroke-width='0.5' opacity='0.08' fill='none'/%3E%3C/svg%3E");
-  background-size: contain;
-  background-repeat: no-repeat;
-  z-index: 2;
-  opacity: 0.5;
+  opacity: 0.3;
 }
 
 /* Lake/Water Element */
@@ -725,41 +786,7 @@ onUnmounted(() => {
   opacity: 0.7;
 }
 
-.cultural-heritage-section > .premium-header::before {
-  content: "";
-  position: absolute;
-  top: -100px;
-  left: 0;
-  right: 0;
-  height: 3px;
-  background: linear-gradient(
-    90deg,
-    transparent 0%,
-    rgba(212, 175, 55, 0.3) 20%,
-    rgba(30, 58, 138, 0.4) 50%,
-    rgba(212, 175, 55, 0.3) 80%,
-    transparent 100%
-  );
-  z-index: 10;
-}
-
-.cultural-heritage-section > .premium-cards-container::after {
-  content: "";
-  position: absolute;
-  bottom: -80px;
-  left: 0;
-  right: 0;
-  height: 3px;
-  background: linear-gradient(
-    90deg,
-    transparent 0%,
-    rgba(30, 58, 138, 0.3) 20%,
-    rgba(212, 175, 55, 0.4) 50%,
-    rgba(30, 58, 138, 0.3) 80%,
-    transparent 100%
-  );
-  z-index: 10;
-}
+/* Garis dekoratif dihapus untuk transisi yang bersih */
 
 /* ===== PREMIUM HEADER ===== */
 .premium-header {
@@ -813,7 +840,7 @@ onUnmounted(() => {
   background: linear-gradient(
     90deg,
     transparent,
-    var(--gold-accent),
+    var(--royal-blue),
     transparent
   );
 }
@@ -858,6 +885,9 @@ onUnmounted(() => {
 .premium-culture-card {
   position: relative;
   transition: var(--premium-transition);
+  /* Initial hidden state untuk animasi masuk */
+  opacity: 0;
+  transform: translateX(0) rotateY(0deg);
 }
 
 .card-frame {
@@ -869,13 +899,14 @@ onUnmounted(() => {
   grid-template-columns: 400px 1fr;
   min-height: 350px;
   position: relative;
-  border: 1px solid rgba(212, 175, 55, 0.2);
+  border: 2px solid rgba(212, 175, 55, 0.6);
   transition: var(--premium-transition);
 }
 
 .premium-culture-card:hover .card-frame {
   transform: translateY(-8px);
   box-shadow: 0 30px 60px rgba(30, 58, 138, 0.25);
+  border: 3px solid var(--gold-accent);
   border-color: var(--gold-accent);
 }
 
@@ -890,6 +921,9 @@ onUnmounted(() => {
   background-size: 80px 80px;
   z-index: 1;
   pointer-events: none;
+  /* Initial hidden state untuk animasi */
+  opacity: 0;
+  transform: scale(0.8);
 }
 
 /* ===== ARTISTIC IMAGE FRAME ===== */
@@ -908,8 +942,8 @@ onUnmounted(() => {
   height: 90%;
   background: var(--pearl-white);
   border-radius: 16px;
-  box-shadow: inset 0 0 20px rgba(212, 175, 55, 0.1);
-  border: 3px solid transparent;
+  box-shadow: inset 0 0 20px rgba(212, 175, 55, 0.15);
+  border: 2px solid rgba(212, 175, 55, 0.4);
   background-clip: padding-box;
 }
 
@@ -933,6 +967,7 @@ onUnmounted(() => {
   width: 20px;
   height: 20px;
   border: 2px solid var(--gold-accent);
+  opacity: 0.8;
 }
 
 .corner-tl {
@@ -961,6 +996,14 @@ onUnmounted(() => {
   right: 10px;
   border-left: none;
   border-top: none;
+}
+
+/* Initial state untuk corners - tidak ada !important */
+.premium-culture-card .corner {
+  /* Default state untuk corners */
+  opacity: 0;
+  transform: scale(0);
+  transition: all 0.3s ease;
 }
 
 .image-placeholder {
@@ -1331,6 +1374,38 @@ onUnmounted(() => {
   transform: translateX(5px);
 }
 
+/* ===== INITIAL ANIMATION STATES ===== */
+/* Set semua elemen ke hidden state untuk animasi masuk yang smooth */
+.cultural-badge {
+  opacity: 0;
+  transform: translateY(-20px);
+}
+
+.cultural-image {
+  opacity: 0;
+  transform: scale(1.1);
+}
+
+.premium-title {
+  opacity: 0;
+  transform: translateY(30px);
+}
+
+.premium-subtitle {
+  opacity: 0;
+  transform: translateY(20px);
+}
+
+.premium-description {
+  opacity: 0;
+  transform: translateY(25px);
+}
+
+.premium-button {
+  opacity: 0;
+  transform: translateY(30px);
+}
+
 /* ===== RESPONSIVE DESIGN ===== */
 @media (max-width: 1200px) {
   .card-frame {
@@ -1482,4 +1557,6 @@ onUnmounted(() => {
     display: none;
   }
 }
+
+/* Overlay transisi tidak diperlukan karena warna sudah menyatu */
 </style>
