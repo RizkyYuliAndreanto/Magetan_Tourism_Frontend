@@ -1,141 +1,233 @@
 <template>
   <div class="detail-informasi-view">
-    <!-- Luxurious Background -->
-    <div class="luxury-background">
-      <div class="mountain-silhouettes"></div>
-      <div class="floating-clouds"></div>
-      <div class="information-patterns"></div>
-      <div class="blue-glow"></div>
-      <div class="light-waves"></div>
-      <div class="floating-particles"></div>
+    <!-- Modern News Portal Background -->
+    <div class="modern-background">
+      <div class="gradient-overlay"></div>
+      <div class="pattern-dots"></div>
+      <div class="floating-shapes"></div>
     </div>
 
-    <div class="main-content">
-      <!-- Loading State -->
-      <div v-if="loading" class="loading-container">
-        <div class="loading-spinner"></div>
-        <p class="loading-text">Memuat detail informasi...</p>
+    <!-- Loading State -->
+    <div v-if="loading" class="loading-container">
+      <div class="modern-loader">
+        <div class="loader-ring"></div>
+        <div class="loader-text">Memuat artikel...</div>
       </div>
+    </div>
 
-      <!-- Error State -->
-      <div v-else-if="error" class="error-container">
-        <div class="error-icon">⚠️</div>
-        <h2 class="error-title">Terjadi Kesalahan</h2>
+    <!-- Error State -->
+    <div v-else-if="error" class="error-container">
+      <div class="error-card">
+        <div class="error-icon">📰</div>
+        <h3 class="error-title">Artikel Tidak Ditemukan</h3>
         <p class="error-message">{{ error }}</p>
         <button @click="fetchData" class="retry-button">
-          <svg class="retry-icon" viewBox="0 0 24 24" fill="currentColor">
+          <svg
+            class="retry-icon"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2">
             <path
-              d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z" />
+              d="M21 12c0 4.97-4.03 9-9 9s-9-4.03-9-9 4.03-9 9-9c2.12 0 4.07.74 5.61 1.98" />
+            <path d="M17 2l4 4-4 4" />
           </svg>
           Coba Lagi
         </button>
       </div>
+    </div>
 
-      <!-- Main Content -->
-      <div v-else-if="informasi" class="detail-container">
-        <!-- Navigation -->
-        <div class="navigation-section">
-          <button @click="goBack" class="back-button">
-            <svg class="back-icon" viewBox="0 0 24 24" fill="currentColor">
-              <path
-                d="M15.41 16.59L10.83 12L15.41 7.41L14 6L8 12L14 18L15.41 16.59Z" />
-            </svg>
-            <span>Kembali</span>
-          </button>
-        </div>
+    <!-- Main Article Content -->
+    <main v-else-if="informasi" class="article-main">
+      <!-- Hero Section -->
+      <section class="hero-section">
+        <div class="hero-container">
+          <!-- Back Button -->
+          <div class="back-navigation">
+            <button @click="goBack" class="simple-back-btn">
+              <svg
+                class="back-arrow"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2">
+                <path d="M19 12H5M12 19l-7-7 7-7" />
+              </svg>
+              Kembali ke Daftar
+            </button>
+          </div>
 
-        <!-- Header Section -->
-        <header class="article-header">
-          <!-- Category Badge -->
-          <div class="category-container">
-            <div class="category-badge">
-              <span class="badge-icon">🏷️</span>
-              <span class="badge-text">{{
-                informasi.kategoriBerita?.nama_kategori || "Informasi"
-              }}</span>
+          <!-- Article Meta Info -->
+          <div class="article-meta-top">
+            <span class="category-badge">
+              <svg
+                class="category-icon"
+                viewBox="0 0 24 24"
+                fill="currentColor">
+                <path
+                  d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z" />
+              </svg>
+              {{ informasi.kategoriBerita?.nama_kategori || "Informasi" }}
+            </span>
+            <div class="article-stats">
+              <span class="stat-item">
+                <svg
+                  class="stat-icon"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2">
+                  <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                  <line x1="16" y1="2" x2="16" y2="6" />
+                  <line x1="8" y1="2" x2="8" y2="6" />
+                  <line x1="3" y1="10" x2="21" y2="10" />
+                </svg>
+                {{ formatDate(informasi.tanggal_publikasi) }}
+              </span>
+              <span class="stat-item">
+                <svg
+                  class="stat-icon"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                  <circle cx="12" cy="12" r="3" />
+                </svg>
+                {{ formatViews(informasi.jumlah_dilihat || 0) }} views
+              </span>
+              <span class="stat-item">
+                <svg
+                  class="stat-icon"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                  <circle cx="12" cy="7" r="4" />
+                </svg>
+                {{ informasi.adminPembuat?.nama || "Admin" }}
+              </span>
             </div>
           </div>
 
-          <!-- Title -->
+          <!-- Article Title -->
           <h1 class="article-title">{{ informasi.judul }}</h1>
 
-          <!-- Meta Information -->
-          <div class="article-meta">
-            <div class="meta-item">
-              <svg class="meta-icon" viewBox="0 0 24 24" fill="currentColor">
-                <path
-                  d="M9 11H7v2h2v-2zm4 0h-2v2h2v-2zm4 0h-2v2h2v-2zm2-7h-1V2h-2v2H8V2H6v2H5c-1.1 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z" />
+          <!-- Reading Time & Share Preview -->
+          <div class="article-info">
+            <span class="reading-time">
+              <svg
+                class="time-icon"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2">
+                <circle cx="12" cy="12" r="10" />
+                <polyline points="12,6 12,12 16,14" />
               </svg>
-              <span>{{ formatDate(informasi.tanggal_publikasi) }}</span>
-            </div>
-            <div class="meta-item">
-              <svg class="meta-icon" viewBox="0 0 24 24" fill="currentColor">
-                <path
-                  d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z" />
-              </svg>
-              <span>{{ informasi.jumlah_dilihat || 0 }} kali dilihat</span>
-            </div>
-            <div v-if="informasi.adminPembuat" class="meta-item">
-              <svg class="meta-icon" viewBox="0 0 24 24" fill="currentColor">
-                <path
-                  d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
-              </svg>
-              <span>{{ informasi.adminPembuat.nama || "Admin" }}</span>
-            </div>
+              {{ getReadingTime(informasi.isi_berita) }} menit baca
+            </span>
           </div>
-        </header>
+        </div>
+      </section>
 
-        <!-- Hero Image -->
-        <div v-if="informasi.gambar_hero_berita" class="hero-image-container">
+      <!-- Hero Image Section -->
+      <section class="hero-image-section">
+        <div class="image-container">
           <img
+            v-if="informasi.gambar_hero_berita"
             :src="getImageUrl(informasi.gambar_hero_berita)"
             :alt="informasi.judul"
             class="hero-image"
             @error="handleImageError" />
-          <div class="image-caption">
-            <span>{{ informasi.judul }}</span>
+          <div class="image-overlay">
+            <div class="overlay-gradient"></div>
           </div>
         </div>
+      </section>
 
-        <!-- Article Content -->
-        <article class="article-content">
-          <div class="content-wrapper">
+      <!-- Article Content -->
+      <section class="content-section">
+        <div class="content-container">
+          <article class="article-content">
             <div
-              class="article-body"
+              class="content-body"
               v-html="formatContent(informasi.isi_berita)"></div>
-          </div>
-        </article>
+          </article>
 
-        <!-- Action Buttons -->
-        <div class="action-section">
-          <div class="action-buttons">
-            <button @click="shareArticle" class="action-button share-button">
-              <svg class="action-icon" viewBox="0 0 24 24" fill="currentColor">
-                <path
-                  d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92s2.92-1.31 2.92-2.92-1.31-2.92-2.92-2.92z" />
+          <!-- Article Actions -->
+          <div class="article-actions">
+            <button @click="shareArticle" class="action-btn primary">
+              <svg
+                class="btn-icon"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2">
+                <circle cx="18" cy="5" r="3" />
+                <circle cx="6" cy="12" r="3" />
+                <circle cx="18" cy="19" r="3" />
+                <line x1="8.59" y1="13.51" x2="15.42" y2="17.49" />
+                <line x1="15.41" y1="6.51" x2="8.59" y2="10.49" />
               </svg>
-              <span>Bagikan</span>
+              Bagikan
             </button>
-
-            <button @click="printArticle" class="action-button print-button">
-              <svg class="action-icon" viewBox="0 0 24 24" fill="currentColor">
+            <button @click="printArticle" class="action-btn secondary">
+              <svg
+                class="btn-icon"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2">
+                <polyline points="6,9 6,2 18,2 18,9" />
                 <path
-                  d="M19 8H5c-1.66 0-3 1.34-3 3v6h4v4h12v-4h4v-6c0-1.66-1.34-3-3-3zm-3 11H8v-5h8v5zm3-7c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm-1-9H6v4h12V3z" />
+                  d="M6,18H4a2,2,0,0,1-2-2v-5a2,2,0,0,1,2-2H20a2,2,0,0,1,2,2v5a2,2,0,0,1-2,2H18" />
+                <polyline points="6,14 6,22 18,22 18,14" />
               </svg>
-              <span>Cetak</span>
+              Cetak
             </button>
-
-            <button @click="goBack" class="action-button back-button-alt">
-              <svg class="action-icon" viewBox="0 0 24 24" fill="currentColor">
-                <path
-                  d="M15.41 16.59L10.83 12L15.41 7.41L14 6L8 12L14 18L15.41 16.59Z" />
+            <button @click="goBack" class="action-btn tertiary">
+              <svg
+                class="btn-icon"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2">
+                <path d="M3 12h18M12 5l7 7-7 7" />
               </svg>
-              <span>Kembali ke Daftar</span>
+              Kembali
             </button>
           </div>
         </div>
-      </div>
-    </div>
+      </section>
+
+      <!-- Related Articles Section -->
+      <section class="related-section">
+        <div class="related-container">
+          <h3 class="related-title">Artikel Terkait</h3>
+          <div class="related-grid">
+            <!-- Placeholder for related articles -->
+            <div class="related-card" v-for="i in 3" :key="i">
+              <div class="related-image">
+                <img
+                  src="https://via.placeholder.com/200x120/EAF4FF/007BFF?text=Artikel"
+                  alt="Related Article" />
+              </div>
+              <div class="related-content">
+                <h4 class="related-card-title">Artikel Terkait {{ i }}</h4>
+                <p class="related-excerpt">
+                  Deskripsi singkat artikel terkait...
+                </p>
+                <span class="related-date">{{
+                  new Date().toLocaleDateString("id-ID")
+                }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
   </div>
 </template>
 
@@ -185,7 +277,7 @@ const getImageUrl = (imagePath) => {
 
 const handleImageError = (event) => {
   event.target.src =
-    "https://via.placeholder.com/800x400/e2e8f0/64748b?text=Image+Not+Found";
+    "https://via.placeholder.com/1200x600/f8fafc/64748b?text=Gambar+Tidak+Tersedia";
 };
 
 const formatDate = (dateString) => {
@@ -202,13 +294,81 @@ const formatDate = (dateString) => {
 const formatContent = (content) => {
   if (!content) return "";
 
-  // Basic HTML formatting
-  return content
-    .replace(/\n\n/g, "</p><p>")
+  // Enhanced HTML formatting with better typography
+  let formattedContent = content
+    .replace(/\n\n/g, "</p><p class='content-paragraph'>")
     .replace(/\n/g, "<br>")
-    .replace(/^/, "<p>")
+    .replace(/^/, "<p class='content-paragraph'>")
     .replace(/$/, "</p>")
-    .replace(/<p><\/p>/g, "");
+    .replace(/<p class='content-paragraph'><\/p>/g, "");
+
+  // Add emphasis for important text (basic markdown-like support)
+  formattedContent = formattedContent
+    .replace(/\*\*(.*?)\*\*/g, "<strong class='content-strong'>$1</strong>")
+    .replace(/\*(.*?)\*/g, "<em class='content-emphasis'>$1</em>");
+
+  return formattedContent;
+};
+
+const getReadingTime = (content) => {
+  if (!content) return 0;
+  const wordsPerMinute = 200;
+  const wordCount = content.trim().split(/\s+/).length;
+  return Math.ceil(wordCount / wordsPerMinute);
+};
+
+const formatViews = (views) => {
+  if (views < 1000) return views.toString();
+  if (views < 1000000) return (views / 1000).toFixed(1) + "K";
+  return (views / 1000000).toFixed(1) + "M";
+};
+
+const getCategoryIcon = (categoryName) => {
+  if (!categoryName) return "📰";
+  const name = categoryName.toLowerCase();
+  if (name.includes("wisata") || name.includes("pariwisata")) return "🏖️";
+  if (name.includes("budaya") || name.includes("tradisi")) return "🎭";
+  if (name.includes("teknologi") || name.includes("digital")) return "💻";
+  if (name.includes("kesehatan") || name.includes("health")) return "🏥";
+  if (name.includes("pendidikan") || name.includes("education")) return "📚";
+  if (name.includes("ekonomi") || name.includes("business")) return "💼";
+  if (name.includes("olahraga") || name.includes("sport")) return "⚽";
+  if (name.includes("lingkungan") || name.includes("environment")) return "🌱";
+  return "📰";
+};
+
+const getCategoryClass = (categoryName) => {
+  if (!categoryName) return "default";
+  const name = categoryName.toLowerCase();
+  if (name.includes("wisata") || name.includes("pariwisata")) return "tourism";
+  if (name.includes("budaya") || name.includes("tradisi")) return "culture";
+  if (name.includes("teknologi") || name.includes("digital"))
+    return "technology";
+  if (name.includes("kesehatan") || name.includes("health")) return "health";
+  if (name.includes("pendidikan") || name.includes("education"))
+    return "education";
+  if (name.includes("ekonomi") || name.includes("business")) return "business";
+  if (name.includes("olahraga") || name.includes("sport")) return "sports";
+  if (name.includes("lingkungan") || name.includes("environment"))
+    return "environment";
+  return "default";
+};
+
+const getArticleTags = (categoryName) => {
+  if (!categoryName) return ["informasi", "magetan"];
+  const name = categoryName.toLowerCase();
+  const tags = ["magetan"];
+
+  if (name.includes("wisata")) tags.push("wisata", "destinasi", "traveling");
+  if (name.includes("budaya")) tags.push("budaya", "tradisi", "warisan");
+  if (name.includes("teknologi")) tags.push("teknologi", "digital", "inovasi");
+  if (name.includes("kesehatan")) tags.push("kesehatan", "medis", "wellness");
+  if (name.includes("pendidikan"))
+    tags.push("pendidikan", "sekolah", "belajar");
+  if (name.includes("ekonomi")) tags.push("ekonomi", "bisnis", "keuangan");
+
+  tags.push("informasi");
+  return tags;
 };
 
 const goBack = () => {
@@ -237,6 +397,28 @@ const shareArticle = () => {
   }
 };
 
+const shareToFacebook = () => {
+  const url = encodeURIComponent(window.location.href);
+  window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}`, "_blank");
+};
+
+const shareToTwitter = () => {
+  const url = encodeURIComponent(window.location.href);
+  const text = encodeURIComponent(informasi.value.judul);
+  window.open(
+    `https://twitter.com/intent/tweet?url=${url}&text=${text}`,
+    "_blank"
+  );
+};
+
+const shareToWhatsApp = () => {
+  const url = encodeURIComponent(window.location.href);
+  const text = encodeURIComponent(
+    `${informasi.value.judul} - ${window.location.href}`
+  );
+  window.open(`https://wa.me/?text=${text}`, "_blank");
+};
+
 const printArticle = () => {
   window.print();
 };
@@ -249,7 +431,7 @@ const getPreviewText = (text, maxLength = 100) => {
 
 // Lifecycle
 onMounted(() => {
-  // Scroll to top
+  // Scroll to top with smooth animation
   window.scrollTo({
     top: 0,
     behavior: "smooth",
@@ -259,171 +441,135 @@ onMounted(() => {
 </script>
 
 <style scoped>
-/* ========== LUXURY BACKGROUND ========== */
-.luxury-background {
+/* ========== MODERN NEWS PORTAL DESIGN ========== */
+* {
+  box-sizing: border-box;
+}
+
+.detail-informasi-view {
+  min-height: 100vh;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Inter", "Roboto",
+    "Helvetica Neue", Arial, sans-serif;
+  line-height: 1.6;
+  color: #1a202c;
+  background: #ffffff;
+  overflow-y: auto;
+
+}
+
+/* ========== MODERN BACKGROUND ========== */
+.modern-background {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
   z-index: -1;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(180deg, #eaf4ff 0%, #ffffff 45%, #f5f7fa 100%);
   overflow: hidden;
 }
 
-.mountain-silhouettes,
-.floating-clouds,
-.information-patterns,
-.blue-glow,
-.light-waves,
-.floating-particles {
+.gradient-overlay {
   position: absolute;
-}
-
-.mountain-silhouettes {
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 30%;
-  background: linear-gradient(to top, rgba(0, 0, 0, 0.1), transparent);
-  clip-path: polygon(
-    0 100%,
-    0 60%,
-    15% 50%,
-    30% 70%,
-    50% 45%,
-    70% 65%,
-    85% 40%,
-    100% 55%,
-    100% 100%
-  );
-}
-
-.floating-clouds {
-  top: 10%;
-  width: 100%;
-  height: 40%;
-  background: radial-gradient(
-    ellipse at center,
-    rgba(255, 255, 255, 0.1) 0%,
-    transparent 70%
-  );
-  border-radius: 50%;
-  animation: float 20s ease-in-out infinite;
-}
-
-.information-patterns {
   top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-image: radial-gradient(
-    circle at 25% 25%,
-    rgba(255, 255, 255, 0.1) 0%,
-    transparent 50%
-  );
-}
-
-.blue-glow {
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 80%;
-  height: 80%;
-  background: radial-gradient(
-    ellipse at center,
-    rgba(37, 99, 235, 0.2) 0%,
-    transparent 70%
-  );
-  animation: pulse 8s ease-in-out infinite;
-}
-
-.light-waves {
-  bottom: 0;
   left: 0;
   right: 0;
   height: 50%;
   background: linear-gradient(
-    45deg,
-    rgba(255, 255, 255, 0.05) 0%,
-    rgba(255, 255, 255, 0.08) 100%
+    135deg,
+    rgba(0, 123, 255, 0.03) 0%,
+    rgba(0, 123, 255, 0.08) 50%,
+    transparent 100%
   );
-  animation: wave 15s linear infinite;
 }
 
-.floating-particles {
+.pattern-dots {
+  position: absolute;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
   background-image: radial-gradient(
-      2px 2px at 20px 30px,
-      rgba(255, 255, 255, 0.3),
-      transparent
+    circle at 1px 1px,
+    rgba(0, 123, 255, 0.1) 1px,
+    transparent 0
+  );
+  background-size: 40px 40px;
+  animation: patternMove 60s linear infinite;
+}
+
+.floating-shapes {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(
+      ellipse at 20% 20%,
+      rgba(0, 123, 255, 0.04) 0%,
+      transparent 50%
     ),
-    radial-gradient(1px 1px at 40px 70px, rgba(255, 255, 255, 0.2), transparent);
-  background-repeat: repeat;
-  background-size: 150px 100px;
-  animation: sparkle 10s linear infinite;
+    radial-gradient(
+      ellipse at 80% 80%,
+      rgba(99, 179, 237, 0.04) 0%,
+      transparent 50%
+    );
+  animation: floatShapes 30s ease-in-out infinite;
 }
 
-/* ========== MAIN CONTENT ========== */
-.detail-informasi-view {
-  min-height: 100vh;
-  font-family: "Inter", "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-}
-
-.main-content {
-  position: relative;
-  z-index: 1;
-  padding-top: 80px;
-}
-
-/* ========== LOADING & ERROR STATES ========== */
+/* ========== LOADING STATES ========== */
 .loading-container,
 .error-container {
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-  min-height: 60vh;
+  min-height: 80vh;
   padding: 40px 20px;
+}
+
+.modern-loader {
   text-align: center;
 }
 
-.loading-spinner {
+.loader-ring {
   width: 50px;
   height: 50px;
-  border: 4px solid rgba(255, 255, 255, 0.3);
-  border-top: 4px solid #3b82f6;
+  border: 4px solid #eaf4ff;
+  border-top: 4px solid #007bff;
   border-radius: 50%;
+  margin: 0 auto 20px;
   animation: spin 1s linear infinite;
-  margin-bottom: 24px;
 }
 
-.loading-text {
-  color: white;
-  font-size: 1.1rem;
-  opacity: 0.9;
+.loader-text {
+  color: #4a5568;
+  font-weight: 500;
+}
+
+.error-card {
+  text-align: center;
+  padding: 40px;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  max-width: 400px;
 }
 
 .error-icon {
-  font-size: 4rem;
-  margin-bottom: 24px;
+  font-size: 3rem;
+  margin-bottom: 20px;
 }
 
 .error-title {
-  color: white;
-  font-size: 1.8rem;
+  font-size: 1.5rem;
   font-weight: 600;
-  margin-bottom: 16px;
+  color: #2d3748;
+  margin-bottom: 12px;
 }
 
 .error-message {
-  color: rgba(255, 255, 255, 0.8);
-  font-size: 1.1rem;
-  margin-bottom: 32px;
-  max-width: 500px;
+  color: #718096;
+  margin-bottom: 24px;
 }
 
 .retry-button {
@@ -431,7 +577,7 @@ onMounted(() => {
   align-items: center;
   gap: 8px;
   padding: 12px 24px;
-  background: #3b82f6;
+  background: #007bff;
   color: white;
   border: none;
   border-radius: 8px;
@@ -441,8 +587,8 @@ onMounted(() => {
 }
 
 .retry-button:hover {
-  background: #2563eb;
-  transform: translateY(-2px);
+  background: #0056b3;
+  transform: translateY(-1px);
 }
 
 .retry-icon {
@@ -450,52 +596,67 @@ onMounted(() => {
   height: 18px;
 }
 
-/* ========== DETAIL CONTAINER ========== */
-.detail-container {
-  max-width: 900px;
+/* ========== MAIN ARTICLE ========== */
+.article-main {
+  margin-top: 0;
+}
+
+/* ========== HERO SECTION ========== */
+.hero-section {
+  padding: 80px 20px 60px;
+  background: linear-gradient(
+    135deg,
+    #eaf4ff 0%,
+    rgba(255, 255, 255, 0.9) 100%
+  );
+}
+
+.hero-container {
+  max-width: 800px;
   margin: 0 auto;
-  padding: 0 20px 60px;
+  text-align: center;
 }
 
-/* ========== NAVIGATION ========== */
-.navigation-section {
+.back-navigation {
   margin-bottom: 32px;
+  text-align: left;
 }
 
-.back-button {
+.simple-back-btn {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 10px 16px;
+  padding: 10px 20px;
   background: rgba(255, 255, 255, 0.9);
-  color: #374151;
-  border: none;
-  border-radius: 8px;
+  color: #007bff;
+  border: 2px solid #007bff;
+  border-radius: 10px;
   font-weight: 500;
+  font-size: 0.9rem;
   cursor: pointer;
   transition: all 0.3s ease;
   backdrop-filter: blur(10px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
-.back-button:hover {
-  background: white;
+.simple-back-btn:hover {
+  background: #007bff;
+  color: white;
   transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 6px 20px rgba(0, 123, 255, 0.3);
 }
 
-.back-icon {
+.back-arrow {
   width: 18px;
   height: 18px;
 }
 
-/* ========== ARTICLE HEADER ========== */
-.article-header {
-  margin-bottom: 40px;
-}
-
-.category-container {
+.article-meta-top {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
   margin-bottom: 24px;
+  flex-wrap: wrap;
 }
 
 .category-badge {
@@ -503,55 +664,83 @@ onMounted(() => {
   align-items: center;
   gap: 6px;
   padding: 8px 16px;
-  background: linear-gradient(135deg, #3b82f6, #1e3a8a);
+  background: #007bff;
   color: white;
   border-radius: 20px;
-  font-size: 0.9rem;
-  font-weight: 500;
-  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
-.badge-icon {
-  font-size: 1.1rem;
+.category-icon {
+  width: 16px;
+  height: 16px;
+}
+
+.article-stats {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.stat-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #4a5568;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.stat-icon {
+  width: 16px;
+  height: 16px;
 }
 
 .article-title {
   font-size: 2.5rem;
-  font-weight: 700;
-  color: white;
+  font-weight: 800;
+  color: #1a202c;
   line-height: 1.2;
   margin-bottom: 24px;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  font-family: "Georgia", "Times New Roman", serif;
 }
 
-.article-meta {
+.article-info {
   display: flex;
-  gap: 24px;
-  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  margin-top: 20px;
 }
 
-.meta-item {
+.reading-time {
   display: flex;
   align-items: center;
   gap: 6px;
-  color: rgba(255, 255, 255, 0.9);
-  font-size: 0.95rem;
+  color: #4a5568;
+  font-size: 0.9rem;
   font-weight: 500;
 }
 
-.meta-icon {
-  width: 18px;
-  height: 18px;
-  opacity: 0.8;
+.time-icon {
+  width: 16px;
+  height: 16px;
 }
 
 /* ========== HERO IMAGE ========== */
-.hero-image-container {
+.hero-image-section {
+  padding: 0 20px 40px;
+}
+
+.image-container {
   position: relative;
-  margin-bottom: 40px;
+  max-width: 1000px;
+  margin: 0 auto;
   border-radius: 16px;
   overflow: hidden;
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
 }
 
 .hero-image {
@@ -561,182 +750,258 @@ onMounted(() => {
   display: block;
 }
 
-.image-caption {
+.image-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
+
+.overlay-gradient {
   position: absolute;
   bottom: 0;
   left: 0;
   right: 0;
-  background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
-  color: white;
-  padding: 24px;
-  font-size: 1.1rem;
-  font-weight: 500;
+  height: 30%;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.4), transparent);
 }
 
-/* ========== ARTICLE CONTENT ========== */
+/* ========== CONTENT SECTION ========== */
+.content-section {
+  padding: 40px 20px;
+}
+
+.content-container {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
 .article-content {
   background: white;
   border-radius: 16px;
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+  padding: 50px;
   margin-bottom: 40px;
-  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+  border: 1px solid rgba(0, 123, 255, 0.08);
 }
 
-.content-wrapper {
-  padding: 40px;
-}
-
-.article-body {
+.content-body {
+  font-size: 1.125rem;
   line-height: 1.8;
-  color: #374151;
-  font-size: 1.1rem;
+  color: #2d3748;
+  font-family: "Georgia", "Times New Roman", serif;
 }
 
-.article-body :deep(p) {
+.content-body :deep(p) {
   margin-bottom: 1.5rem;
   text-align: justify;
 }
 
-.article-body :deep(p:last-child) {
-  margin-bottom: 0;
+.content-body :deep(p:first-child) {
+  font-size: 1.2rem;
+  font-weight: 500;
+  color: #1a202c;
 }
 
-.article-body :deep(br) {
-  margin-bottom: 0.5rem;
+.content-body :deep(strong) {
+  font-weight: 700;
+  color: #1a202c;
 }
 
-/* ========== ACTION SECTION ========== */
-.action-section {
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(10px);
-  border-radius: 16px;
-  padding: 24px;
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+.content-body :deep(em) {
+  font-style: italic;
+  color: #007bff;
 }
 
-.action-buttons {
+/* ========== ARTICLE ACTIONS ========== */
+.article-actions {
   display: flex;
-  gap: 16px;
+  gap: 12px;
   justify-content: center;
   flex-wrap: wrap;
 }
 
-.action-button {
+.action-btn {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 12px 20px;
-  border: none;
-  border-radius: 8px;
-  font-weight: 500;
+  padding: 12px 24px;
+  border: 2px solid transparent;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 0.95rem;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
-.share-button {
-  background: linear-gradient(135deg, #10b981, #059669);
+.action-btn.primary {
+  background: #007bff;
   color: white;
 }
 
-.share-button:hover {
-  background: linear-gradient(135deg, #059669, #047857);
+.action-btn.primary:hover {
+  background: #0056b3;
   transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(16, 185, 129, 0.3);
+  box-shadow: 0 6px 20px rgba(0, 123, 255, 0.3);
 }
 
-.print-button {
-  background: linear-gradient(135deg, #6b7280, #4b5563);
-  color: white;
+.action-btn.secondary {
+  background: #f5f7fa;
+  color: #4a5568;
+  border-color: #e2e8f0;
 }
 
-.print-button:hover {
-  background: linear-gradient(135deg, #4b5563, #374151);
+.action-btn.secondary:hover {
+  background: #edf2f7;
+  border-color: #cbd5e0;
   transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(107, 114, 128, 0.3);
 }
 
-.back-button-alt {
-  background: linear-gradient(135deg, #3b82f6, #1e3a8a);
-  color: white;
+.action-btn.tertiary {
+  background: transparent;
+  color: #007bff;
+  border-color: #007bff;
 }
 
-.back-button-alt:hover {
-  background: linear-gradient(135deg, #2563eb, #1e40af);
+.action-btn.tertiary:hover {
+  background: #eaf4ff;
   transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(59, 130, 246, 0.3);
 }
 
-.action-icon {
+.btn-icon {
   width: 18px;
   height: 18px;
 }
 
+/* ========== RELATED ARTICLES ========== */
+.related-section {
+  padding: 60px 20px;
+  background: #f5f7fa;
+}
+
+.related-container {
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.related-title {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #1a202c;
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.related-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 24px;
+}
+
+.related-card {
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.06);
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.related-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+}
+
+.related-image {
+  height: 160px;
+  overflow: hidden;
+}
+
+.related-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.related-card:hover .related-image img {
+  transform: scale(1.05);
+}
+
+.related-content {
+  padding: 20px;
+}
+
+.related-card-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #1a202c;
+  margin-bottom: 8px;
+  line-height: 1.4;
+}
+
+.related-excerpt {
+  color: #4a5568;
+  font-size: 0.9rem;
+  margin-bottom: 12px;
+  line-height: 1.5;
+}
+
+.related-date {
+  color: #718096;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
 /* ========== ANIMATIONS ========== */
-@keyframes float {
-  0%,
-  100% {
-    transform: translateY(0px);
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
   }
-  50% {
-    transform: translateY(-20px);
-  }
-}
-
-@keyframes pulse {
-  0%,
-  100% {
-    opacity: 0.2;
-  }
-  50% {
-    opacity: 0.4;
+  to {
+    transform: rotate(360deg);
   }
 }
 
-@keyframes wave {
+@keyframes patternMove {
   0% {
     background-position: 0 0;
   }
   100% {
-    background-position: 100px 0;
+    background-position: 40px 40px;
   }
 }
 
-@keyframes sparkle {
+@keyframes floatShapes {
   0%,
   100% {
-    opacity: 0.3;
+    transform: translateY(0px) rotate(0deg);
   }
-  50% {
-    opacity: 0.7;
+  33% {
+    transform: translateY(-10px) rotate(1deg);
   }
-}
-
-@keyframes spin {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg);
+  66% {
+    transform: translateY(5px) rotate(-1deg);
   }
 }
 
 /* ========== RESPONSIVE DESIGN ========== */
 @media (max-width: 768px) {
-  .main-content {
-    padding-top: 60px;
+  .article-main {
+    margin-top: 0;
   }
 
-  .detail-container {
-    padding: 0 15px 40px;
+  .hero-section {
+    padding: 40px 15px;
   }
 
   .article-title {
-    font-size: 2rem;
+    font-size: 1.8rem;
   }
 
-  .article-meta {
+  .article-meta-top,
+  .article-stats {
     flex-direction: column;
     gap: 12px;
   }
@@ -745,71 +1010,72 @@ onMounted(() => {
     height: 250px;
   }
 
-  .content-wrapper {
-    padding: 24px;
+  .article-content {
+    padding: 30px 25px;
   }
 
-  .article-body {
+  .content-body {
     font-size: 1rem;
   }
 
-  .action-buttons {
-    flex-direction: column;
-    align-items: stretch;
+  .action-btn {
+    padding: 10px 20px;
+    font-size: 0.9rem;
   }
 
-  .action-button {
-    justify-content: center;
+  .related-grid {
+    grid-template-columns: 1fr;
   }
 }
 
 @media (max-width: 480px) {
+  .hero-section {
+    padding: 30px 10px;
+  }
+
   .article-title {
-    font-size: 1.6rem;
+    font-size: 1.5rem;
   }
 
-  .hero-image {
-    height: 200px;
-  }
-
-  .content-wrapper {
+  .article-content {
     padding: 20px;
   }
 
-  .action-section {
-    padding: 20px;
+  .action-btn {
+    padding: 8px 16px;
+    font-size: 0.85rem;
+  }
+
+  .article-actions {
+    flex-direction: column;
   }
 }
 
 /* ========== PRINT STYLES ========== */
 @media print {
-  .luxury-background,
-  .navigation-section,
-  .action-section {
+  .modern-background,
+  .article-actions,
+  .related-section {
     display: none !important;
   }
 
-  .main-content {
-    padding-top: 0;
-  }
-
-  .article-title {
-    color: #000 !important;
-    text-shadow: none !important;
-  }
-
-  .article-meta {
-    color: #666 !important;
+  .article-main {
+    margin-top: 0;
   }
 
   .article-content {
-    box-shadow: none !important;
-    border: 1px solid #ddd;
+    box-shadow: none;
+    border: none;
+    padding: 0;
   }
-}
-</style>
-<style scoped>
-.detail-informasi-view {
-  overflow-y: auto;
+
+  .article-title {
+    color: #000;
+  }
+
+  .content-body {
+    font-size: 12pt;
+    line-height: 1.6;
+  }
 }
 </style>

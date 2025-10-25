@@ -53,75 +53,80 @@
       </div>
     </div>
 
-    <div v-if="formPengumumanOpen" class="form-card card">
-      <PengumumanForm
-        :is-editing="isEditingPengumuman"
-        :initial-data="formPengumuman"
-        @close-form="closePengumumanForm"
-        @save-pengumuman="handleSavePengumuman"
-        @update-pengumuman="handleUpdatePengumuman" />
+    <!-- Form Overlay -->
+    <div v-if="formPengumumanOpen" class="form-overlay">
+      <div class="form-card card">
+        <PengumumanForm
+          :is-editing="isEditingPengumuman"
+          :initial-data="formPengumuman"
+          @close-form="closePengumumanForm"
+          @save-pengumuman="handleSavePengumuman"
+          @update-pengumuman="handleUpdatePengumuman" />
+      </div>
     </div>
 
-    <div v-else class="table-wrapper">
-      <div class="table-header">
-        <h3 class="table-title">
-          <i class="fas fa-list"></i>
-          Daftar Pengumuman
-        </h3>
-      </div>
-      <div class="table-responsive">
-        <table class="data-table">
-          <thead>
-            <tr>
-              <th><i class="fas fa-hashtag"></i>ID</th>
-              <th><i class="fas fa-bullhorn"></i>Judul</th>
-              <th><i class="fas fa-user-shield"></i>Admin Pengelola</th>
-              <th><i class="fas fa-calendar"></i>Tanggal Publikasi</th>
-              <th><i class="fas fa-cogs"></i>Aksi</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-if="pengumumanList.length === 0">
-              <td colspan="5">
-                <div class="empty-state">
-                  <i class="fas fa-bullhorn"></i>
-                  <h3>Belum Ada Pengumuman</h3>
-                  <p>
-                    Mulai buat pengumuman penting untuk masyarakat dan wisatawan
-                    Magetan.
-                  </p>
+    <div v-else>
+      <div class="table-wrapper">
+        <div class="table-header">
+          <h3 class="table-title">
+            <i class="fas fa-list"></i>
+            Daftar Pengumuman
+          </h3>
+        </div>
+        <div class="table-responsive">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th><i class="fas fa-hashtag"></i>ID</th>
+                <th><i class="fas fa-bullhorn"></i>Judul</th>
+                <th><i class="fas fa-user-shield"></i>Admin Pengelola</th>
+                <th><i class="fas fa-calendar"></i>Tanggal Publikasi</th>
+                <th><i class="fas fa-cogs"></i>Aksi</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-if="pengumumanList.length === 0">
+                <td colspan="5">
+                  <div class="empty-state">
+                    <i class="fas fa-bullhorn"></i>
+                    <h3>Belum Ada Pengumuman</h3>
+                    <p>
+                      Mulai buat pengumuman penting untuk masyarakat dan
+                      wisatawan Magetan.
+                    </p>
+                    <button
+                      class="action-button add-button"
+                      @click="openPengumumanForm()">
+                      <i class="fas fa-plus-circle"></i> Buat Pengumuman Pertama
+                    </button>
+                  </div>
+                </td>
+              </tr>
+              <tr
+                v-for="pengumuman in pengumumanList"
+                :key="pengumuman.id_pengumuman">
+                <td>{{ pengumuman.id_pengumuman }}</td>
+                <td>{{ pengumuman.judul_pengumuman }}</td>
+                <td>{{ pengumuman.adminPengelola.username }}</td>
+                <td>{{ formatDate(pengumuman.tanggal_publikasi) }}</td>
+                <td class="actions">
                   <button
-                    class="action-button add-button"
-                    @click="openPengumumanForm()">
-                    <i class="fas fa-plus-circle"></i> Buat Pengumuman Pertama
+                    class="action-button edit-button"
+                    @click="openPengumumanForm(pengumuman)"
+                    title="Edit">
+                    <i class="fas fa-edit"></i>
                   </button>
-                </div>
-              </td>
-            </tr>
-            <tr
-              v-for="pengumuman in pengumumanList"
-              :key="pengumuman.id_pengumuman">
-              <td>{{ pengumuman.id_pengumuman }}</td>
-              <td>{{ pengumuman.judul_pengumuman }}</td>
-              <td>{{ pengumuman.adminPengelola.username }}</td>
-              <td>{{ formatDate(pengumuman.tanggal_publikasi) }}</td>
-              <td class="actions">
-                <button
-                  class="action-button edit-button"
-                  @click="openPengumumanForm(pengumuman)"
-                  title="Edit">
-                  <i class="fas fa-edit"></i>
-                </button>
-                <button
-                  class="action-button delete-button"
-                  @click="showDeleteConfirm(pengumuman.id_pengumuman)"
-                  title="Hapus">
-                  <i class="fas fa-trash-alt"></i>
-                </button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+                  <button
+                    class="action-button delete-button"
+                    @click="showDeleteConfirm(pengumuman.id_pengumuman)"
+                    title="Hapus">
+                    <i class="fas fa-trash-alt"></i>
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
 
@@ -460,6 +465,45 @@ onMounted(() => {
   background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
   transform: translateY(-1px);
   box-shadow: 0 8px 25px rgba(59, 130, 246, 0.3);
+}
+
+/* Form Overlay */
+.form-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  z-index: 9999;
+  overflow-y: auto;
+  padding: 2rem;
+  box-sizing: border-box;
+}
+
+.form-overlay .form-card {
+  position: relative;
+  max-width: 900px;
+  width: 100%;
+  margin: auto;
+  z-index: 10000;
+  box-shadow: 0 25px 80px rgba(0, 0, 0, 0.3);
+  border: 2px solid rgba(255, 255, 255, 0.1);
+}
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
 /* Form Card */

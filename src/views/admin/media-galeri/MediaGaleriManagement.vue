@@ -54,92 +54,97 @@
       </div>
     </div>
 
-    <div v-if="formMediaOpen" class="form-card card">
-      <MediaGaleriForm
-        :is-editing="isEditingMedia"
-        :initial-data="formMedia"
-        @close-form="closeMediaForm"
-        @save-media="handleSaveMedia"
-        @update-media="handleUpdateMedia" />
+    <!-- Form Overlay -->
+    <div v-if="formMediaOpen" class="form-overlay">
+      <div class="form-card card">
+        <MediaGaleriForm
+          :is-editing="isEditingMedia"
+          :initial-data="formMedia"
+          @close-form="closeMediaForm"
+          @save-media="handleSaveMedia"
+          @update-media="handleUpdateMedia" />
+      </div>
     </div>
 
-    <div v-else class="table-container card">
-      <div class="table-header">
-        <h3 class="table-title">
-          <i class="fas fa-list"></i>
-          Daftar Media Galeri
-        </h3>
-      </div>
-      <div class="table-responsive">
-        <table class="data-table">
-          <thead>
-            <tr>
-              <th><i class="fas fa-hashtag"></i> ID</th>
-              <th><i class="fas fa-link"></i> ID Konten</th>
-              <th><i class="fas fa-tag"></i> Tipe Konten</th>
-              <th><i class="fas fa-file"></i> Jenis File</th>
-              <th><i class="fas fa-comment"></i> Deskripsi</th>
-              <th><i class="fas fa-sort-numeric-up"></i> Urutan</th>
-              <th><i class="fas fa-eye"></i> Pratinjau</th>
-              <th><i class="fas fa-cogs"></i> Aksi</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-if="mediaGaleriList.length === 0">
-              <td colspan="8">
-                <div class="empty-state">
-                  <i class="fas fa-images"></i>
-                  <h3>Belum Ada Media</h3>
-                  <p>
-                    Mulai upload foto dan video untuk memperkaya galeri konten
-                    wisata Magetan.
-                  </p>
+    <div v-else>
+      <div class="table-container card">
+        <div class="table-header">
+          <h3 class="table-title">
+            <i class="fas fa-list"></i>
+            Daftar Media Galeri
+          </h3>
+        </div>
+        <div class="table-responsive">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th><i class="fas fa-hashtag"></i> ID</th>
+                <th><i class="fas fa-link"></i> ID Konten</th>
+                <th><i class="fas fa-tag"></i> Tipe Konten</th>
+                <th><i class="fas fa-file"></i> Jenis File</th>
+                <th><i class="fas fa-comment"></i> Deskripsi</th>
+                <th><i class="fas fa-sort-numeric-up"></i> Urutan</th>
+                <th><i class="fas fa-eye"></i> Pratinjau</th>
+                <th><i class="fas fa-cogs"></i> Aksi</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-if="mediaGaleriList.length === 0">
+                <td colspan="8">
+                  <div class="empty-state">
+                    <i class="fas fa-images"></i>
+                    <h3>Belum Ada Media</h3>
+                    <p>
+                      Mulai upload foto dan video untuk memperkaya galeri konten
+                      wisata Magetan.
+                    </p>
+                    <button
+                      class="action-button add-button"
+                      @click="openMediaForm()">
+                      <i class="fas fa-plus-circle"></i> Upload Media Pertama
+                    </button>
+                  </div>
+                </td>
+              </tr>
+              <tr v-for="media in mediaGaleriList" :key="media.id_media_galeri">
+                <td>{{ media.id_media_galeri }}</td>
+                <td>{{ media.id_konten || "-" }}</td>
+                <td>{{ media.tipe_konten || "-" }}</td>
+                <td>{{ media.jenis_file }}</td>
+                <td>{{ media.deskripsi_file || "-" }}</td>
+                <td>{{ media.urutan_tampil }}</td>
+                <td>
+                  <div class="media-preview-thumb">
+                    <img
+                      v-if="media.jenis_file === 'gambar'"
+                      :src="getMediaUrl(media.path_file)"
+                      alt="Preview"
+                      class="media-thumbnail-small" />
+                    <video
+                      v-else-if="media.jenis_file === 'video'"
+                      :src="getMediaUrl(media.path_file)"
+                      controls
+                      class="media-thumbnail-small"></video>
+                  </div>
+                </td>
+                <td class="actions">
                   <button
-                    class="action-button add-button"
-                    @click="openMediaForm()">
-                    <i class="fas fa-plus-circle"></i> Upload Media Pertama
+                    class="action-button edit-button"
+                    @click="openMediaForm(media)"
+                    title="Edit">
+                    <i class="fas fa-edit"></i>
                   </button>
-                </div>
-              </td>
-            </tr>
-            <tr v-for="media in mediaGaleriList" :key="media.id_media_galeri">
-              <td>{{ media.id_media_galeri }}</td>
-              <td>{{ media.id_konten || "-" }}</td>
-              <td>{{ media.tipe_konten || "-" }}</td>
-              <td>{{ media.jenis_file }}</td>
-              <td>{{ media.deskripsi_file || "-" }}</td>
-              <td>{{ media.urutan_tampil }}</td>
-              <td>
-                <div class="media-preview-thumb">
-                  <img
-                    v-if="media.jenis_file === 'gambar'"
-                    :src="getMediaUrl(media.path_file)"
-                    alt="Preview"
-                    class="media-thumbnail-small" />
-                  <video
-                    v-else-if="media.jenis_file === 'video'"
-                    :src="getMediaUrl(media.path_file)"
-                    controls
-                    class="media-thumbnail-small"></video>
-                </div>
-              </td>
-              <td class="actions">
-                <button
-                  class="action-button edit-button"
-                  @click="openMediaForm(media)"
-                  title="Edit">
-                  <i class="fas fa-edit"></i>
-                </button>
-                <button
-                  class="action-button delete-button"
-                  @click="showDeleteConfirm(media.id_media_galeri)"
-                  title="Hapus">
-                  <i class="fas fa-trash-alt"></i>
-                </button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+                  <button
+                    class="action-button delete-button"
+                    @click="showDeleteConfirm(media.id_media_galeri)"
+                    title="Hapus">
+                    <i class="fas fa-trash-alt"></i>
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
 
@@ -832,6 +837,45 @@ onMounted(() => {
   font-size: 0.9rem;
   margin: 0.25rem 0 0 0;
   opacity: 0.9;
+}
+
+/* Form Overlay */
+.form-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  z-index: 9999;
+  overflow-y: auto;
+  padding: 2rem;
+  box-sizing: border-box;
+}
+
+.form-overlay .form-card {
+  position: relative;
+  max-width: 900px;
+  width: 100%;
+  margin: auto;
+  z-index: 10000;
+  box-shadow: 0 25px 80px rgba(0, 0, 0, 0.3);
+  border: 2px solid rgba(255, 255, 255, 0.1);
+}
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
 /* Empty State */

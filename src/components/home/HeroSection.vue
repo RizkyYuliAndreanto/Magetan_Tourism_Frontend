@@ -5,9 +5,7 @@
       <div class="background-carousel">
         <div
           class="carousel-slide active"
-          style="
-            background-image: url('/src/assets/carousel5.jpg');
-          "></div>
+          style="background-image: url('/src/assets/carousel5.jpg')"></div>
         <div
           class="carousel-slide"
           style="background-image: url('/src/assets/BG.jpg')"></div>
@@ -83,6 +81,9 @@ onMounted(() => {
   // Start background carousel
   initializeCarousel();
 
+  // Initialize scroll transition effects
+  initializeScrollTransitions();
+
   // Handle reduced motion preference
   handleReducedMotion();
 
@@ -140,6 +141,44 @@ function initializeHeroAnimations() {
   }, 1800);
 }
 
+function initializeScrollTransitions() {
+  // Add smooth scroll transition effects
+  let ticking = false;
+
+  function updateTransitions() {
+    const scrolled = window.scrollY;
+    const rate = scrolled * -0.5;
+    const heroSection = document.querySelector(".hero-section");
+
+    if (heroSection) {
+      // Subtle parallax effect on scroll
+      heroSection.style.transform = `translateY(${rate * 0.1}px)`;
+
+      // Enhance transition opacity based on scroll
+      const transitionElement = heroSection.querySelector(
+        ".hero-section::after"
+      );
+      if (scrolled > 100) {
+        heroSection.style.setProperty("--transition-opacity", "0.9");
+      } else {
+        heroSection.style.setProperty("--transition-opacity", "0.6");
+      }
+    }
+
+    ticking = false;
+  }
+
+  function requestTick() {
+    if (!ticking) {
+      requestAnimationFrame(updateTransitions);
+      ticking = true;
+    }
+  }
+
+  // Throttled scroll listener for performance
+  window.addEventListener("scroll", requestTick, { passive: true });
+}
+
 function handleReducedMotion() {
   const prefersReducedMotion = window.matchMedia(
     "(prefers-reduced-motion: reduce)"
@@ -166,14 +205,57 @@ onUnmounted(() => {
 /* Hero Section Layout */
 .hero-section {
   position: relative;
-  height: 100vh;
+  height: calc(100vh - 60px);
+  min-height: 720px;
+  max-height: none;
   display: flex;
   align-items: center;
   justify-content: center;
-  overflow: hidden;
+  overflow: visible;
   font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
   z-index: 1;
   isolation: isolate;
+  width: 100%;
+  --transition-opacity: 0.6;
+  transition: transform 0.1s ease-out;
+}
+
+.hero-section::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 180px;
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    rgba(59, 130, 246, 0.05) 15%,
+    rgba(96, 165, 250, 0.1) 30%,
+    rgba(147, 197, 253, 0.2) 45%,
+    rgba(186, 230, 253, 0.4) 60%,
+    rgba(186, 230, 253, 0.7) 80%,
+    rgba(186, 230, 253, 0.9) 95%,
+    rgba(186, 230, 253, 1) 100%
+  );
+  z-index: 10;
+  pointer-events: none;
+}
+
+.hero-section::before {
+  content: "";
+  position: absolute;
+  bottom: -15px;
+  left: 0;
+  right: 0;
+  height: 60px;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 60'%3E%3Cpath d='M0,30 C300,10 600,50 900,20 C1000,10 1100,35 1200,25 L1200,60 L0,60 Z' fill='rgba(186,230,253,0.8)'/%3E%3C/svg%3E")
+    no-repeat center bottom;
+  background-size: cover;
+  z-index: 15;
+  pointer-events: none;
+  animation: waveTransition 12s ease-in-out infinite alternate;
+  opacity: 0.9;
 }
 
 /* Dynamic Background Carousel */
@@ -184,6 +266,7 @@ onUnmounted(() => {
   width: 100%;
   height: 100%;
   z-index: -2;
+  overflow: hidden;
 }
 
 .background-carousel {
@@ -231,31 +314,40 @@ onUnmounted(() => {
 /* Hero Content */
 .hero-content {
   position: relative;
-  z-index: 100;
+  z-index: 10;
   text-align: center;
   color: white;
   max-width: 1200px;
   width: 100%;
-  padding: 0 2rem;
+  padding: 1rem 2rem;
   margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100%;
 }
 
 .content-wrapper {
   backdrop-filter: blur(20px);
   background: rgba(255, 255, 255, 0.03);
   border-radius: 24px;
-  padding: 4rem 3rem;
+  padding: 2.5rem 3rem 3.5rem 3rem;
   border: 1px solid rgba(255, 255, 255, 0.08);
   box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15),
     0 0 0 1px rgba(255, 255, 255, 0.05);
   width: 100%;
   max-width: 100%;
+  margin: auto;
+  overflow: visible;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
 /* Refined Logo Section */
 .logo-section {
   position: relative;
-  margin-bottom: 3rem;
+  margin-bottom: 2rem;
   opacity: 0;
   transform: translateY(30px);
   transition: all 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
@@ -306,7 +398,7 @@ onUnmounted(() => {
   font-size: clamp(2.5rem, 5vw, 4rem);
   font-weight: 700;
   line-height: 1.2;
-  margin-bottom: 1.5rem;
+  margin-bottom: 1rem;
   letter-spacing: -0.02em;
   text-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
 }
@@ -337,7 +429,7 @@ onUnmounted(() => {
   font-size: clamp(1.2rem, 2.5vw, 1.5rem);
   font-weight: 400;
   line-height: 1.6;
-  margin-bottom: 3rem;
+  margin-bottom: 2rem;
   opacity: 0;
   transform: translateY(20px);
   transition: all 0.8s ease 0.4s;
@@ -357,7 +449,7 @@ onUnmounted(() => {
 .hero-actions {
   display: flex;
   justify-content: center;
-  margin-bottom: 0;
+  margin-bottom: 1.5rem;
 }
 
 .hero-button {
@@ -412,7 +504,24 @@ onUnmounted(() => {
 }
 
 /* Responsive Design */
-@media (min-width: 1400px) {
+/* Full HD and higher */
+@media (min-width: 1920px) {
+  .hero-section {
+    height: calc(100vh - 60px);
+    min-height: 920px;
+  }
+
+  .content-wrapper {
+    padding: 4rem 4rem;
+  }
+}
+
+@media (min-width: 1400px) and (max-width: 1919px) {
+  .hero-section {
+    height: calc(100vh - 60px);
+    min-height: 820px;
+  }
+
   .content-wrapper {
     padding: 5rem 4rem;
   }
@@ -442,13 +551,62 @@ onUnmounted(() => {
   }
 }
 
-@media (max-width: 1200px) {
+@media (min-width: 1200px) and (max-width: 1399px) {
+  .hero-section {
+    height: calc(100vh - 60px);
+    min-height: 720px;
+  }
+
   .content-wrapper {
-    padding: 3rem 2.5rem;
+    padding: 3.5rem 3rem;
+    max-width: 1000px;
+  }
+}
+
+/* Desktop Standard Resolution (1920x1080) */
+@media (min-width: 1600px) and (max-width: 1920px) {
+  .hero-section {
+    height: calc(100vh - 60px);
+    min-height: 820px;
+  }
+
+  .content-wrapper {
+    padding: 4rem 4rem;
+    max-width: 1200px;
+  }
+
+  .hero-title {
+    font-size: clamp(3.5rem, 4vw, 4.2rem);
+  }
+}
+
+@media (max-width: 1200px) {
+  .hero-section {
+    min-height: 700px;
+  }
+
+  .content-wrapper {
+    padding: 2.5rem 2.5rem 3rem 2.5rem;
   }
 
   .logo-container {
     gap: 2rem;
+  }
+
+  .logo-section {
+    margin-bottom: 1.5rem;
+  }
+
+  .hero-title {
+    margin-bottom: 0.8rem;
+  }
+
+  .hero-tagline {
+    margin-bottom: 1.5rem;
+  }
+
+  .hero-actions {
+    margin-bottom: 1.5rem;
   }
 }
 
@@ -485,12 +643,12 @@ onUnmounted(() => {
 
 @media (max-width: 768px) {
   .hero-section {
-    height: 100vh;
-    min-height: 600px;
+    height: calc(100vh - 60px);
+    min-height: 640px;
   }
 
   .content-wrapper {
-    padding: 2rem 1.5rem;
+    padding: 2rem 1.5rem 2.5rem 1.5rem;
     margin: 0 1rem;
     border-radius: 20px;
   }
@@ -527,6 +685,10 @@ onUnmounted(() => {
   .hero-button {
     padding: 1.2rem 2.5rem;
     font-size: 1rem;
+  }
+
+  .hero-actions {
+    margin-bottom: 1.5rem;
   }
 }
 
@@ -641,6 +803,22 @@ onUnmounted(() => {
 
   .logo-container img {
     filter: grayscale(1);
+  }
+}
+
+/* Transition Animations */
+@keyframes waveTransition {
+  0% {
+    transform: translateX(-3px) scaleX(1.005);
+    opacity: 0.8;
+  }
+  50% {
+    transform: translateX(0px) scaleX(1);
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(3px) scaleX(1.005);
+    opacity: 0.8;
   }
 }
 </style>
