@@ -55,8 +55,6 @@ const handleLogin = async () => {
       password: password.value,
     });
 
-    console.log("Login berhasil:", response.data);
-
     // Simpan token dan data admin di localStorage
     localStorage.setItem("access_token", response.data.token);
     localStorage.setItem("user", JSON.stringify(response.data.admin));
@@ -75,7 +73,6 @@ const handleLogin = async () => {
     // Clear flag jika login gagal
     window.isLoggingIn = false;
 
-    console.error("Login gagal:", error.response?.data || error.message);
     alert(
       error.response?.data?.error ||
         "Login gagal. Periksa kembali identifier dan password Anda."

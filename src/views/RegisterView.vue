@@ -73,12 +73,9 @@ const handleRegister = async () => {
       }
     );
 
-    console.log("Pendaftaran berhasil:", response.data);
     alert("Pendaftaran berhasil! Silakan login.");
     router.push("/login");
   } catch (error) {
-    console.error("Pendaftaran gagal:", error.response?.data || error.message);
-
     // Tangani error spesifik dari backend (misalnya, username/email sudah ada)
     alert(error.response?.data?.error || "Pendaftaran gagal");
   }

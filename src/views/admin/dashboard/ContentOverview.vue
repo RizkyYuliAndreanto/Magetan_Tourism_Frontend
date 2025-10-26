@@ -525,7 +525,7 @@ const fetchAllStats = async () => {
       stats.value.visiMisi = visiMisiRes.value.data;
     }
   } catch (error) {
-    console.error("Error fetching stats:", error);
+    // Silent fail for stats
   } finally {
     loading.value = false;
   }
