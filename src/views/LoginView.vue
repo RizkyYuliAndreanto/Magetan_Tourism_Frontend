@@ -37,6 +37,7 @@
 import { ref } from "vue";
 import axios from "axios";
 import { useRouter } from "vue-router";
+import { onLoginSuccess } from "../utils/auth.js";
 
 const identifier = ref("");
 const password = ref("");
@@ -44,6 +45,9 @@ const router = useRouter();
 
 const handleLogin = async () => {
   try {
+    // Set flag untuk mencegah router guard interference
+    window.isLoggingIn = true;
+
     // Endpoint backend untuk login adalah POST /login
     // Backend mengharapkan identifier (username/email) dan password
     const response = await axios.post("http://localhost:5000/api/auth/login", {
@@ -57,9 +61,20 @@ const handleLogin = async () => {
     localStorage.setItem("access_token", response.data.token);
     localStorage.setItem("user", JSON.stringify(response.data.admin));
 
+    // Inisialisasi session management setelah login berhasil
+    await onLoginSuccess();
+
     // Arahkan ke dashboard admin setelah login berhasil
-    router.push("/admin");
+    await router.push("/admin");
+
+    // Clear flag setelah navigasi berhasil
+    setTimeout(() => {
+      window.isLoggingIn = false;
+    }, 100);
   } catch (error) {
+    // Clear flag jika login gagal
+    window.isLoggingIn = false;
+
     console.error("Login gagal:", error.response?.data || error.message);
     alert(
       error.response?.data?.error ||

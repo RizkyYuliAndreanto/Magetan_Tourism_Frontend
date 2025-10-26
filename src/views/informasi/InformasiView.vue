@@ -631,7 +631,7 @@ watch(
   min-height: 100vh;
   font-family: "Inter", "Poppins", sans-serif;
   color: var(--text);
-  overflow: hidden;
+  overflow-x: hidden;
   overflow-y: auto;
   background: linear-gradient(
     135deg,

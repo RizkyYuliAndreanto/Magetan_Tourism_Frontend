@@ -100,6 +100,11 @@ const routes = [
     component: RegisterView,
   },
   {
+    path: "/forgot-password",
+    name: "forgot-password",
+    component: LoginView, // Sementara redirect ke login, bisa dibuat komponen terpisah nanti
+  },
+  {
     path: "/destinasi",
     name: "Destinasi",
     component: PariwisataView,
@@ -250,22 +255,51 @@ const router = createRouter({
   },
 });
 
-router.beforeEach((to, from, next) => {
-  if (to.path.startsWith("/admin")) {
-    const token = localStorage.getItem("access_token");
-    if (!token) {
-      alert("Anda harus login untuk mengakses halaman admin.");
-      next("/"); // Redirect ke home jika belum login
-      return;
-    }
+router.beforeEach(async (to, from, next) => {
+  // Skip auth checks during login process to prevent interference
+  if (window.isLoggingIn) {
+    console.log("🛡️ Skipping router auth check - login in progress");
+    next();
+    return;
   }
-  if (to.meta.requiresAuth) {
-    const token = localStorage.getItem("access_token");
-    if (!token) {
-      alert("Anda harus login untuk mengakses halaman ini.");
-      next("/login");
-    } else {
+
+  console.log(
+    `🛡️ Router guard check for ${to.path}, isLoggingIn: ${window.isLoggingIn}`
+  );
+
+  // Import auth utilities dynamically to avoid circular imports
+  const { canAccessAdmin, checkLoginStatus, clearSession } = await import(
+    "../utils/auth.js"
+  );
+
+  if (to.path.startsWith("/admin") || to.meta.requiresAuth) {
+    try {
+      // Check if user can access admin pages (validates token and expiry)
+      const hasAccess = await canAccessAdmin();
+
+      if (!hasAccess) {
+        // Clear any invalid session data
+        clearSession(true, "router_guard_no_access");
+        alert("Sesi Anda telah berakhir. Silakan login kembali.");
+        next("/login");
+        return;
+      }
+
+      // Additional check for token validity with backend
+      const loginStatus = await checkLoginStatus();
+      if (!loginStatus.isLoggedIn) {
+        clearSession(true, "router_guard_invalid_login");
+        alert("Sesi Anda tidak valid. Silakan login kembali.");
+        next("/login");
+        return;
+      }
+
       next();
+    } catch (error) {
+      console.error("Error checking admin access:", error);
+      clearSession(true, "router_guard_error");
+      alert("Terjadi kesalahan autentikasi. Silakan login kembali.");
+      next("/login");
     }
   } else {
     next();

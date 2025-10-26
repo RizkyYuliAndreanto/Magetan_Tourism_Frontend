@@ -211,10 +211,10 @@ const handleLogout = () => {
   flex-direction: column;
   box-shadow: 2px 0 10px rgba(0, 0, 0, 0.05);
   border-right: 1px solid var(--border-color);
-  z-index: 990;
+  z-index: 999;
   transition: transform 0.3s ease-in-out;
   flex-shrink: 0;
-  padding-top: 90px;
+  padding-top: 20px;
 }
 .admin-sidebar:not(.is-open) {
   transform: translateX(-100%);

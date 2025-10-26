@@ -4,38 +4,44 @@ import { useRoute } from "vue-router";
 import Navbar from "./components/Navbar.vue";
 import MainFooter from "./components/MainFooter.vue";
 
-// Mengakses objek rute saat ini
 const route = useRoute();
-
-// Properti terhitung untuk memeriksa apakah rute saat ini adalah rute admin
-// startswith('/admin') akan mengembalikan true untuk '/admin', '/admin/dashboard', dll.
-const isPublicRoute = computed(() => !route.path.startsWith("/admin"));
+const isAdminPage = computed(
+  () =>
+    route.path.startsWith("/admin") ||
+    route.path === "/login" ||
+    route.path === "/register"
+);
 </script>
 
 <template>
-  <Navbar />
-
-  <router-view />
-
-  <MainFooter v-if="isPublicRoute" />
+  <div id="app" class="app-container">
+    <Navbar v-if="!isAdminPage" />
+    <main class="main-content">
+      <router-view />
+    </main>
+    <MainFooter v-if="!isAdminPage" />
+  </div>
 </template>
 
 <style>
-/* Gaya global yang tersisa */
 body {
   margin: 0;
   font-family: Arial, sans-serif;
   line-height: 1.5;
-  background-color: #00bfff; /* Background global */
-  color: rgba(255, 255, 255, 0.87); /* Warna teks global default */
-  overflow-x: hidden; /* Mencegah scroll horizontal */
+  background-color: #00bfff;
+  color: rgba(255, 255, 255, 0.87);
+  overflow-x: hidden;
 }
 
-#app {
+.app-container {
   min-height: 100vh;
   width: 100%;
   display: flex;
   flex-direction: column;
+}
+
+.main-content {
+  flex: 1;
   overflow-y: auto;
 }
 </style>

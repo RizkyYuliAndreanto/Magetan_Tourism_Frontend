@@ -825,7 +825,8 @@ watch(currentIndex, (newIndex, oldIndex) => {
 /* ===== MAIN SECTION LAYOUT ===== */
 .premium-tourism-section {
   position: relative;
-  min-height: 650px;
+  min-height: 100vh;
+  height: auto;
   padding: 20px 32px 64px 32px;
   margin-top: -40px;
   background: linear-gradient(
@@ -836,7 +837,7 @@ watch(currentIndex, (newIndex, oldIndex) => {
     rgba(59, 130, 246, 0.8) 75%,
     rgba(37, 99, 235, 0.75) 100%
   );
-  overflow: hidden;
+  overflow: visible;
   font-family: "Inter", "SF Pro Display", sans-serif;
   z-index: 5;
   transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
