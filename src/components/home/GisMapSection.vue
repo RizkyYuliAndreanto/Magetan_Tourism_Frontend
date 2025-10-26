@@ -19,7 +19,7 @@ const lokasiData = ref([]);
 const fetchAllLokasiData = async () => {
   try {
     console.log("Fetching data from backend...");
-    
+
     // Fetch data dari semua endpoint
     const [destinasiResponse, eventResponse, akomodasiResponse] =
       await Promise.all([
@@ -31,7 +31,7 @@ const fetchAllLokasiData = async () => {
     console.log("Raw API responses:", {
       destinasi: destinasiResponse.data,
       event: eventResponse.data,
-      akomodasi: akomodasiResponse.data
+      akomodasi: akomodasiResponse.data,
     });
 
     // Gabungkan semua data dengan format yang konsisten
@@ -116,7 +116,7 @@ const initializeMap = () => {
       const [lat, lng] = lokasi.koordinat
         .split(",")
         .map((s) => Number(s.trim()));
-      
+
       // Debug koordinat dan validasi
       console.log("Processing marker:", {
         nama: lokasi.nama,
@@ -124,7 +124,7 @@ const initializeMap = () => {
         lat: lat,
         lng: lng,
         isValidLat: !isNaN(lat) && lat >= -90 && lat <= 90,
-        isValidLng: !isNaN(lng) && lng >= -180 && lng <= 180
+        isValidLng: !isNaN(lng) && lng >= -180 && lng <= 180,
       });
 
       // Debug: Cek apakah koordinat berada dalam view map saat ini
@@ -135,8 +135,22 @@ const initializeMap = () => {
       console.log("Marker position:", [lat, lng]);
 
       // Validasi koordinat sebelum membuat marker
-      if (isNaN(lat) || isNaN(lng) || lat < -90 || lat > 90 || lng < -180 || lng > 180) {
-        console.error("Invalid coordinates for:", lokasi.nama, "lat:", lat, "lng:", lng);
+      if (
+        isNaN(lat) ||
+        isNaN(lng) ||
+        lat < -90 ||
+        lat > 90 ||
+        lng < -180 ||
+        lng > 180
+      ) {
+        console.error(
+          "Invalid coordinates for:",
+          lokasi.nama,
+          "lat:",
+          lat,
+          "lng:",
+          lng
+        );
         return; // Skip marker ini jika koordinat tidak valid
       }
 
@@ -254,29 +268,37 @@ const initializeMap = () => {
           });
 
         // Event listener untuk auto zoom saat marker diklik
-        marker.on('click', function(e) {
-          console.log("Marker clicked:", lokasi.nama, "zooming to:", [lat, lng]);
+        marker.on("click", function (e) {
+          console.log("Marker clicked:", lokasi.nama, "zooming to:", [
+            lat,
+            lng,
+          ]);
           // Zoom ke marker dengan animasi smooth
           mapInstance.value.setView([lat, lng], 16, {
             animate: true,
             duration: 0.8, // durasi animasi dalam detik
-            easeLinearity: 0.3
+            easeLinearity: 0.3,
           });
         });
 
         // Event listener untuk auto zoom saat popup dibuka
-        marker.on('popupopen', function(e) {
+        marker.on("popupopen", function (e) {
           console.log("Popup opened for:", lokasi.nama, "adjusting view");
           // Zoom lebih dekat saat popup terbuka
           mapInstance.value.setView([lat, lng], 17, {
             animate: true,
             duration: 0.6,
-            easeLinearity: 0.25
+            easeLinearity: 0.25,
           });
         });
-        
-        console.log("Marker berhasil dibuat untuk:", lokasi.nama, "at position:", [lat, lng]);
-        
+
+        console.log(
+          "Marker berhasil dibuat untuk:",
+          lokasi.nama,
+          "at position:",
+          [lat, lng]
+        );
+
         // Debug: Auto fit bounds ke marker jika hanya 1 marker
         if (lokasiData.value.length === 1) {
           console.log("Auto fitting map to single marker position");
@@ -289,8 +311,6 @@ const initializeMap = () => {
       console.log("Koordinat tidak tersedia untuk:", lokasi.nama);
     }
   });
-
-
 };
 
 const destroyMap = () => {

@@ -57,36 +57,66 @@
               required />
           </div>
           <div class="form-group">
+            <label for="kategori_induk"
+              >Kategori Induk <span class="required">*</span></label
+            >
+            <select
+              id="kategori_induk"
+              v-model="selectedKategoriInduk"
+              class="form-input"
+              required>
+              <option value="">Pilih Kategori Induk</option>
+              <option
+                v-for="induk in kategoriInduk"
+                :key="induk.id_kategori_ppid"
+                :value="induk.id_kategori_ppid">
+                📁 {{ induk.nama_kategori }}
+              </option>
+            </select>
+            <small class="form-helper">
+              <i class="fas fa-info-circle"></i>
+              Pilih kategori induk terlebih dahulu untuk menampilkan
+              sub-kategori
+            </small>
+          </div>
+
+          <div
+            class="form-group"
+            v-if="selectedKategoriInduk && subKategoriTersedia.length > 0">
             <label for="id_kategori_ppid"
-              >Kategori PPID <span class="required">*</span></label
+              >Sub-Kategori <span class="required">*</span></label
             >
             <select
               id="id_kategori_ppid"
               v-model="formData.id_kategori_ppid"
               class="form-input"
               required>
-              <option value="">Pilih Kategori</option>
-              <optgroup
-                v-for="induk in kategoriBerstruktur"
-                :key="induk.id_kategori_ppid"
-                :label="induk.nama_kategori">
-                <option :value="induk.id_kategori_ppid">
-                  📁 {{ induk.nama_kategori }} (Kategori Utama)
-                </option>
-                <option
-                  v-for="sub in induk.subKategoris"
-                  :key="sub.id_kategori_ppid"
-                  :value="sub.id_kategori_ppid">
-                  📂 {{ sub.nama_kategori }} (Sub dari
-                  {{ induk.nama_kategori }})
-                </option>
-              </optgroup>
+              <option value="">Pilih Sub-Kategori</option>
+              <option
+                v-for="sub in subKategoriTersedia"
+                :key="sub.id_kategori_ppid"
+                :value="sub.id_kategori_ppid">
+                📂 {{ sub.nama_kategori }}
+              </option>
             </select>
             <small class="form-helper">
-              <i class="fas fa-info-circle"></i>
-              Pilih kategori utama (📁) atau sub-kategori (📂) untuk
-              mengorganisir konten PPID
+              <i class="fas fa-check-circle"></i>
+              Konten akan disimpan dalam sub-kategori ini
             </small>
+          </div>
+
+          <div
+            class="form-group"
+            v-else-if="
+              selectedKategoriInduk && subKategoriTersedia.length === 0
+            ">
+            <div class="no-subcategory-message">
+              <i class="fas fa-exclamation-triangle"></i>
+              <p>Kategori induk yang dipilih belum memiliki sub-kategori.</p>
+              <p>
+                Silakan buat sub-kategori terlebih dahulu di menu Kategori PPID.
+              </p>
+            </div>
           </div>
           <div class="form-group span-2">
             <label for="deskripsi_konten">Deskripsi Konten</label>
@@ -365,32 +395,53 @@ const emit = defineEmits(["close-form", "save-konten", "update-konten"]);
 const formData = ref({});
 const isPdfDragover = ref(false);
 const isSampulDragover = ref(false);
+const selectedKategoriInduk = ref(null);
 
-// Computed property untuk struktur kategori hierarkis
-const kategoriBerstruktur = computed(() => {
+// Computed property untuk kategori induk saja
+const kategoriInduk = computed(() => {
   if (!props.kategoriList || props.kategoriList.length === 0) return [];
 
-  // Filter kategori induk (tidak memiliki parent)
-  const kategoriInduk = props.kategoriList.filter(
-    (k) => k.id_kategori_induk === null
-  );
-
-  // Untuk setiap kategori induk, cari sub-kategorinya
-  return kategoriInduk.map((induk) => ({
-    ...induk,
-    subKategoris: props.kategoriList.filter(
-      (k) => k.id_kategori_induk === induk.id_kategori_ppid
-    ),
-  }));
+  return props.kategoriList.filter((k) => k.id_kategori_induk === null);
 });
+
+// Computed property untuk sub-kategori berdasarkan kategori induk yang dipilih
+const subKategoriTersedia = computed(() => {
+  if (!selectedKategoriInduk.value || !props.kategoriList) return [];
+
+  return props.kategoriList.filter(
+    (k) => k.id_kategori_induk === selectedKategoriInduk.value
+  );
+});
+
+// Method untuk handle perubahan kategori induk
+const handleKategoriIndukChange = () => {
+  // Reset pilihan sub-kategori dan form kategori saat kategori induk berubah
+  formData.value.id_kategori_ppid = "";
+};
 
 watch(
   () => props.initialData,
   (newVal) => {
     formData.value = newVal ? { ...newVal } : {};
+
+    // Jika dalam mode edit, set kategori induk berdasarkan data yang ada
+    if (newVal && newVal.kategoriPPID) {
+      if (newVal.kategoriPPID.id_kategori_induk) {
+        // Jika yang dipilih adalah sub-kategori, set induknya
+        selectedKategoriInduk.value = newVal.kategoriPPID.id_kategori_induk;
+      } else {
+        // Jika yang dipilih adalah kategori induk (tidak seharusnya terjadi)
+        selectedKategoriInduk.value = null;
+      }
+    }
   },
   { immediate: true, deep: true }
 );
+
+// Watch perubahan selectedKategoriInduk
+watch(selectedKategoriInduk, () => {
+  handleKategoriIndukChange();
+});
 
 const getFilePath = (path) => {
   return `http://localhost:5000${path}`;
@@ -476,6 +527,24 @@ onUnmounted(() => {
 });
 
 const submitForm = () => {
+  // Validasi: pastikan sub-kategori sudah dipilih
+  if (!formData.value.id_kategori_ppid) {
+    alert("Silakan pilih sub-kategori terlebih dahulu!");
+    return;
+  }
+
+  // Validasi: pastikan sub-kategori yang dipilih bukan kategori induk
+  const selectedCategory = props.kategoriList.find(
+    (k) => k.id_kategori_ppid === formData.value.id_kategori_ppid
+  );
+
+  if (selectedCategory && !selectedCategory.id_kategori_induk) {
+    alert(
+      "Tidak dapat menyimpan konten langsung ke kategori induk. Silakan pilih sub-kategori!"
+    );
+    return;
+  }
+
   const submitData = new FormData();
 
   // Tambahkan field teks secara eksplisit
@@ -658,9 +727,40 @@ select.form-input option {
   margin-right: 0.25rem;
 }
 
+.form-helper i.fa-check-circle {
+  color: #28a745;
+}
+
 .required {
   color: #dc3545;
   font-weight: 700;
+}
+
+/* No Subcategory Message */
+.no-subcategory-message {
+  background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+  border: 1px solid #ffc107;
+  border-radius: 8px;
+  padding: 1.5rem;
+  text-align: center;
+  color: #856404;
+}
+
+.no-subcategory-message i {
+  font-size: 2rem;
+  color: #ffc107;
+  margin-bottom: 1rem;
+  display: block;
+}
+
+.no-subcategory-message p {
+  margin: 0.5rem 0;
+  font-weight: 500;
+}
+
+.no-subcategory-message p:first-of-type {
+  font-weight: 600;
+  color: #495057;
 }
 
 textarea.form-input {

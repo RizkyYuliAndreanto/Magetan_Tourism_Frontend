@@ -1,27 +1,60 @@
 <template>
   <div class="pengumuman-view-user">
-    <div class="container">
-      <h1 class="page-title">Pengumuman Terbaru</h1>
-      <p class="page-subtitle">
-        Informasi penting seputar kegiatan Dinas Kebudayaan dan Pariwisata
-        Kabupaten Magetan.
-      </p>
+    <!-- Hero Section -->
+    <div class="hero-section">
+      <div class="hero-overlay"></div>
+      <div class="hero-content">
+        <button @click="goBack" class="back-button">
+          <i class="fas fa-arrow-left"></i> Kembali
+        </button>
+        <div class="hero-text">
+          <h1 class="hero-title">
+            <i class="fas fa-bullhorn"></i>
+            Pengumuman Terbaru
+          </h1>
+          <p class="hero-subtitle">Informasi dan Pengumuman Resmi</p>
+          <p class="hero-description">
+            Dapatkan informasi terkini seputar pengumuman resmi, kegiatan, dan
+            program dari Dinas Kebudayaan dan Pariwisata Kabupaten Magetan.
+          </p>
+          <div class="hero-stats">
+            <div class="stat-item">
+              <div class="stat-number">{{ totalPengumuman }}</div>
+              <div class="stat-label">Total Pengumuman</div>
+            </div>
+            <div class="stat-divider"></div>
+            <div class="stat-item">
+              <div class="stat-number">{{ activePengumuman }}</div>
+              <div class="stat-label">Aktif</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
 
+    <div class="container">
       <div v-if="loading" class="state-message">
         <div class="spinner"></div>
         <p>Memuat daftar pengumuman...</p>
       </div>
 
       <div v-if="error" class="state-message error-message">
+        <i class="fas fa-exclamation-triangle fa-2x"></i>
         <p>
-          ❌ Maaf, terjadi kesalahan saat memuat data. Silakan coba kembali.
+          Maaf, terjadi kesalahan saat memuat data. Silakan coba kembali atau
+          hubungi administrator.
         </p>
       </div>
 
       <div
         v-if="!loading && !error && pengumumanList.length === 0"
         class="state-message empty-message">
-        <p>📋 Belum ada pengumuman yang tersedia saat ini.</p>
+        <i class="fas fa-inbox fa-2x"></i>
+        <h3>Belum Ada Pengumuman</h3>
+        <p>
+          Saat ini belum ada pengumuman yang tersedia. Silakan periksa kembali
+          nanti.
+        </p>
       </div>
 
       <ul class="pengumuman-list" v-if="pengumumanList.length > 0">
@@ -68,13 +101,24 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, computed } from "vue";
 import axios from "axios";
+import { useRouter } from "vue-router";
 
+const router = useRouter();
 const pengumumanList = ref([]);
 const loading = ref(true);
 const error = ref(false);
 const baseUrl = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
+
+// Computed properties for statistics
+const totalPengumuman = computed(() => pengumumanList.value.length);
+const activePengumuman = computed(
+  () =>
+    pengumumanList.value.filter(
+      (p) => new Date(p.tanggal_publikasi) <= new Date()
+    ).length
+);
 
 const showPdfModal = ref(false);
 const currentPdfUrl = ref("");
@@ -84,10 +128,23 @@ const fetchPengumuman = async () => {
   error.value = false;
   try {
     const response = await axios.get(`${baseUrl}/api/pengumuman`);
-    pengumumanList.value = response.data;
+    if (response.data && Array.isArray(response.data)) {
+      pengumumanList.value = response.data;
+    } else {
+      pengumumanList.value = [];
+    }
   } catch (err) {
     console.error("Error fetching pengumuman:", err);
-    error.value = true;
+    // Jika error 404 atau data kosong, jangan tampilkan sebagai error
+    if (
+      err.response &&
+      (err.response.status === 404 || err.response.status === 204)
+    ) {
+      pengumumanList.value = [];
+      error.value = false;
+    } else {
+      error.value = true;
+    }
   } finally {
     loading.value = false;
   }
@@ -115,6 +172,10 @@ const closePdfModal = () => {
   currentPdfUrl.value = "";
 };
 
+const goBack = () => {
+  router.go(-1);
+};
+
 onMounted(() => {
   // Scroll ke atas halaman
   window.scrollTo({
@@ -126,18 +187,138 @@ onMounted(() => {
 </script>
 
 <style scoped>
-/* Styling yang sudah ada */
+/* Professional Government Styling */
 .pengumuman-view-user {
-  padding-top: 80px;
   min-height: 100vh;
-  background-color: #f4f7f9;
+  background: linear-gradient(135deg, #f4f7f9 0%, #e8f0fe 50%, #f1f5f9 100%);
   color: #333;
+  font-family: "Inter", "Segoe UI", sans-serif;
+}
+
+/* Hero Section */
+.hero-section {
+  position: relative;
+  background: linear-gradient(135deg, #0077b6 0%, #023e8a 100%);
+  color: white;
+  padding: 120px 20px 80px;
+  text-align: center;
+  overflow: hidden;
+}
+
+.hero-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 30, 60, 0.3);
+  backdrop-filter: blur(2px);
+}
+
+.hero-content {
+  position: relative;
+  z-index: 2;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.back-button {
+  position: absolute;
+  top: -40px;
+  left: 0;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: white;
+  padding: 12px 20px;
+  border-radius: 25px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+
+.back-button:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateY(-2px);
+}
+
+.hero-text {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.hero-title {
+  font-size: 3.5rem;
+  font-weight: 700;
+  margin: 0 0 20px 0;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+}
+
+.hero-title i {
+  margin-right: 20px;
+  color: #ffd700;
+}
+
+.hero-subtitle {
+  font-size: 1.4rem;
+  font-weight: 500;
+  margin: 0 0 25px 0;
+  color: #e3f2fd;
+}
+
+.hero-description {
+  font-size: 1.15rem;
+  line-height: 1.7;
+  margin: 0 0 40px 0;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.hero-stats {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 30px;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(15px);
+  border-radius: 20px;
+  padding: 30px 40px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  margin-top: 40px;
+}
+
+.stat-item {
+  text-align: center;
+}
+
+.stat-number {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #ffd700;
+  margin-bottom: 8px;
+}
+
+.stat-label {
+  font-size: 1rem;
+  color: rgba(255, 255, 255, 0.8);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.stat-divider {
+  width: 2px;
+  height: 40px;
+  background: rgba(255, 255, 255, 0.3);
 }
 
 .container {
-  max-width: 1300px; /* Diperlebar menjadi 1300px */
+  max-width: 1300px;
   margin: 0 auto;
   padding: 40px 20px;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-radius: 20px;
+  box-shadow: 0 4px 30px rgba(0, 119, 182, 0.08);
 }
 
 .page-title {
@@ -166,16 +347,19 @@ onMounted(() => {
 .pengumuman-card {
   background: white;
   border-radius: 12px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  box-shadow: 0 4px 20px rgba(0, 119, 182, 0.08);
+  border: 1px solid rgba(0, 119, 182, 0.1);
+  transition: all 0.3s ease;
   overflow: hidden;
   display: flex;
   flex-direction: row;
+  position: relative;
 }
 
 .pengumuman-card:hover {
   transform: translateY(-8px);
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 12px 40px rgba(0, 119, 182, 0.15);
+  border-color: rgba(0, 119, 182, 0.2);
 }
 
 /* Styling untuk foto sampul */
@@ -203,13 +387,16 @@ onMounted(() => {
   font-size: 2rem;
   color: #1a1a1a;
   margin-bottom: 10px;
+  font-weight: 600;
+  line-height: 1.3;
 }
 
 .pengumuman-meta {
-  font-size: 1rem;
-  color: #888;
+  font-size: 0.95rem;
+  color: #64748b;
   margin-bottom: 25px;
   font-style: italic;
+  font-weight: 500;
 }
 
 .pengumuman-excerpt {
@@ -331,8 +518,25 @@ onMounted(() => {
   color: #dc3545;
 }
 
+.state-message.error-message i {
+  margin-bottom: 15px;
+  opacity: 0.8;
+}
+
 .state-message.empty-message {
-  color: #ffc107;
+  color: #64748b;
+}
+
+.state-message.empty-message i {
+  margin-bottom: 15px;
+  color: #0077b6;
+  opacity: 0.7;
+}
+
+.state-message.empty-message h3 {
+  color: #1a1a1a;
+  font-size: 1.5rem;
+  margin-bottom: 10px;
 }
 
 .spinner {

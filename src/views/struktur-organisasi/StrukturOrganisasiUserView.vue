@@ -1,26 +1,61 @@
 <template>
   <div class="detail-page-container">
-    <div class="content-wrapper">
-      <button @click="goBack" class="back-button">
-        <i class="fas fa-arrow-left"></i> Kembali
-      </button>
-      <h1 class="page-main-title">Struktur Organisasi</h1>
+    <!-- Hero Section -->
+    <div class="hero-section">
+      <div class="hero-overlay"></div>
+      <div class="hero-content">
+        <button @click="goBack" class="back-button">
+          <i class="fas fa-arrow-left"></i> Kembali
+        </button>
+        <div class="hero-text">
+          <h1 class="hero-title">
+            <i class="fas fa-sitemap"></i>
+            Struktur Organisasi
+          </h1>
+          <p class="hero-subtitle">Organisasi dan Tata Kerja Dinas</p>
+          <p class="hero-description">
+            Bagan dan informasi lengkap mengenai struktur organisasi Dinas
+            Kebudayaan dan Pariwisata Kabupaten Magetan.
+          </p>
+          <div class="hero-stats">
+            <div class="stat-item">
+              <div class="stat-number">1</div>
+              <div class="stat-label">Struktur Organisasi</div>
+            </div>
+            <div class="stat-divider"></div>
+            <div class="stat-item">
+              <div class="stat-number">
+                {{ strukturOrganisasiData ? 1 : 0 }}
+              </div>
+              <div class="stat-label">Tersedia</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
 
+    <div class="content-wrapper">
       <!-- Loading, Error, and Empty States -->
       <div v-if="loading" class="state-message">
         <div class="spinner"></div>
         <p>Memuat Struktur Organisasi...</p>
       </div>
       <div v-if="error" class="state-message error-message">
+        <div class="state-icon">🔧</div>
+        <h3>Gagal Memuat Data</h3>
         <p>
-          ❌ Maaf, terjadi kesalahan saat memuat data. Silakan coba kembali.
+          Tidak dapat mengakses informasi struktur organisasi. Silakan coba
+          kembali atau hubungi administrator.
         </p>
       </div>
       <div
         v-if="!loading && !error && !strukturOrganisasiData"
         class="state-message empty-message">
+        <div class="state-icon">🏢</div>
+        <h3>Belum Ada Konten</h3>
         <p>
-          📋 Belum ada informasi Struktur Organisasi yang tersedia saat ini.
+          Informasi struktur organisasi belum tersedia. Silakan periksa kembali
+          nanti.
         </p>
       </div>
 
@@ -84,14 +119,23 @@ const fetchStrukturOrganisasiData = async () => {
   error.value = false;
   try {
     const response = await axios.get(`${baseUrl}/api/struktur-organisasi`);
-    if (response.data) {
+    if (response.data && Object.keys(response.data).length > 0) {
       strukturOrganisasiData.value = response.data;
     } else {
       strukturOrganisasiData.value = null;
     }
   } catch (err) {
     console.error("Error fetching Struktur Organisasi data:", err);
-    error.value = true;
+    // Jika error 404 atau data kosong, jangan tampilkan sebagai error
+    if (
+      err.response &&
+      (err.response.status === 404 || err.response.status === 204)
+    ) {
+      strukturOrganisasiData.value = null;
+      error.value = false;
+    } else {
+      error.value = true;
+    }
   } finally {
     loading.value = false;
   }
@@ -124,37 +168,158 @@ onMounted(() => {
 </script>
 
 <style scoped>
-/* Base Page Styles */
+/* Professional Government Base Styles */
 .detail-page-container {
-  padding-top: 100px;
-  padding-bottom: 20px;
   min-height: 100vh;
-  background-color: #f4f7f9;
+  background: linear-gradient(135deg, #f4f7f9 0%, #e8f0fe 50%, #f1f5f9 100%);
   color: #333;
+  font-family: "Inter", "Segoe UI", sans-serif;
+}
+
+/* Hero Section */
+.hero-section {
+  position: relative;
+  background: linear-gradient(135deg, #0077b6 0%, #023e8a 100%);
+  color: white;
+  padding: 120px 20px 80px;
+  text-align: center;
+  overflow: hidden;
+}
+
+.hero-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 30, 60, 0.3);
+  backdrop-filter: blur(2px);
+}
+
+.hero-content {
+  position: relative;
+  z-index: 2;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.back-button {
+  position: absolute;
+  top: -40px;
+  left: 0;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: white;
+  padding: 12px 20px;
+  border-radius: 25px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+
+.back-button:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateY(-2px);
+}
+
+.hero-text {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.hero-title {
+  font-size: 3.5rem;
+  font-weight: 700;
+  margin: 0 0 20px 0;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+}
+
+.hero-title i {
+  margin-right: 20px;
+  color: #ffd700;
+}
+
+.hero-subtitle {
+  font-size: 1.4rem;
+  font-weight: 500;
+  margin: 0 0 25px 0;
+  color: #e3f2fd;
+}
+
+.hero-description {
+  font-size: 1.15rem;
+  line-height: 1.7;
+  margin: 0 0 40px 0;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.hero-stats {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 30px;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(15px);
+  border-radius: 20px;
+  padding: 30px 40px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  margin-top: 40px;
+}
+
+.stat-item {
+  text-align: center;
+}
+
+.stat-number {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #ffd700;
+  margin-bottom: 8px;
+}
+
+.stat-label {
+  font-size: 1rem;
+  color: rgba(255, 255, 255, 0.8);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.stat-divider {
+  width: 2px;
+  height: 40px;
+  background: rgba(255, 255, 255, 0.3);
 }
 .content-wrapper {
   max-width: 1300px;
   margin: 0 auto;
   padding: 40px 20px;
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-radius: 20px;
+  box-shadow: 0 4px 30px rgba(0, 119, 182, 0.08);
+  border: 1px solid rgba(0, 119, 182, 0.1);
 }
 .back-button {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 10px 15px;
-  background-color: #6c757d;
+  padding: 12px 20px;
+  background: linear-gradient(135deg, #475569 0%, #64748b 100%);
   color: white;
   border: none;
-  border-radius: 8px;
+  border-radius: 12px;
   cursor: pointer;
   margin-bottom: 25px;
-  transition: background-color 0.3s ease;
+  transition: all 0.3s ease;
+  font-weight: 500;
+  box-shadow: 0 2px 10px rgba(71, 85, 105, 0.2);
 }
 .back-button:hover {
-  background-color: #5a6268;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(71, 85, 105, 0.3);
+  background: linear-gradient(135deg, #64748b 0%, #475569 100%);
 }
 .page-main-title {
   font-size: 2.8rem;
@@ -190,12 +355,13 @@ onMounted(() => {
 }
 .struktur-image-container {
   width: 100%;
-  max-height: 600px; /* Batasi tinggi gambar */
+  max-height: 600px;
   overflow: hidden;
   margin-bottom: 30px;
-  border-radius: 8px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
-  background-color: #e0e0e0; /* Placeholder background */
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 119, 182, 0.12);
+  border: 1px solid rgba(0, 119, 182, 0.1);
+  background-color: #f8fafc;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -237,15 +403,49 @@ onMounted(() => {
 /* Other shared styles (Loading, Error, Spinner) */
 .state-message {
   text-align: center;
-  font-size: 1.2rem;
-  color: #6c757d;
-  margin: 50px 0;
+  margin: 50px auto;
+  padding: 40px 30px;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  max-width: 600px;
 }
+
+.state-message .state-icon {
+  font-size: 3rem;
+  margin-bottom: 20px;
+  display: block;
+}
+
+.state-message h3 {
+  margin: 0 0 15px 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #475569;
+}
+
+.state-message p {
+  margin: 0;
+  font-size: 1.1rem;
+  line-height: 1.6;
+  color: #64748b;
+}
+
 .state-message.error-message {
-  color: #dc3545;
+  border-left: 4px solid #ef4444;
 }
+
+.state-message.error-message h3 {
+  color: #ef4444;
+}
+
 .state-message.empty-message {
-  color: #ffc107;
+  border-left: 4px solid #0077b6;
+}
+
+.state-message.empty-message h3 {
+  color: #0077b6;
 }
 .spinner {
   border: 4px solid rgba(0, 0, 0, 0.1);
