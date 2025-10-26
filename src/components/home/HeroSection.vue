@@ -142,22 +142,28 @@ function initializeHeroAnimations() {
 }
 
 function initializeScrollTransitions() {
-  // Add smooth scroll transition effects
+  // Optimized scroll transition effects
   let ticking = false;
+  let lastScrollY = 0;
 
   function updateTransitions() {
     const scrolled = window.scrollY;
-    const rate = scrolled * -0.5;
+
+    // Only update if scroll changed significantly to reduce glitch
+    if (Math.abs(scrolled - lastScrollY) < 2) {
+      ticking = false;
+      return;
+    }
+
     const heroSection = document.querySelector(".hero-section");
 
     if (heroSection) {
-      // Subtle parallax effect on scroll
-      heroSection.style.transform = `translateY(${rate * 0.1}px)`;
+      // Reduced parallax effect to minimize glitch
+      const translateY = scrolled * 0.05; // Reduced from 0.1
+      heroSection.style.transform = `translate3d(0, ${translateY}px, 0)`;
+      heroSection.style.willChange = "transform"; // GPU acceleration
 
-      // Enhance transition opacity based on scroll
-      const transitionElement = heroSection.querySelector(
-        ".hero-section::after"
-      );
+      // Smooth opacity transition
       if (scrolled > 100) {
         heroSection.style.setProperty("--transition-opacity", "0.9");
       } else {
@@ -165,6 +171,7 @@ function initializeScrollTransitions() {
       }
     }
 
+    lastScrollY = scrolled;
     ticking = false;
   }
 
@@ -175,8 +182,18 @@ function initializeScrollTransitions() {
     }
   }
 
-  // Throttled scroll listener for performance
-  window.addEventListener("scroll", requestTick, { passive: true });
+  // Throttled scroll listener for better performance
+  let scrollTimeout;
+  window.addEventListener(
+    "scroll",
+    () => {
+      if (scrollTimeout) {
+        clearTimeout(scrollTimeout);
+      }
+      scrollTimeout = setTimeout(requestTick, 8); // Reduced frequency
+    },
+    { passive: true }
+  );
 }
 
 function handleReducedMotion() {
@@ -217,7 +234,12 @@ onUnmounted(() => {
   isolation: isolate;
   width: 100%;
   --transition-opacity: 0.6;
-  transition: transform 0.1s ease-out;
+  /* Optimized for smooth animations */
+  will-change: transform;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  transform-style: preserve-3d;
+  transition: transform 0.1s ease-out, opacity 0.1s ease-out;
 }
 
 .hero-section::after {

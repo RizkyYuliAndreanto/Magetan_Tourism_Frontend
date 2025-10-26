@@ -637,7 +637,7 @@ onBeforeUnmount(() => {
   position: relative;
   min-height: 100vh;
   font-family: "Inter", "Poppins", sans-serif;
-  overflow: hidden;
+  overflow-x: hidden;
   background: linear-gradient(
     135deg,
     #f0f9ff 0%,

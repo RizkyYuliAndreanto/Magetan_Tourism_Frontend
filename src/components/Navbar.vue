@@ -92,8 +92,14 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onBeforeUnmount, computed } from "vue";
+import { ref, onMounted, onBeforeUnmount, computed, watch } from "vue";
 import { useRouter, useRoute } from "vue-router";
+import {
+  checkLoginStatus,
+  isTokenExpired,
+  clearSession,
+  onLoginSuccess,
+} from "../utils/auth.js";
 import logoMagetanTourismPng from "../assets/Logo Magetan Tourism (png).png";
 import logoMagetanNgangeniOutline from "../assets/LOGO MAGETAN NGANGENI outline.png";
 import logoWonderfulIndonesiaFinal from "../assets/Logo Wonderful indonesia Final.png";
@@ -114,25 +120,49 @@ const isActive = (path) => {
   );
 };
 
-const checkLoginStatus = () => {
-  const token = localStorage.getItem("access_token");
-  const userData = localStorage.getItem("user");
+// Updated login status check using auth utility
+const updateLoginStatus = () => {
+  try {
+    const loginStatus = checkLoginStatus();
 
-  if (token && userData) {
-    isLoggedIn.value = true;
-    try {
-      const user = JSON.parse(userData);
-      username.value = user.username || "Admin";
-      avatarUrl.value =
-        user.photoUrl || "https://placehold.co/40x40/cccccc/ffffff?text=AD";
-    } catch (e) {
-      username.value = "Admin";
+    if (loginStatus.isLoggedIn) {
+      isLoggedIn.value = true;
+      const userData = localStorage.getItem("user");
+
+      if (userData) {
+        try {
+          const user = JSON.parse(userData);
+          username.value = user.username || "Admin";
+          avatarUrl.value =
+            user.photoUrl || "https://placehold.co/40x40/cccccc/ffffff?text=AD";
+        } catch (e) {
+          username.value = "Admin";
+          avatarUrl.value = "https://placehold.co/40x40/cccccc/ffffff?text=AD";
+        }
+      }
+    } else {
+      // Session expired or invalid - clear everything
+      isLoggedIn.value = false;
+      username.value = "";
       avatarUrl.value = "https://placehold.co/40x40/cccccc/ffffff?text=AD";
+
+      // If user was logged in and now session is expired, redirect to login if on admin page
+      if (route.path.startsWith("/admin")) {
+        router.push("/login");
+      }
     }
-  } else {
+  } catch (error) {
+    console.error("Error checking login status:", error);
     isLoggedIn.value = false;
     username.value = "";
     avatarUrl.value = "https://placehold.co/40x40/cccccc/ffffff?text=AD";
+  }
+};
+
+// Handle storage changes (for multi-tab synchronization)
+const handleStorageChange = (event) => {
+  if (event.key === "access_token" || event.key === "user") {
+    updateLoginStatus();
   }
 };
 
@@ -145,18 +175,38 @@ const closeMenu = () => {
 };
 
 onMounted(() => {
-  checkLoginStatus();
-  window.addEventListener("storage", checkLoginStatus);
+  // Initial login status check
+  updateLoginStatus();
+
+  // Listen for storage changes (multi-tab sync)
+  window.addEventListener("storage", handleStorageChange);
+
+  // Listen for auth events from auth.js
+  window.addEventListener("authLoginSuccess", updateLoginStatus);
+  window.addEventListener("authSessionExpired", () => {
+    isLoggedIn.value = false;
+    username.value = "";
+    avatarUrl.value = "https://placehold.co/40x40/cccccc/ffffff?text=AD";
+
+    if (route.path.startsWith("/admin")) {
+      router.push("/login");
+    }
+  });
 });
 
 onBeforeUnmount(() => {
-  window.removeEventListener("storage", checkLoginStatus);
+  window.removeEventListener("storage", handleStorageChange);
+  window.removeEventListener("authLoginSuccess", updateLoginStatus);
+  window.removeEventListener("authSessionExpired", () => {});
 });
 
-router.beforeEach((to, from, next) => {
-  checkLoginStatus();
-  next();
-});
+// Watch route changes for login status updates
+watch(
+  () => route.path,
+  () => {
+    updateLoginStatus();
+  }
+);
 </script>
 
 <style scoped>
@@ -335,7 +385,6 @@ router.beforeEach((to, from, next) => {
   display: flex;
   align-items: center;
   position: relative;
- 
 }
 
 .navbar-links {
@@ -410,7 +459,7 @@ router.beforeEach((to, from, next) => {
   overflow: hidden;
   transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   font-size: clamp(0.8rem, 2vw, 0.9rem);
-   margin-left: -20px; 
+  margin-left: -20px;
   z-index: 1; /* z-index yang terlalu tinggi tidak diperlukan di sini */
 }
 
@@ -635,31 +684,31 @@ router.beforeEach((to, from, next) => {
     padding: 12px 20px;
     width: 90%;
     font-size: 1.1rem;
-     width: 100%;
-     max-width: 150px;
-     padding: 10px 8px;
-     font-size: 0.95rem;
-     margin: 0 auto;
-     box-sizing: border-box;
+    width: 100%;
+    max-width: 150px;
+    padding: 10px 8px;
+    font-size: 0.95rem;
+    margin: 0 auto;
+    box-sizing: border-box;
   }
 
   .navbar-login {
-     margin-top: 12px;
-     margin-left: 0;
-     width: 100%;
-     display: flex;
-     justify-content: center;
+    margin-top: 12px;
+    margin-left: 0;
+    width: 100%;
+    display: flex;
+    justify-content: center;
   }
 
   .button-login {
-     width: 100%;
-     max-width: 220px;
-     text-align: center;
-     padding: 12px 16px;
-     font-size: 1rem;
-     border-radius: 25px;
-     margin: 0 auto;
-     box-sizing: border-box;
+    width: 100%;
+    max-width: 220px;
+    text-align: center;
+    padding: 12px 16px;
+    font-size: 1rem;
+    border-radius: 25px;
+    margin: 0 auto;
+    box-sizing: border-box;
   }
   .user-menu-container {
     display: flex;
@@ -736,12 +785,12 @@ router.beforeEach((to, from, next) => {
   }
 
   .button-login {
-     width: 100%;
-     max-width: 180px;
-     padding: 10px 10px;
-     font-size: 0.95rem;
-     margin: 0 auto;
-     box-sizing: border-box;
+    width: 100%;
+    max-width: 180px;
+    padding: 10px 10px;
+    font-size: 0.95rem;
+    margin: 0 auto;
+    box-sizing: border-box;
   }
 }
 

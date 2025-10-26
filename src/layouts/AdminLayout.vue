@@ -1,8 +1,11 @@
 <template>
   <div class="admin-layout">
-    <AdminSidebar :is-open="sidebarOpen" @close-sidebar="closeSidebar" />
-    <div :class="['main-content-wrapper', { 'sidebar-open': sidebarOpen }]">
-      <router-view />
+    <Navbar />
+    <div class="admin-content">
+      <AdminSidebar :is-open="sidebarOpen" @close-sidebar="closeSidebar" />
+      <div :class="['main-content-wrapper', { 'sidebar-open': sidebarOpen }]">
+        <router-view />
+      </div>
     </div>
   </div>
 </template>
@@ -10,6 +13,7 @@
 <script setup>
 import { ref, provide, onMounted, onUnmounted } from "vue";
 import AdminSidebar from "../components/admin/AdminSidebar.vue";
+import Navbar from "../components/Navbar.vue";
 
 const sidebarOpen = ref(true);
 
@@ -90,37 +94,35 @@ onUnmounted(() => {
   --background-light: #e9ecef;
 }
 
-/* Ensure html and body allow scrolling */
-html,
-body {
-  overflow-x: hidden;
-  scroll-behavior: smooth;
-  height: 100%;
-}
+/* Remove global HTML/body restrictions */
 
 /* Reset any potential scroll-blocking styles */
 * {
   scroll-behavior: smooth;
 }
 
-/* Ensure no elements block scrolling */
-#app {
+/* AdminLayout specific container */
+
+.admin-layout {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
   height: 100vh;
   overflow: hidden;
 }
 
-.admin-layout {
+.admin-content {
   display: flex;
-  min-height: 100vh;
-  height: 100vh;
-  overflow: hidden;
+  flex: 1;
+  margin-top: 70px; /* Space for navbar */
 }
+
 .main-content-wrapper {
   flex-grow: 1;
   margin-left: var(--sidebar-width);
   transition: margin-left 0.3s ease;
-  min-height: 100vh;
-  height: 100vh;
+  min-height: calc(100vh - 70px);
+  height: calc(100vh - 70px);
   display: flex;
   flex-direction: column;
   overflow-y: auto;

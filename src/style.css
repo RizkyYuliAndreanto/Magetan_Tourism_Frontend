@@ -7,6 +7,19 @@
   padding: 0;
 }
 
+/* Ensure scrolling works everywhere */
+html {
+  height: 100%;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+body {
+  height: 100%;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
 /* Variabel CSS Global untuk Warna */
 :root {
   /* Palet Warna Biru & Putih Ceria dengan Aksen Transparan */
@@ -59,15 +72,13 @@
   --box-shadow-medium: rgba(0, 0, 0, 0.15); /* Bayangan elemen terang sedang */
 }
 
-/* Gaya Dasar HTML dan Body */
-html,
+/* Additional body styling */
 body {
   min-height: 100%;
   margin: 0;
   font-family: Arial, sans-serif;
   background-color: var(--off-white);
   color: var(--text-color-dark);
-  overflow-x: hidden;
 }
 
 /* Pengaturan Aplikasi Vue Utama */
@@ -76,4 +87,8 @@ body {
   width: 100%;
   display: flex;
   flex-direction: column;
+  overflow-y: auto;
+  /* Anti-glitch optimizations */
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
 }
