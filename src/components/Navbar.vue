@@ -152,7 +152,6 @@ const updateLoginStatus = () => {
       }
     }
   } catch (error) {
-    console.error("Error checking login status:", error);
     isLoggedIn.value = false;
     username.value = "";
     avatarUrl.value = "https://placehold.co/40x40/cccccc/ffffff?text=AD";

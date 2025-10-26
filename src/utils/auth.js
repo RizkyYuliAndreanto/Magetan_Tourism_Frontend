@@ -22,15 +22,6 @@ export function parseJWT(token) {
         .join("")
     );
     const payload = JSON.parse(jsonPayload);
-
-    // Debug logging untuk development
-    console.log("🔐 Token payload:", {
-      exp: payload.exp,
-      expDate: new Date(payload.exp * 1000),
-      currentTime: new Date(),
-      isExpired: payload.exp < Math.floor(Date.now() / 1000),
-    });
-
     return payload;
   } catch (error) {
     console.error("Error parsing JWT:", error);
@@ -77,11 +68,8 @@ export async function validateTokenWithBackend(token) {
   }
 }
 
-// Fungsi untuk clear session - IMPROVED WITH DEBUGGING
+// Fungsi untuk clear session
 export function clearSession(emitEvent = true, reason = "unknown") {
-  console.log("🔴 clearSession called - Reason:", reason);
-  console.trace("clearSession call stack"); // Ini akan show siapa yang memanggil
-
   localStorage.removeItem(AUTH_CONFIG.TOKEN_KEY);
   localStorage.removeItem(AUTH_CONFIG.USER_KEY);
 
@@ -89,8 +77,6 @@ export function clearSession(emitEvent = true, reason = "unknown") {
   if (emitEvent && !window.isLoggingIn) {
     window.dispatchEvent(new CustomEvent("authSessionExpired")); // Langsung ke authSessionExpired, skip auth-session-expired
   }
-
-  console.log("Session cleared");
 }
 
 // Fungsi untuk mengecek status login - SIMPLIFIED VERSION
@@ -121,19 +107,15 @@ export function startSessionCheck() {
   // Setup interval untuk check session secara berkala
   // PENTING: Tidak langsung jalankan check, tunggu interval pertama
   checkInterval = setInterval(async () => {
-    console.log("Performing periodic session check...");
-
     const token = localStorage.getItem(AUTH_CONFIG.TOKEN_KEY);
 
     if (!token) {
-      console.log("No token found, session expired");
       clearSession(true, "periodic_check_no_token");
       return;
     }
 
     // Cek token expiry dengan toleransi 5 menit
     if (isTokenExpired(token)) {
-      console.log("Token expired locally");
       clearSession(true, "periodic_check_token_expired");
       return;
     }
@@ -144,17 +126,10 @@ export function startSessionCheck() {
       // 10% chance per check
       const isValid = await validateTokenWithBackend(token);
       if (!isValid) {
-        console.log("Token invalid on server");
         clearSession(true, "periodic_check_backend_invalid");
       }
     }
   }, AUTH_CONFIG.CHECK_INTERVAL);
-
-  console.log(
-    "Session check started - first check in",
-    AUTH_CONFIG.CHECK_INTERVAL / 60000,
-    "minutes"
-  );
 }
 
 // Fungsi untuk stop session check
@@ -162,19 +137,12 @@ export function stopSessionCheck() {
   if (checkInterval) {
     clearInterval(checkInterval);
     checkInterval = null;
-    console.log("Session check stopped");
   }
 }
 
 // Fungsi untuk mengecek apakah user bisa akses admin
 export function canAccessAdmin() {
   const { isLoggedIn, user, expired } = checkLoginStatus();
-
-  console.log(
-    `🔐 canAccessAdmin check - isLoggedIn: ${isLoggedIn}, user:`,
-    user,
-    `expired: ${expired}`
-  );
 
   // Jika token expired, clear session dan return false
   if (expired) {
@@ -189,16 +157,11 @@ export function canAccessAdmin() {
       user.level_akses === "super_admin" ||
       user.level_akses === "superadmin");
 
-  console.log(
-    `🔐 canAccessAdmin result: ${hasAccess}, user.level_akses: ${user?.level_akses}`
-  );
   return hasAccess;
 }
 
 // Initialize session management
 export function initSessionManagement() {
-  console.log("Initializing session management...");
-
   // JANGAN start session check otomatis, hanya setup listeners
   // Session check akan dimulai saat login berhasil
 
@@ -216,29 +179,23 @@ export function initSessionManagement() {
   // Listen untuk session expired event - SIMPLIFIED
   window.addEventListener("auth-session-expired", () => {
     stopSessionCheck();
-    console.log("Session expired event received");
     // Tidak emit event lagi untuk mencegah circular calls
   });
 }
 
 // Function to call when user successfully logs in
 export const onLoginSuccess = async () => {
-  console.log("🔐 Login success - starting session management");
-
   // Emit login success event untuk components lain
   window.dispatchEvent(new CustomEvent("authLoginSuccess"));
 
   // Delay session check start untuk memberi waktu token settle
   setTimeout(() => {
-    console.log("🔐 Starting session check after delay");
     startSessionCheck();
   }, 2000); // 2 detik delay
 };
 
 // Function untuk logout manual
 export const onLogout = () => {
-  console.log("🔐 Manual logout");
-
   // Stop session checking
   stopSessionCheck();
 

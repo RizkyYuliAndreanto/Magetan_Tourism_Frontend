@@ -144,17 +144,11 @@
 import { ref, onMounted } from "vue";
 import ContentOverview from "./ContentOverview.vue";
 import axios from "@/api/axios.js";
+import { useAuth } from "@/composables/useAuth.js";
 
 const error = ref(null);
 const loading = ref(false);
 const recentActivity = ref([]);
-
-// Function untuk redirect ke login
-function goToLogin() {
-  // You can implement router navigation here
-  console.log("Redirecting to login...");
-  // router.push('/admin/login');
-}
 
 // Function untuk refresh dashboard
 function refreshDashboard() {
@@ -162,7 +156,6 @@ function refreshDashboard() {
   fetchRecentActivity();
   setTimeout(() => {
     loading.value = false;
-    console.log("Dashboard refreshed");
   }, 1000);
 }
 
@@ -198,7 +191,7 @@ const getActivityIcon = (type) => {
     login: [
       "M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4",
       "M10 17l5-5-5-5",
-      "M15 12H3"
+      "M15 12H3",
     ],
   };
   return iconPaths[type] || iconPaths.create;
@@ -293,14 +286,9 @@ const formatTimestamp = (dateString) => {
 const fetchRecentActivity = async () => {
   try {
     loading.value = true;
-    console.log("🔄 Fetching recent activities from backend...");
 
     // Check if token exists
     const token = localStorage.getItem("access_token");
-    console.log("🔑 Token exists:", !!token);
-    if (token) {
-      console.log("🔑 Token preview:", token.substring(0, 20) + "...");
-    }
 
     // Mengambil data dari backend API
     // Coba dulu endpoint admin (dengan auth), jika gagal fallback ke dashboard
@@ -310,17 +298,11 @@ const fetchRecentActivity = async () => {
         params: { limit: 15 }, // Ambil lebih banyak untuk filtering
       });
     } catch (adminError) {
-      console.warn(
-        "⚠️ Admin endpoint failed, trying dashboard endpoint:",
-        adminError.response?.status
-      );
       // Fallback ke dashboard endpoint (public)
       response = await axios.get("/dashboard/activity", {
         params: { limit: 15 }, // Ambil lebih banyak untuk filtering
       });
     }
-
-    console.log("✅ Backend response:", response.data);
 
     if (response.data.success && response.data.data) {
       // Format data dari backend untuk frontend
@@ -375,31 +357,11 @@ const fetchRecentActivity = async () => {
         .slice(0, 10);
 
       recentActivity.value = mixedActivities;
-      console.log("✅ Activities loaded:", mixedActivities.length);
-      console.log("📊 Activity types:", {
-        crud: crudActivities.length,
-        login: loginActivities.length,
-        showing: mixedActivities.length,
-      });
     } else {
-      console.warn("⚠️ No activity data received from backend");
       recentActivity.value = [];
     }
   } catch (error) {
-    console.error("❌ Error fetching recent activity:", error);
-
-    // Jika gagal koneksi ke backend, tampilkan pesan error yang informatif
-    if (error.response) {
-      // Server responded with error status
-      console.error("Backend error:", error.response.data);
-    } else if (error.request) {
-      // Request made but no response received
-      console.error("No response from backend. Is the server running?");
-    } else {
-      // Something else happened
-      console.error("Request setup error:", error.message);
-    }
-
+    // Jika gagal koneksi ke backend, silent fail
     recentActivity.value = [];
   } finally {
     loading.value = false;

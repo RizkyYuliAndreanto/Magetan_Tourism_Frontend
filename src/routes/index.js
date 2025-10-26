@@ -17,13 +17,14 @@ import StrukturOrganisasiView from "../views/admin/struktur-organisasi/StrukturO
 import AkomodasiView from "../views/admin/akomodasi/AkomodasiView.vue";
 import KontenPpidView from "../views/admin/ppid/KontenPpidView.vue";
 import AdminBudayaView from "../views/admin/budaya/BudayaView.vue";
+import PengaturanAkun from "../views/admin/superadmin/PengaturanAkun.vue";
 
 //user
 import PengumumanUserView from "../views/pengumuman/PengumumanUserView.vue";
 import EventUserView from "../views/event/EventUserView.vue";
 import DetailEventUserView from "../views/event/DetailEventUserView.vue";
 import ProfilDinasView from "../views/ProfilDinas/ProfilDinasView.vue";
-import DetailProfilDinasView from "../views/profilDinas/DetailProfilDinasView.vue";
+import DetailProfilDinasView from "../views/ProfilDinas/DetailProfilDinasView.vue";
 import VisiMisiUserView from "../views/visi-misi/VisiMisiUserView.vue";
 import StrukturOrganisasiUserView from "../views/struktur-organisasi/StrukturOrganisasiUserView.vue";
 import StrukturAnggotaUserView from "../views/struktur-anggota/StrukturAnggotaUserView.vue";
@@ -228,6 +229,12 @@ const routes = [
         name: "adminKontenPpid",
         component: KontenPpidView,
       },
+      {
+        path: "pengaturan-akun",
+        name: "pengaturanAkun",
+        component: PengaturanAkun,
+        meta: { requiresSuperAdmin: true },
+      },
     ],
   },
 ];
@@ -263,10 +270,6 @@ router.beforeEach(async (to, from, next) => {
     return;
   }
 
-  console.log(
-    `🛡️ Router guard check for ${to.path}, isLoggingIn: ${window.isLoggingIn}`
-  );
-
   // Import auth utilities dynamically to avoid circular imports
   const { canAccessAdmin, checkLoginStatus, clearSession } = await import(
     "../utils/auth.js"
@@ -292,6 +295,30 @@ router.beforeEach(async (to, from, next) => {
         alert("Sesi Anda tidak valid. Silakan login kembali.");
         next("/login");
         return;
+      }
+
+      // Check super admin access for specific routes
+      if (to.meta.requiresSuperAdmin) {
+        const userData = localStorage.getItem("user");
+        let userRole = null;
+
+        if (userData) {
+          try {
+            const user = JSON.parse(userData);
+            // Use level_akses instead of role (based on database structure)
+            userRole = user.level_akses || user.role;
+          } catch (error) {
+            console.error("Error parsing user data:", error);
+          }
+        }
+
+        if (userRole !== "superadmin") {
+          alert(
+            "Akses ditolak. Hanya Super Admin yang dapat mengakses halaman ini."
+          );
+          next("/admin/dashboard");
+          return;
+        }
       }
 
       next();

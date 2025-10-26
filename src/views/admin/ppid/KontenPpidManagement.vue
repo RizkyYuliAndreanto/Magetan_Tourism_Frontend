@@ -288,31 +288,18 @@ const subKategoriCount = computed(() => {
 // Computed untuk mendeteksi konten bermasalah (ada di kategori induk)
 const kontenBermasalah = computed(() => {
   if (!kontenList.value || !Array.isArray(kontenList.value)) {
-    console.log("❌ kontenList.value is not an array:", kontenList.value);
     return 0;
   }
 
-  console.log("🔍 Checking for problematic content...");
-  console.log("📊 Total konten:", kontenList.value.length);
-
   const bermasalah = kontenList.value.filter((konten) => {
     if (!konten || !konten.kategoriPPID) {
-      console.log("⚠️ Konten tanpa kategori:", konten);
       return false;
     }
 
     const isProblematic = !konten.kategoriPPID.id_kategori_induk;
-
-    console.log(`📄 Konten "${konten.judul_konten || "No Title"}":`, {
-      kategori: konten.kategoriPPID.nama_kategori,
-      id_kategori_induk: konten.kategoriPPID.id_kategori_induk,
-      isProblematic: isProblematic,
-    });
-
     return isProblematic;
   });
 
-  console.log(`🚨 Found ${bermasalah.length} problematic content items`);
   return bermasalah.length;
 });
 
@@ -357,8 +344,6 @@ const showProblematicData = () => {
 };
 
 const forceRefreshData = async () => {
-  console.log("🔄 Manual force refresh triggered...");
-
   // Reset data terlebih dahulu
   kontenList.value = [];
   kategoriList.value = [];
@@ -369,45 +354,22 @@ const forceRefreshData = async () => {
     await fetchKontenData();
     await fetchKategoriData();
 
-    console.log("✅ Manual refresh completed");
-
     // Show success message
     openPopUp("success", "refresh", "Data berhasil diperbarui!");
   } catch (error) {
-    console.error("❌ Manual refresh failed:", error);
     openPopUp("error", "refresh", "Gagal memperbarui data. Silakan coba lagi.");
   }
 };
 
 const fetchKontenData = async () => {
   try {
-    console.log("🔄 Fetching konten data from API...");
     // Add cache busting parameter
     const cacheBuster = Date.now();
     const response = await axios.get(
       `http://localhost:5000/api/konten-ppid?_t=${cacheBuster}`
     );
     kontenList.value = Array.isArray(response.data) ? response.data : [];
-
-    // Enhanced logging untuk debugging
-    console.log("✅ Konten data loaded:", kontenList.value.length, "items");
-
-    // Log setiap konten dengan detail kategori
-    kontenList.value.forEach((konten, index) => {
-      if (konten && konten.kategoriPPID) {
-        console.log(`📄 Konten ${index + 1}:`, {
-          id: konten.id_konten_ppid, // ✅ Fix: use correct field name
-          judul: konten.judul_konten, // ✅ Fix: use correct field name
-          kategori_nama: konten.kategoriPPID.nama_kategori,
-          kategori_id_induk: konten.kategoriPPID.id_kategori_induk,
-          is_kategori_induk: !konten.kategoriPPID.id_kategori_induk,
-        });
-      } else {
-        console.log(`❌ Konten ${index + 1}: Invalid data structure`, konten);
-      }
-    });
   } catch (err) {
-    console.error("❌ Gagal memuat data konten PPID:", err);
     kontenList.value = []; // Reset to empty array on error
     openPopUp(
       "error",
@@ -419,7 +381,6 @@ const fetchKontenData = async () => {
 
 const fetchKategoriData = async () => {
   try {
-    console.log("🔄 Fetching kategori data from API...");
     // Fetch all categories to have complete hierarchy information with cache busting
     const cacheBuster = Date.now();
     const response = await axios.get(
@@ -427,31 +388,11 @@ const fetchKategoriData = async () => {
     );
     kategoriList.value = Array.isArray(response.data) ? response.data : [];
 
-    // Enhanced logging untuk debugging kategori
-    console.log(
-      "✅ Kategori data loaded:",
-      kategoriList.value.length,
-      "categories"
-    );
-
     const kategoriInduk = kategoriList.value.filter(
       (k) => !k.id_kategori_induk
     );
     const subKategori = kategoriList.value.filter((k) => k.id_kategori_induk);
-
-    console.log("📁 Kategori Induk:", kategoriInduk.length, "items");
-    kategoriInduk.forEach((k) => {
-      console.log(`  - ${k.nama_kategori} (ID: ${k.id_kategori_ppid})`);
-    });
-
-    console.log("📂 Sub-Kategori:", subKategori.length, "items");
-    subKategori.forEach((k) => {
-      console.log(
-        `  - ${k.nama_kategori} (ID: ${k.id_kategori_ppid}, Parent: ${k.id_kategori_induk})`
-      );
-    });
   } catch (err) {
-    console.error("❌ Gagal memuat data kategori PPID:", err);
     kategoriList.value = []; // Reset to empty array on error
     openPopUp(
       "error",
@@ -501,11 +442,9 @@ const closeKontenForm = () => {
   document.body.style.width = "";
 
   // Force refresh data dengan cache busting
-  console.log("🔄 Force refreshing data after form close...");
   setTimeout(async () => {
     await fetchKontenData();
     await fetchKategoriData();
-    console.log("✅ Data refresh completed");
   }, 100);
 };
 
@@ -524,7 +463,6 @@ const handleSaveKonten = async (formData) => {
   } catch (err) {
     const errorMessage =
       err.response?.data?.error || "Gagal menyimpan konten PPID.";
-    console.error("Gagal menyimpan konten PPID:", errorMessage);
     openPopUp("error", "create", errorMessage);
   }
 };
@@ -550,7 +488,6 @@ const handleUpdateKonten = async (formData) => {
   } catch (err) {
     const errorMessage =
       err.response?.data?.error || "Gagal memperbarui konten PPID.";
-    console.error("Gagal memperbarui konten PPID:", errorMessage);
     openPopUp("error", "update", errorMessage);
   }
 };
@@ -579,7 +516,6 @@ const handleDeleteConfirmed = async () => {
   } catch (err) {
     const errorMessage =
       err.response?.data?.error || "Gagal menghapus konten PPID.";
-    console.error("Gagal menghapus konten PPID:", errorMessage);
     openPopUp("error", "delete", errorMessage);
   } finally {
     kontenToDeleteId.value = null;
