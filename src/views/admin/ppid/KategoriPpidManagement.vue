@@ -82,12 +82,13 @@
                 <th>Nama Kategori</th>
                 <th>Deskripsi</th>
                 <th>Sub-Kategori</th>
+                <th>Total Konten</th>
                 <th>Aksi</th>
               </tr>
             </thead>
             <tbody>
               <tr v-if="kategoriIndukData.length === 0">
-                <td colspan="5" class="no-data-found">
+                <td colspan="6" class="no-data-found">
                   <div class="empty-state">
                     <i class="fas fa-folder-plus"></i>
                     <p>Belum ada kategori induk yang tersedia.</p>
@@ -124,6 +125,19 @@
                     }}
                     sub-kategori
                   </span>
+                </td>
+                <td>
+                  <div class="content-info">
+                    <span class="content-count" v-if="kategori.totalKonten > 0">
+                      <i class="fas fa-file-alt"></i>
+                      {{ kategori.totalKonten }} dokumen
+                    </span>
+                    <span class="content-count empty" v-else>
+                      <i class="fas fa-file-alt"></i>
+                      0 dokumen
+                    </span>
+                    <small class="content-note">Di sub-kategori</small>
+                  </div>
                 </td>
                 <td class="actions">
                   <button
@@ -165,6 +179,7 @@
                   <th>ID</th>
                   <th>Nama Sub-Kategori</th>
                   <th>Deskripsi</th>
+                  <th>Jumlah Konten</th>
                   <th>Aksi</th>
                 </tr>
               </thead>
@@ -184,6 +199,23 @@
                     </div>
                   </td>
                   <td>{{ subKategori.deskripsi_kategori || "-" }}</td>
+                  <td>
+                    <div class="content-info">
+                      <span
+                        class="content-count"
+                        v-if="
+                          subKategori.kontenPPID &&
+                          subKategori.kontenPPID.length > 0
+                        ">
+                        <i class="fas fa-file-alt"></i>
+                        {{ subKategori.kontenPPID.length }} dokumen
+                      </span>
+                      <span class="content-count empty" v-else>
+                        <i class="fas fa-file-alt"></i>
+                        0 dokumen
+                      </span>
+                    </div>
+                  </td>
                   <td class="actions">
                     <button
                       class="action-button edit-button"
@@ -299,27 +331,37 @@ const closePopUp = () => {
 
 const fetchKategoriData = async () => {
   try {
+    // Fetch kategori dengan sub-kategori dan konten untuk mendapatkan struktur lengkap
     const response = await axios.get(
-      "http://localhost:5000/api/kategori-ppid?includeSubKategori=true"
+      "http://localhost:5000/api/kategori-ppid?includeSubKategori=true&includeKonten=true"
     );
     kategoriList.value = response.data;
 
     const allKategoris = response.data;
 
-    kategoriIndukData.value = allKategoris.filter(
+    // Filter kategori induk
+    const kategoriInduk = allKategoris.filter(
       (k) => k.id_kategori_induk === null
     );
 
-    kategoriIndukData.value = kategoriIndukData.value.map((induk) => ({
-      ...induk,
-      subKategoris: allKategoris.filter(
+    // Struktur data untuk tampilan hierarkis dengan informasi konten
+    kategoriIndukData.value = kategoriInduk.map((induk) => {
+      const subKategoris = allKategoris.filter(
         (k) => k.id_kategori_induk === induk.id_kategori_ppid
-      ),
-    }));
+      );
 
-    kategoriIndukList.value = kategoriIndukData.value.filter(
-      (k) => k.id_kategori_induk === null
-    );
+      return {
+        ...induk,
+        subKategoris: subKategoris,
+        totalKonten: subKategoris.reduce(
+          (total, sub) => total + (sub.kontenPPID ? sub.kontenPPID.length : 0),
+          0
+        ),
+      };
+    });
+
+    // Set kategori induk list untuk dropdown
+    kategoriIndukList.value = kategoriInduk;
   } catch (err) {
     console.error("Gagal memuat data kategori PPID:", err);
     openPopUp("error", "fetch", "Gagal memuat data kategori PPID.");
@@ -823,6 +865,52 @@ onMounted(() => {
   font-weight: 600;
   white-space: nowrap;
   box-shadow: 0 1px 2px rgba(16, 185, 129, 0.2);
+}
+
+/* Content Info Styling */
+.content-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  align-items: flex-start;
+}
+
+.content-count {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.3rem 0.6rem;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%);
+  color: white;
+  box-shadow: 0 2px 4px rgba(40, 167, 69, 0.2);
+}
+
+.content-count.empty {
+  background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+  color: #e9ecef;
+}
+
+.content-count i {
+  font-size: 0.7rem;
+}
+
+.content-note {
+  font-size: 0.65rem;
+  color: #6c757d;
+  font-style: italic;
+}
+
+/* Sub-category header styling */
+.sub-category-header {
+  background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+  border-bottom: 1px solid #2196f3;
+}
+
+.sub-category-header .table-title {
+  color: #1565c0;
 }
 .mt-4 {
   margin-top: 1.5rem;
