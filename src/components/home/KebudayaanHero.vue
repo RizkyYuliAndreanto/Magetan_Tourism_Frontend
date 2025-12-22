@@ -251,7 +251,7 @@
 </template>
 
 <script setup>
-import { onMounted, onUnmounted, ref } from "vue";
+import { onMounted, onUnmounted, ref, nextTick } from "vue";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
@@ -351,16 +351,18 @@ const resumeCagarSlideshow = () => {
 };
 
 onMounted(() => {
-  // Set initial states untuk semua elemen animasi SEBELUM memulai animasi
-  gsap.set(".premium-culture-card", { opacity: 0, x: 0, rotationY: 0 });
-  gsap.set(".cultural-pattern-overlay", { opacity: 0, scale: 0.8 });
-  gsap.set(".corner", { opacity: 0, scale: 0 });
-  gsap.set(".cultural-badge", { opacity: 0, y: -20 });
-  gsap.set(".cultural-image", { opacity: 0, scale: 1.1 });
-  gsap.set(".premium-title", { opacity: 0, y: 30 });
-  gsap.set(".premium-subtitle", { opacity: 0, y: 20 });
-  gsap.set(".premium-description", { opacity: 0, y: 25 });
-  gsap.set(".premium-button", { opacity: 0, y: 30 });
+  // Tunggu DOM ready dulu
+  nextTick(() => {
+    // Set initial states untuk semua elemen animasi SEBELUM memulai animasi
+    gsap.set(".premium-culture-card", { opacity: 1, x: 0, rotationY: 0 });
+    gsap.set(".cultural-pattern-overlay", { opacity: 0, scale: 0.8 });
+    gsap.set(".corner", { opacity: 0, scale: 0 });
+    gsap.set(".cultural-badge", { opacity: 0, y: -20 });
+    gsap.set(".cultural-image", { opacity: 0, scale: 1.1 });
+    gsap.set(".premium-title", { opacity: 0, y: 30 });
+    gsap.set(".premium-subtitle", { opacity: 0, y: 20 });
+    gsap.set(".premium-description", { opacity: 0, y: 25 });
+    gsap.set(".premium-button", { opacity: 0, y: 30 });
 
   // Start slideshows setelah delay kecil
   setTimeout(() => {
@@ -578,6 +580,7 @@ onMounted(() => {
   setTimeout(() => {
     ScrollTrigger.refresh();
   }, 100);
+  }); // Tutup nextTick()
 });
 
 onUnmounted(() => {

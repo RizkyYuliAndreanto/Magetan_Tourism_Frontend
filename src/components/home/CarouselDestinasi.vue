@@ -325,21 +325,23 @@ const initializeAnimations = () => {
   gsap.fromTo(
     headerRef.value.children,
     {
-      y: 80,
+      y: 30,
       opacity: 0,
-      scale: 0.8,
+      scale: 0.95,
     },
     {
       y: 0,
       opacity: 1,
       scale: 1,
-      duration: 1.2,
-      stagger: 0.3,
-      ease: "back.out(1.7)",
+      duration: 0.8,
+      stagger: 0.2,
+      ease: "power2.out",
+      delay: 0.3, // Add small delay to ensure content is ready
       scrollTrigger: {
         trigger: headerRef.value,
-        start: "top 85%",
+        start: "top 90%",
         toggleActions: "play none none reverse",
+        once: false,
       },
     }
   );
@@ -764,6 +766,11 @@ onMounted(() => {
 
   // Initialize enhanced transition effects
   const observer = initializeTransitionEffects();
+  
+  // Initialize animations after DOM is ready
+  nextTick(() => {
+    initializeAnimations();
+  });
 
   // Store observer for cleanup
   onUnmounted(() => {
@@ -1027,6 +1034,8 @@ watch(currentIndex, (newIndex, oldIndex) => {
   text-align: center;
   margin-bottom: 3rem;
   padding-top: 80px;
+  opacity: 1; /* Ensure header is visible by default */
+  transform: translateY(0); /* Prevent any transform issues */
 }
 
 .premium-title {
@@ -1038,11 +1047,22 @@ watch(currentIndex, (newIndex, oldIndex) => {
   line-height: 1.1;
   text-shadow: 0 4px 8px rgba(30, 58, 138, 0.3), 0 2px 4px rgba(0, 0, 0, 0.1);
   position: relative;
+  /* Fallback solid color for compatibility */
   background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 50%, #1e3a8a 100%);
   background-clip: text;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   animation: titleGlow 3s ease-in-out infinite alternate;
+  opacity: 1; /* Ensure title is visible */
+}
+
+/* Fallback for browsers that don't support background-clip: text */
+@supports not (-webkit-background-clip: text) {
+  .premium-title {
+    background: none;
+    color: #1e3a8a;
+    -webkit-text-fill-color: unset;
+  }
 }
 
 .premium-subtitle {
@@ -1053,6 +1073,7 @@ watch(currentIndex, (newIndex, oldIndex) => {
   margin-top: 1rem;
   text-shadow: 0 2px 4px rgba(30, 41, 59, 0.2);
   opacity: 0.9;
+  visibility: visible; /* Ensure subtitle is visible */
 }
 
 .premium-accent-line {
@@ -1063,6 +1084,8 @@ watch(currentIndex, (newIndex, oldIndex) => {
   border-radius: 3px;
   position: relative;
   box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
+  opacity: 1; /* Ensure accent line is visible */
+  visibility: visible;
 }
 
 .premium-accent-line::before {
