@@ -1,9 +1,21 @@
 <template>
   <div class="form-card">
     <div class="form-header">
-      <h3 class="form-title">{{ isEditing ? 'Edit Akomodasi' : 'Tambah Akomodasi Baru' }}</h3>
+      <h3 class="form-title">
+        {{ isEditing ? "Edit Akomodasi" : "Tambah Akomodasi Baru" }}
+      </h3>
       <button class="close-form-btn" @click="$emit('close-form')">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-x">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          class="feather feather-x">
           <line x1="18" y1="6" x2="6" y2="18"></line>
           <line x1="6" y1="6" x2="18" y2="18"></line>
         </svg>
@@ -23,8 +35,10 @@
             stroke-linecap="round"
             stroke-linejoin="round"
             class="feather feather-bed">
-            <path d="M2 19.5V20a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-.5a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2z"></path>
-            <path d="M12 2a4 4 0 0 0-4 4v5a4 4 0 0 0 4 4h4a4 4 0 0 0 4-4V6a4 4 0 0 0-4-4h-4z"></path>
+            <path
+              d="M2 19.5V20a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-.5a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2z"></path>
+            <path
+              d="M12 2a4 4 0 0 0-4 4v5a4 4 0 0 0 4 4h4a4 4 0 0 0 4-4V6a4 4 0 0 0-4-4h-4z"></path>
             <line x1="10" y1="9" x2="14" y2="9"></line>
             <line x1="10" y1="12" x2="14" y2="12"></line>
             <line x1="10" y1="6" x2="14" y2="6"></line>
@@ -33,33 +47,78 @@
         </h4>
         <div class="form-grid">
           <div class="form-group">
-            <label for="nama_hotel">Nama Akomodasi <span class="required">*</span></label>
-            <input type="text" id="nama_hotel" v-model="formData.nama_hotel" class="form-input" required>
+            <label for="nama_hotel"
+              >Nama Akomodasi <span class="required">*</span></label
+            >
+            <input
+              type="text"
+              id="nama_hotel"
+              v-model="formData.nama_hotel"
+              class="form-input"
+              required />
           </div>
           <div class="form-group">
-            <label for="kontak">Kontak <span class="required">*</span></label>
-            <input type="text" id="kontak" v-model="formData.kontak" class="form-input" required>
+            <label for="kontak_hotel"
+              >Kontak <span class="required">*</span></label
+            >
+            <input
+              type="text"
+              id="kontak_hotel"
+              v-model="formData.kontak_hotel"
+              class="form-input"
+              required />
           </div>
           <div class="form-group span-2">
-            <label for="deskripsi_hotel">Deskripsi Akomodasi <span class="required">*</span></label>
-            <textarea id="deskripsi_hotel" v-model="formData.deskripsi_hotel" class="form-input" rows="5" required></textarea>
+            <label for="deskripsi_hotel"
+              >Deskripsi Akomodasi <span class="required">*</span></label
+            >
+            <textarea
+              id="deskripsi_hotel"
+              v-model="formData.deskripsi_hotel"
+              class="form-input"
+              rows="5"
+              required></textarea>
           </div>
           <div class="form-group span-2">
-            <label for="alamat_hotel">Alamat <span class="required">*</span></label>
-            <textarea id="alamat_hotel" v-model="formData.alamat_hotel" class="form-input" rows="3" required></textarea>
+            <label for="alamat_hotel"
+              >Alamat <span class="required">*</span></label
+            >
+            <textarea
+              id="alamat_hotel"
+              v-model="formData.alamat_hotel"
+              class="form-input"
+              rows="3"
+              required></textarea>
           </div>
           <div class="form-group">
-            <label for="link_website">Link Website</label>
-            <input type="url" id="link_website" v-model="formData.link_website" class="form-input">
+            <label for="website_hotel">Website Hotel</label>
+            <input
+              type="url"
+              id="website_hotel"
+              v-model="formData.website_hotel"
+              class="form-input" />
           </div>
           <div class="form-group">
-            <label for="harga_akomodasi">Harga Akomodasi</label>
-            <input type="number" id="harga_akomodasi" v-model="formData.harga_akomodasi" class="form-input" step="0.01">
+            <label for="rating_hotel">Rating Hotel</label>
+            <input
+              type="number"
+              id="rating_hotel"
+              v-model="formData.rating_hotel"
+              class="form-input"
+              step="0.1"
+              min="0"
+              max="5" />
           </div>
           <div class="form-group span-2">
-            <label for="gambar_akomodasi">Gambar Utama Akomodasi <span class="required" v-if="!isEditing">*</span></label>
-             <div
-              :class="['file-drop-area', {'is-dragover': isGambarAkomodasiDragover}]"
+            <label for="gambar_akomodasi"
+              >Gambar Utama Akomodasi
+              <span class="required" v-if="!isEditing">*</span></label
+            >
+            <div
+              :class="[
+                'file-drop-area',
+                { 'is-dragover': isGambarAkomodasiDragover },
+              ]"
               @dragover.prevent="isGambarAkomodasiDragover = true"
               @dragleave.prevent="isGambarAkomodasiDragover = false"
               @drop="handleDropGambarAkomodasi">
@@ -83,7 +142,9 @@
                   </svg>
                   <span class="file-message">
                     Drag files to upload or
-                    <label for="gambar_akomodasi" class="file-link">browse</label>
+                    <label for="gambar_akomodasi" class="file-link"
+                      >browse</label
+                    >
                   </span>
                   <input
                     type="file"
@@ -132,18 +193,40 @@
               </div>
             </div>
           </div>
+          <div class="form-group span-2">
+            <label for="fasilitas">Fasilitas Hotel</label>
+            <textarea
+              id="fasilitas"
+              v-model="formData.fasilitas"
+              class="form-input"
+              rows="3"
+              placeholder="Contoh: WiFi gratis, AC, kolam renang, restoran, dll."></textarea>
+          </div>
           <div class="form-group">
-            <label for="koordinat_lokasi">Koordinat Lokasi (Otomatis dari Peta)</label>
-            <input type="text" id="koordinat_lokasi" v-model="formData.koordinat_lokasi" class="form-input" readonly>
+            <label for="koordinat_lokasi"
+              >Koordinat Lokasi (Otomatis dari Peta)</label
+            >
+            <input
+              type="text"
+              id="koordinat_lokasi"
+              v-model="formData.koordinat_lokasi"
+              class="form-input"
+              readonly />
           </div>
           <div class="form-group span-2">
             <label>Pilih Lokasi di Peta</label>
-            <div id="map" style="height: 400px; border-radius: 8px; border: 1px solid #ddd;"></div>
+            <div
+              id="map"
+              style="
+                height: 400px;
+                border-radius: 8px;
+                border: 1px solid #ddd;
+              "></div>
           </div>
         </div>
       </div>
 
-      <hr class="form-divider">
+      <hr class="form-divider" />
 
       <div class="form-section">
         <h4 class="section-title">
@@ -165,9 +248,11 @@
           MEDIA GALERI
         </h4>
         <div class="form-group span-2">
-          <label for="galeri-files">Unggah File Galeri Baru (Gambar/Video)</label>
+          <label for="galeri-files"
+            >Unggah File Galeri Baru (Gambar/Video)</label
+          >
           <div
-            :class="['file-drop-area', {'is-dragover': isGalleryDragover}]"
+            :class="['file-drop-area', { 'is-dragover': isGalleryDragover }]"
             @dragover.prevent="isGalleryDragover = true"
             @dragleave.prevent="isGalleryDragover = false"
             @drop="handleDropGalleryFiles">
@@ -203,14 +288,24 @@
           </div>
         </div>
 
-        <div class="gallery-preview-container" v-if="initialGalleryFiles.length > 0">
+        <div
+          class="gallery-preview-container"
+          v-if="initialGalleryFiles.length > 0">
           <div
             v-for="file in initialGalleryFiles"
             :key="file.id_media_galeri"
             class="gallery-item-preview">
             <div class="thumbnail-wrapper">
-              <img v-if="file.jenis_file === 'gambar'" :src="getMediaUrl(file.path_file)" class="thumbnail-image" alt="Galeri Media">
-              <video v-else-if="file.jenis_file === 'video'" :src="getMediaUrl(file.path_file)" class="thumbnail-image" controls></video>
+              <img
+                v-if="file.jenis_file === 'gambar'"
+                :src="getMediaUrl(file.path_file)"
+                class="thumbnail-image"
+                alt="Galeri Media" />
+              <video
+                v-else-if="file.jenis_file === 'video'"
+                :src="getMediaUrl(file.path_file)"
+                class="thumbnail-image"
+                controls></video>
               <svg
                 v-else
                 xmlns="http://www.w3.org/2000/svg"
@@ -223,7 +318,8 @@
                 stroke-linecap="round"
                 stroke-linejoin="round"
                 class="feather feather-file-text placeholder-icon">
-                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <path
+                  d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
                 <polyline points="14 2 14 8 20 8"></polyline>
                 <line x1="16" y1="13" x2="8" y2="13"></line>
                 <line x1="16" y1="17" x2="8" y2="17"></line>
@@ -231,15 +327,41 @@
               </svg>
             </div>
             <div class="file-info">
-              <span class="file-name" :title="file.path_file.split('/').pop()">{{ file.path_file.split("/").pop() }}</span>
+              <span
+                class="file-name"
+                :title="file.path_file.split('/').pop()"
+                >{{ file.path_file.split("/").pop() }}</span
+              >
             </div>
             <div class="item-details">
-              <input type="text" v-model="file.deskripsi_file" placeholder="Deskripsi file" class="form-input small-input">
-              <input type="number" v-model="file.urutan_tampil" placeholder="Urutan" class="form-input small-input">
-              <button class="remove-file-btn" @click="removeExistingGalleryFile(file.id_media_galeri)" title="Hapus">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-trash-2">
+              <input
+                type="text"
+                v-model="file.deskripsi_file"
+                placeholder="Deskripsi file"
+                class="form-input small-input" />
+              <input
+                type="number"
+                v-model="file.urutan_tampil"
+                placeholder="Urutan"
+                class="form-input small-input" />
+              <button
+                class="remove-file-btn"
+                @click="removeExistingGalleryFile(file.id_media_galeri)"
+                title="Hapus">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  class="feather feather-trash-2">
                   <polyline points="3 6 5 6 21 6"></polyline>
-                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                  <path
+                    d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
                   <line x1="10" y1="11" x2="10" y2="17"></line>
                   <line x1="14" y1="11" x2="14" y2="17"></line>
                 </svg>
@@ -324,15 +446,39 @@
 
       <div class="form-actions">
         <button type="submit" class="action-button save-button">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-save">
-            <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            class="feather feather-save">
+            <path
+              d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
             <polyline points="17 21 17 13 7 13 7 21"></polyline>
             <polyline points="7 3 7 8 15 8"></polyline>
           </svg>
-          {{ isEditing ? 'Simpan Perubahan' : 'Simpan Akomodasi & Galeri' }}
+          {{ isEditing ? "Simpan Perubahan" : "Simpan Akomodasi & Galeri" }}
         </button>
-        <button type="button" class="action-button cancel-button" @click="$emit('close-form')">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-x">
+        <button
+          type="button"
+          class="action-button cancel-button"
+          @click="$emit('close-form')">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            class="feather feather-x">
             <line x1="18" y1="6" x2="6" y2="18"></line>
             <line x1="6" y1="6" x2="18" y2="18"></line>
           </svg>
@@ -344,10 +490,10 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted, nextTick, watch } from 'vue';
-import 'leaflet/dist/leaflet.css';
-import L from 'leaflet';
-import axios from 'axios';
+import { ref, onMounted, onUnmounted, nextTick, watch } from "vue";
+import "leaflet/dist/leaflet.css";
+import L from "leaflet";
+import axios from "axios";
 
 const props = defineProps({
   isEditing: Boolean,
@@ -358,7 +504,7 @@ const props = defineProps({
   },
 });
 
-const emit = defineEmits(['close-form', 'save-akomodasi', 'update-akomodasi']);
+const emit = defineEmits(["close-form", "save-akomodasi", "update-akomodasi"]);
 
 const formData = ref({});
 const galleryFiles = ref([]);
@@ -369,23 +515,27 @@ const isGalleryDragover = ref(false);
 const mapInstance = ref(null);
 const markerInstance = ref(null);
 
-watch(() => props.initialData, (newVal) => {
-  formData.value = { ...newVal };
-  if (
-    formData.value.gambar_akomodasi &&
-    typeof formData.value.gambar_akomodasi === 'string'
-  ) {
-    formData.value.preview_gambar_akomodasi = `http://localhost:5000${formData.value.gambar_akomodasi}`;
-  } else {
-    formData.value.preview_gambar_akomodasi = null;
-  }
-  initialGalleryFiles.value = props.galleryList ? [...props.galleryList] : [];
-  galleryFiles.value = [];
-  deletedGalleryIds.value = [];
-  nextTick(() => {
-    initializeMap();
-  });
-}, { immediate: true });
+watch(
+  () => props.initialData,
+  (newVal) => {
+    formData.value = { ...newVal };
+    if (
+      formData.value.gambar_akomodasi &&
+      typeof formData.value.gambar_akomodasi === "string"
+    ) {
+      formData.value.preview_gambar_akomodasi = `http://localhost:5000${formData.value.gambar_akomodasi}`;
+    } else {
+      formData.value.preview_gambar_akomodasi = null;
+    }
+    initialGalleryFiles.value = props.galleryList ? [...props.galleryList] : [];
+    galleryFiles.value = [];
+    deletedGalleryIds.value = [];
+    nextTick(() => {
+      initializeMap();
+    });
+  },
+  { immediate: true }
+);
 
 // Fungsi untuk Gambar Utama Akomodasi
 const handleGambarAkomodasiUpload = (event) => {
@@ -399,7 +549,7 @@ const handleDropGambarAkomodasi = (event) => {
   event.preventDefault();
   isGambarAkomodasiDragover.value = false;
   const file = event.dataTransfer.files[0];
-  if (file && file.type.startsWith('image/')) {
+  if (file && file.type.startsWith("image/")) {
     formData.value.gambar_akomodasi = file;
     formData.value.preview_gambar_akomodasi = URL.createObjectURL(file);
   }
@@ -416,7 +566,7 @@ const removeGambarAkomodasi = () => {
 const handleGalleryFileUpload = (event) => {
   const files = event.target.files;
   addGalleryFiles(files);
-  event.target.value = '';
+  event.target.value = "";
 };
 const handleDropGalleryFiles = (event) => {
   event.preventDefault();
@@ -426,17 +576,17 @@ const handleDropGalleryFiles = (event) => {
 };
 const addGalleryFiles = (files) => {
   for (const file of files) {
-    if (file.type.startsWith('image/') || file.type.startsWith('video/')) {
+    if (file.type.startsWith("image/") || file.type.startsWith("video/")) {
       let previewUrl = null;
-      if (file.type.startsWith('image/')) {
+      if (file.type.startsWith("image/")) {
         previewUrl = URL.createObjectURL(file);
       }
       galleryFiles.value.push({
         file,
-        deskripsi: '',
+        deskripsi: "",
         urutan: galleryFiles.value.length + 1,
-        jenis_file: file.type.startsWith('image/') ? 'gambar' : 'video',
-        previewUrl
+        jenis_file: file.type.startsWith("image/") ? "gambar" : "video",
+        previewUrl,
       });
     }
   }
@@ -448,8 +598,14 @@ const removeGalleryFile = (index) => {
   galleryFiles.value.splice(index, 1);
 };
 const removeExistingGalleryFile = (id) => {
-  if (confirm('Apakah Anda yakin ingin menghapus file galeri ini? Perubahan akan disimpan saat Anda memperbarui akomodasi.')) {
-    initialGalleryFiles.value = initialGalleryFiles.value.filter(file => file.id_media_galeri !== id);
+  if (
+    confirm(
+      "Apakah Anda yakin ingin menghapus file galeri ini? Perubahan akan disimpan saat Anda memperbarui akomodasi."
+    )
+  ) {
+    initialGalleryFiles.value = initialGalleryFiles.value.filter(
+      (file) => file.id_media_galeri !== id
+    );
     deletedGalleryIds.value.push(id);
   }
 };
@@ -462,23 +618,40 @@ const submitForm = () => {
   const submitData = new FormData();
   for (const key in formData.value) {
     if (
-      key !== 'preview_gambar_akomodasi' &&
+      key !== "preview_gambar_akomodasi" &&
+      key !== "gambar_akomodasi" &&
       formData.value[key] !== null
     ) {
       submitData.append(key, formData.value[key]);
     }
   }
+
+  // Handle gambar akomodasi dengan field name yang benar
+  if (
+    formData.value.gambar_akomodasi &&
+    formData.value.gambar_akomodasi instanceof File
+  ) {
+    submitData.append("gambar_utama_hotel", formData.value.gambar_akomodasi);
+  }
   if (props.isEditing) {
-    initialGalleryFiles.value.forEach(item => {
-        submitData.append('existing_gallery_updates', JSON.stringify({
-            id_media_galeri: item.id_media_galeri,
-            deskripsi_file: item.deskripsi_file,
-            urutan_tampil: item.urutan_tampil
-        }));
+    initialGalleryFiles.value.forEach((item) => {
+      submitData.append(
+        "existing_gallery_updates",
+        JSON.stringify({
+          id_media_galeri: item.id_media_galeri,
+          deskripsi_file: item.deskripsi_file,
+          urutan_tampil: item.urutan_tampil,
+        })
+      );
     });
-    emit('update-akomodasi', submitData, galleryFiles.value, deletedGalleryIds.value);
+    emit(
+      "update-akomodasi",
+      submitData,
+      galleryFiles.value,
+      deletedGalleryIds.value
+    );
   } else {
-    emit('save-akomodasi', submitData, galleryFiles.value);
+    emit("save-akomodasi", submitData, galleryFiles.value);
   }
 };
 
@@ -486,25 +659,26 @@ const initializeMap = () => {
   if (mapInstance.value) {
     destroyMap();
   }
-  
-  const mapCenter = formData.value.koordinat_lokasi ? 
-    formData.value.koordinat_lokasi.split(',').map(Number) : 
-    [-7.6534, 111.4116];
-  
-  mapInstance.value = L.map('map').setView(mapCenter, 13);
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+
+  const mapCenter = formData.value.koordinat_lokasi
+    ? formData.value.koordinat_lokasi.split(",").map(Number)
+    : [-7.6534, 111.4116];
+
+  mapInstance.value = L.map("map").setView(mapCenter, 13);
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    attribution:
+      '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
   }).addTo(mapInstance.value);
 
   if (formData.value.koordinat_lokasi) {
     markerInstance.value = L.marker(mapCenter).addTo(mapInstance.value);
   }
 
-  mapInstance.value.on('click', (e) => {
+  mapInstance.value.on("click", (e) => {
     const lat = e.latlng.lat;
     const lng = e.latlng.lng;
     formData.value.koordinat_lokasi = `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
-    
+
     if (markerInstance.value) {
       markerInstance.value.setLatLng(e.latlng);
     } else {
@@ -535,7 +709,8 @@ onUnmounted(() => {
   padding: 2.5rem;
   border-radius: 16px;
   box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
   border: 1px solid #f0f4f8;
 }
 

@@ -71,16 +71,8 @@
           >
         </li>
 
-        <li class="navbar-item navbar-login">
-          <router-link
-            v-if="!isLoggedIn"
-            to="/login"
-            class="navbar-links button-login"
-            @click="closeMenu"
-            >Login</router-link
-          >
-
-          <div v-else class="admin-profile">
+        <li class="navbar-item navbar-login" v-if="isLoggedIn">
+          <div class="admin-profile">
             <router-link to="/admin" class="user-icon-link" @click="closeMenu">
               <img :src="avatarUrl" alt="Admin Avatar" class="admin-avatar" />
             </router-link>

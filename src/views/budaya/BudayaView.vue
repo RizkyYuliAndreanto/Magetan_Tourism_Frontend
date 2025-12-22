@@ -177,9 +177,6 @@
       </section>
 
       <!-- Situs Kebudayaan Section -->
-
-      class="luxury-budaya-section situs-kebudayaan"
-      v-if="situsKebudayaanItems.length > 0">
       <div class="section-header">
         <h2 class="luxury-section-title">
           <span class="title-shimmer">Situs Kebudayaan</span>
@@ -195,103 +192,105 @@
       </div>
 
       <!-- Cultural Carousel -->
-      <div class="cultural-navigation">
-        <div class="nav-controls">
-          <button
-            @click="scrollCarousel('situs-kebudayaan', 'left')"
-            class="nav-button prev-button">
-            <svg viewBox="0 0 24 24" fill="currentColor">
-              <path
-                d="M15.41 16.59L10.83 12L15.41 7.41L14 6L8 12L14 18L15.41 16.59Z" />
-            </svg>
-          </button>
-          <button
-            @click="scrollCarousel('situs-kebudayaan', 'right')"
-            class="nav-button next-button">
-            <svg viewBox="0 0 24 24" fill="currentColor">
-              <path
-                d="M8.59 16.59L13.17 12L8.59 7.41L10 6L16 12L10 18L8.59 16.59Z" />
-            </svg>
-          </button>
+      <div class="cultural-carousel-container">
+        <div class="carousel-header">
+          <div class="carousel-navigation">
+            <button
+              @click="scrollCarousel('situs-kebudayaan', 'left')"
+              class="nav-button prev-button">
+              <svg viewBox="0 0 24 24" fill="currentColor">
+                <path
+                  d="M15.41 16.59L10.83 12L15.41 7.41L14 6L8 12L14 18L15.41 16.59Z" />
+              </svg>
+            </button>
+            <button
+              @click="scrollCarousel('situs-kebudayaan', 'right')"
+              class="nav-button next-button">
+              <svg viewBox="0 0 24 24" fill="currentColor">
+                <path
+                  d="M8.59 16.59L13.17 12L8.59 7.41L10 6L16 12L10 18L8.59 16.59Z" />
+              </svg>
+            </button>
+          </div>
         </div>
-      </div>
 
-      <div class="cultural-carousel situs-kebudayaan-carousel">
-        <div class="carousel-track">
-          <div
-            v-for="(item, index) in situsKebudayaanItems"
-            :key="item.id_budaya"
-            class="carousel-card situs-kebudayaan-card"
-            :style="{ animationDelay: `${index * 0.15}s` }"
-            @mouseenter="cardHover"
-            @mouseleave="cardLeave">
-            <!-- Cultural Badge -->
-            <div class="heritage-badge">
-              <div class="badge-crown">🏛️</div>
-              <span class="badge-text">SITUS KEBUDAYAAN</span>
-              <div class="badge-accent">�️</div>
-            </div>
-
-            <!-- Cultural Frame -->
-            <div class="cultural-frame">
-              <div class="frame-corners">
-                <div class="corner top-left"></div>
-                <div class="corner top-right"></div>
-                <div class="corner bottom-left"></div>
-                <div class="corner bottom-right"></div>
+        <div class="cultural-carousel situs-kebudayaan-carousel">
+          <div class="carousel-track">
+            <div
+              v-for="(item, index) in situsKebudayaanItems"
+              :key="item.id_budaya"
+              class="carousel-card situs-kebudayaan-card"
+              :style="{ animationDelay: `${index * 0.15}s` }"
+              @mouseenter="cardHover"
+              @mouseleave="cardLeave">
+              <!-- Cultural Badge -->
+              <div class="heritage-badge">
+                <div class="badge-crown">🏛️</div>
+                <span class="badge-text">SITUS KEBUDAYAAN</span>
+                <div class="badge-accent">�️</div>
               </div>
 
-              <div class="cultural-image-container">
-                <div class="image-overlay cagar-overlay"></div>
-                <img
-                  v-if="item.gambar_budaya"
-                  :src="`http://localhost:5000${item.gambar_budaya}`"
-                  :alt="item.judul_budaya"
-                  class="cultural-image" />
-                <div v-else class="artistic-no-image">
-                  <div class="culture-icon">�️</div>
-                  <span>Situs Kebudayaan</span>
-                </div>
-                <div class="heritage-shine"></div>
-              </div>
-
-              <!-- Cultural Details -->
-              <div class="cultural-content">
-                <div class="cultural-header">
-                  <h3 class="cultural-title">{{ item.judul_budaya }}</h3>
-                  <div class="heritage-seal">🏛️</div>
+              <!-- Cultural Frame -->
+              <div class="cultural-frame">
+                <div class="frame-corners">
+                  <div class="corner top-left"></div>
+                  <div class="corner top-right"></div>
+                  <div class="corner bottom-left"></div>
+                  <div class="corner bottom-right"></div>
                 </div>
 
-                <div class="cultural-meta">
-                  <span class="origin-info"
-                    >📅
-                    {{
-                      new Date(item.createdAt).toLocaleDateString("id-ID")
-                    }}</span
-                  >
-                  <span class="category-info"
-                    >� {{ item.adminPengelola?.username || "Admin" }}</span
-                  >
+                <div class="cultural-image-container">
+                  <div class="image-overlay cagar-overlay"></div>
+                  <img
+                    v-if="item.gambar_budaya"
+                    :src="`http://localhost:5000${item.gambar_budaya}`"
+                    :alt="item.judul_budaya"
+                    class="cultural-image" />
+                  <div v-else class="artistic-no-image">
+                    <div class="culture-icon">�️</div>
+                    <span>Situs Kebudayaan</span>
+                  </div>
+                  <div class="heritage-shine"></div>
                 </div>
 
-                <p class="cultural-description">
-                  {{ truncateText(item.deskripsi_budaya, 100) }}
-                </p>
+                <!-- Cultural Details -->
+                <div class="cultural-content">
+                  <div class="cultural-header">
+                    <h3 class="cultural-title">{{ item.judul_budaya }}</h3>
+                    <div class="heritage-seal">🏛️</div>
+                  </div>
 
-                <div class="cultural-actions">
-                  <button
-                    @click="exploreSitusKebudayaan(item.id_budaya)"
-                    class="heritage-button">
-                    <span>Pelajari Situs</span>
-                    <div class="button-ornament"></div>
-                  </button>
+                  <div class="cultural-meta">
+                    <span class="origin-info"
+                      >📅
+                      {{
+                        new Date(item.createdAt).toLocaleDateString("id-ID")
+                      }}</span
+                    >
+                    <span class="category-info"
+                      >� {{ item.adminPengelola?.username || "Admin" }}</span
+                    >
+                  </div>
+
+                  <p class="cultural-description">
+                    {{ truncateText(item.deskripsi_budaya, 100) }}
+                  </p>
+
+                  <div class="cultural-actions">
+                    <button
+                      @click="exploreSitusKebudayaan(item.id_budaya)"
+                      class="heritage-button">
+                      <span>Pelajari Situs</span>
+                      <div class="button-ornament"></div>
+                    </button>
+                  </div>
                 </div>
-              </div>
 
-              <!-- Traditional Ornaments -->
-              <div class="traditional-ornaments">
-                <div class="ornament-pattern top"></div>
-                <div class="ornament-pattern bottom"></div>
+                <!-- Traditional Ornaments -->
+                <div class="traditional-ornaments">
+                  <div class="ornament-pattern top"></div>
+                  <div class="ornament-pattern bottom"></div>
+                </div>
               </div>
             </div>
           </div>
@@ -318,103 +317,105 @@
       </div>
 
       <!-- Cultural Carousel -->
-      <div class="cultural-navigation">
-        <div class="nav-controls">
-          <button
-            @click="scrollCarousel('sejarah', 'left')"
-            class="nav-button prev-button">
-            <svg viewBox="0 0 24 24" fill="currentColor">
-              <path
-                d="M15.41 16.59L10.83 12L15.41 7.41L14 6L8 12L14 18L15.41 16.59Z" />
-            </svg>
-          </button>
-          <button
-            @click="scrollCarousel('sejarah', 'right')"
-            class="nav-button next-button">
-            <svg viewBox="0 0 24 24" fill="currentColor">
-              <path
-                d="M8.59 16.59L13.17 12L8.59 7.41L10 6L16 12L10 18L8.59 16.59Z" />
-            </svg>
-          </button>
+      <div class="cultural-carousel-container">
+        <div class="carousel-header">
+          <div class="carousel-navigation">
+            <button
+              @click="scrollCarousel('sejarah', 'left')"
+              class="nav-button prev-button">
+              <svg viewBox="0 0 24 24" fill="currentColor">
+                <path
+                  d="M15.41 16.59L10.83 12L15.41 7.41L14 6L8 12L14 18L15.41 16.59Z" />
+              </svg>
+            </button>
+            <button
+              @click="scrollCarousel('sejarah', 'right')"
+              class="nav-button next-button">
+              <svg viewBox="0 0 24 24" fill="currentColor">
+                <path
+                  d="M8.59 16.59L13.17 12L8.59 7.41L10 6L16 12L10 18L8.59 16.59Z" />
+              </svg>
+            </button>
+          </div>
         </div>
-      </div>
 
-      <div class="cultural-carousel sejarah-carousel">
-        <div class="carousel-track">
-          <div
-            v-for="(item, index) in sejarahItems"
-            :key="item.id_budaya"
-            class="carousel-card sejarah-card"
-            :style="{ animationDelay: `${index * 0.15}s` }"
-            @mouseenter="cardHover"
-            @mouseleave="cardLeave">
-            <!-- Cultural Badge -->
-            <div class="heritage-badge">
-              <div class="badge-crown">📜</div>
-              <span class="badge-text">SEJARAH</span>
-            </div>
-
-            <!-- Cultural Frame -->
-            <div class="cultural-frame">
-              <div class="frame-corners">
-                <div class="corner top-left"></div>
-                <div class="corner top-right"></div>
-                <div class="corner bottom-left"></div>
-                <div class="corner bottom-right"></div>
+        <div class="cultural-carousel sejarah-carousel">
+          <div class="carousel-track">
+            <div
+              v-for="(item, index) in sejarahItems"
+              :key="item.id_budaya"
+              class="carousel-card sejarah-card"
+              :style="{ animationDelay: `${index * 0.15}s` }"
+              @mouseenter="cardHover"
+              @mouseleave="cardLeave">
+              <!-- Cultural Badge -->
+              <div class="heritage-badge">
+                <div class="badge-crown">📜</div>
+                <span class="badge-text">SEJARAH</span>
               </div>
 
-              <div class="cultural-image-container">
-                <div class="image-overlay cagar-overlay"></div>
-                <img
-                  v-if="item.gambar_budaya"
-                  :src="`http://localhost:5000${item.gambar_budaya}`"
-                  :alt="item.judul_budaya"
-                  class="cultural-image" />
-                <div v-else class="cultural-no-image">
-                  <div class="temple-icon">🏛️</div>
-                  <span>Sejarah Budaya</span>
+              <!-- Cultural Frame -->
+              <div class="cultural-frame">
+                <div class="frame-corners">
+                  <div class="corner top-left"></div>
+                  <div class="corner top-right"></div>
+                  <div class="corner bottom-left"></div>
+                  <div class="corner bottom-right"></div>
                 </div>
-                <div class="heritage-shine"></div>
-              </div>
-            </div>
 
-            <!-- Cultural Content -->
-            <div class="cultural-content">
-              <div class="cultural-header">
-                <h3 class="cultural-title">{{ item.judul_budaya }}</h3>
-                <div class="innovation-badge">�</div>
-              </div>
-
-              <div class="cultural-meta">
-                <span class="period-info"
-                  >📅
-                  {{
-                    new Date(item.createdAt).toLocaleDateString("id-ID")
-                  }}</span
-                >
-                <span class="creator-info"
-                  >� {{ item.adminPengelola?.username || "Admin" }}</span
-                >
+                <div class="cultural-image-container">
+                  <div class="image-overlay cagar-overlay"></div>
+                  <img
+                    v-if="item.gambar_budaya"
+                    :src="`http://localhost:5000${item.gambar_budaya}`"
+                    :alt="item.judul_budaya"
+                    class="cultural-image" />
+                  <div v-else class="cultural-no-image">
+                    <div class="temple-icon">🏛️</div>
+                    <span>Sejarah Budaya</span>
+                  </div>
+                  <div class="heritage-shine"></div>
+                </div>
               </div>
 
-              <p class="cultural-description">
-                {{ truncateText(item.deskripsi_budaya, 100) }}
-              </p>
+              <!-- Cultural Content -->
+              <div class="cultural-content">
+                <div class="cultural-header">
+                  <h3 class="cultural-title">{{ item.judul_budaya }}</h3>
+                  <div class="innovation-badge">�</div>
+                </div>
 
-              <div class="cultural-actions">
-                <button
-                  @click="exploreSejarah(item.id_budaya)"
-                  class="heritage-button">
-                  <span>Pelajari Sejarah</span>
-                  <div class="button-ornament"></div>
-                </button>
+                <div class="cultural-meta">
+                  <span class="period-info"
+                    >📅
+                    {{
+                      new Date(item.createdAt).toLocaleDateString("id-ID")
+                    }}</span
+                  >
+                  <span class="creator-info"
+                    >� {{ item.adminPengelola?.username || "Admin" }}</span
+                  >
+                </div>
+
+                <p class="cultural-description">
+                  {{ truncateText(item.deskripsi_budaya, 100) }}
+                </p>
+
+                <div class="cultural-actions">
+                  <button
+                    @click="exploreSejarah(item.id_budaya)"
+                    class="heritage-button">
+                    <span>Pelajari Sejarah</span>
+                    <div class="button-ornament"></div>
+                  </button>
+                </div>
               </div>
-            </div>
 
-            <!-- Traditional Ornaments -->
-            <div class="traditional-ornaments">
-              <div class="ornament-pattern top"></div>
-              <div class="ornament-pattern bottom"></div>
+              <!-- Traditional Ornaments -->
+              <div class="traditional-ornaments">
+                <div class="ornament-pattern top"></div>
+                <div class="ornament-pattern bottom"></div>
+              </div>
             </div>
           </div>
         </div>
@@ -462,14 +463,7 @@ const fetchBudayaData = async () => {
     sejarahItems.value = allBudaya.filter(
       (item) => item.kategori_budaya === "Sejarah"
     );
-
-    console.log("Budaya data loaded:", {
-      objekPengembangan: objekPengembanganItems.value.length,
-      situsKebudayaan: situsKebudayaanItems.value.length,
-      sejarah: sejarahItems.value.length,
-    });
   } catch (err) {
-    console.error("Error fetching budaya data:", err);
     error.value = true;
   } finally {
     loading.value = false;
@@ -513,22 +507,18 @@ const truncateText = (text, length = 100) => {
 };
 
 const exploreObjekPengembangan = (id) => {
-  console.log("Navigate to objek pengembangan budaya detail:", id);
   router.push({ name: "DetailBudaya", params: { id: id } });
 };
 
 const exploreSitusKebudayaan = (id) => {
-  console.log("Navigate to situs kebudayaan detail:", id);
   router.push({ name: "DetailBudaya", params: { id: id } });
 };
 
 const exploreSejarah = (id) => {
-  console.log("Navigate to sejarah detail:", id);
   router.push({ name: "DetailBudaya", params: { id: id } });
 };
 
 const learnMore = (id) => {
-  console.log("Navigate to budaya detail:", id);
   router.push({ name: "DetailBudaya", params: { id: id } });
 };
 
