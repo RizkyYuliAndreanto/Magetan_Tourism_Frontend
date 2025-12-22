@@ -259,6 +259,177 @@
         </div>
       </section>
 
+      <!-- Akomodasi Section -->
+      <section class="luxury-tourism-section akomodasi-section">
+        <div class="section-header">
+          <h2 class="luxury-section-title">
+            <span class="title-shimmer">Akomodasi Terbaik</span>
+          </h2>
+          <div class="title-underline"></div>
+          <p class="section-subtitle">
+            Temukan penginapan yang nyaman untuk perjalanan Anda
+          </p>
+        </div>
+
+        <!-- Loading State -->
+        <div v-if="akomodasiLoading" class="luxury-loading">
+          <div class="loading-spinner"></div>
+          <p>Memuat data akomodasi...</p>
+        </div>
+
+        <!-- Error State -->
+        <div v-else-if="akomodasiError" class="luxury-error">
+          <div class="error-icon">⚠️</div>
+          <h3>Gagal memuat data akomodasi</h3>
+          <p>{{ akomodasiError }}</p>
+        </div>
+
+        <!-- No Data State -->
+        <div v-else-if="!akomodasiList.length" class="no-data-luxury">
+          <div class="no-data-icon">🏨</div>
+          <p>Belum ada akomodasi yang tersedia</p>
+        </div>
+
+        <!-- Akomodasi Cards -->
+        <div v-else class="luxury-cards-grid">
+          <div
+            v-for="(akomodasi, index) in akomodasiList"
+            :key="akomodasi.id_akomodasi"
+            class="luxury-destination-card akomodasi-card"
+            :style="{ 'animation-delay': `${index * 0.1}s` }"
+            @mouseenter="cardHover"
+            @mouseleave="cardLeave"
+            @click="$router.push(`/akomodasi/${akomodasi.id_akomodasi}`)">
+            <!-- Premium Image Container -->
+            <div class="luxury-image-container">
+              <!-- Image Carousel -->
+              <div class="image-carousel">
+                <transition name="luxury-fade" mode="out-in">
+                  <img
+                    :key="currentImageIndex[akomodasi.id_akomodasi] || 0"
+                    :src="
+                      getAkomodasiImages(akomodasi)[
+                        currentImageIndex[akomodasi.id_akomodasi] || 0
+                      ] || '/api/placeholder/400/250'
+                    "
+                    :alt="akomodasi.nama_hotel"
+                    class="luxury-destination-image akomodasi-image" />
+                </transition>
+              </div>
+
+              <!-- Floating Category Badge -->
+              <div class="floating-category-badge akomodasi-badge">
+                <span class="category-icon">🏨</span>
+                <span>AKOMODASI</span>
+              </div>
+
+              <!-- Premium Rating -->
+              <div class="luxury-rating">
+                <div class="stars-container">
+                  <span
+                    v-for="i in 5"
+                    :key="i"
+                    class="luxury-star"
+                    :class="{
+                      filled: i <= Math.floor(akomodasi.rating_hotel || 0),
+                    }"
+                    >★</span
+                  >
+                </div>
+                <span class="rating-text">{{
+                  akomodasi.rating_hotel || "N/A"
+                }}</span>
+              </div>
+
+              <!-- Gradient Overlay -->
+              <div class="luxury-gradient-overlay"></div>
+            </div>
+
+            <!-- Card Content -->
+            <div class="luxury-card-content">
+              <h3 class="luxury-destination-title">
+                {{ akomodasi.nama_hotel }}
+              </h3>
+
+              <div class="luxury-destination-location">
+                <svg
+                  class="location-icon"
+                  viewBox="0 0 24 24"
+                  fill="currentColor">
+                  <path
+                    d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" />
+                </svg>
+                <span>{{ truncateText(akomodasi.alamat_hotel, 50) }}</span>
+              </div>
+
+              <p class="luxury-destination-description">
+                {{ truncateText(akomodasi.deskripsi_hotel, 100) }}
+              </p>
+
+              <!-- Hotel Information -->
+              <div class="hotel-info-grid">
+                <!-- Price Section -->
+                <div class="price-section" v-if="akomodasi.harga_per_malam">
+                  <span class="price-label">Mulai dari</span>
+                  <span class="price-value"
+                    >Rp {{ formatPrice(akomodasi.harga_per_malam) }}</span
+                  >
+                  <span class="price-unit">/malam</span>
+                </div>
+
+                <!-- Facilities Preview -->
+                <div v-if="akomodasi.fasilitas" class="facilities-preview">
+                  <span class="facilities-icon">🏨</span>
+                  <div class="facilities-list">
+                    <span
+                      v-for="(facility, idx) in getFacilitiesPreview(
+                        akomodasi.fasilitas
+                      )"
+                      :key="idx"
+                      class="facility-item"
+                      >{{ facility }}</span
+                    >
+                  </div>
+                </div>
+
+                <!-- Hotel Stats -->
+                <div class="hotel-stats">
+                  <div class="stat-item" v-if="akomodasi.jumlah_kamar">
+                    <span class="stat-icon">�️</span>
+                    <span class="stat-value"
+                      >{{ akomodasi.jumlah_kamar }} kamar</span
+                    >
+                  </div>
+                  <div class="stat-item" v-if="akomodasi.kontak_hotel">
+                    <span class="stat-icon">�</span>
+                    <span class="stat-value"
+                      >{{ akomodasi.kontak_hotel.substring(0, 12) }}...</span
+                    >
+                  </div>
+                  <div class="stat-item" v-if="akomodasi.website_hotel">
+                    <span class="stat-icon">🌐</span>
+                    <span class="stat-value">Website</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Book Now Button -->
+              <div class="booking-action">
+                <button
+                  class="book-now-btn"
+                  @click.stop="contactHotel(akomodasi)">
+                  <span class="btn-icon">📞</span>
+                  <span>Hubungi Hotel</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Luxury Card Effects -->
+            <div class="card-glow-effect"></div>
+          </div>
+        </div>
+      </section>
+
       <!-- Travel Inspirations Section -->
       <section class="travel-inspirations-section">
         <div class="inspirations-header">
@@ -295,6 +466,11 @@ const loading = ref(true);
 const error = ref(null);
 const selectedKategori = ref("");
 const searchQuery = ref("");
+
+// Akomodasi data
+const akomodasiList = ref([]);
+const akomodasiLoading = ref(true);
+const akomodasiError = ref(null);
 const isDropdownOpen = ref(false);
 
 const carouselInterval = ref(null);
@@ -404,7 +580,76 @@ const fetchKategori = async () => {
     kategoriList.value = response.data;
   } catch (err) {
     error.value = "Gagal memuat data kategori.";
-    console.error(err);
+  }
+};
+
+const fetchAkomodasi = async () => {
+  try {
+    akomodasiLoading.value = true;
+    const response = await axios.get(`${API_BASE_URL}/api/akomodasi`);
+    akomodasiList.value = response.data;
+    akomodasiError.value = null;
+  } catch (err) {
+    akomodasiError.value = "Gagal memuat data akomodasi.";
+  } finally {
+    akomodasiLoading.value = false;
+  }
+};
+
+const getAkomodasiImages = (akomodasi) => {
+  const images = [];
+  if (akomodasi.gambar_utama_hotel) {
+    images.push(getImageUrl(akomodasi.gambar_utama_hotel));
+  }
+  if (akomodasi.galeriAkomodasi && akomodasi.galeriAkomodasi.length > 0) {
+    akomodasi.galeriAkomodasi.forEach((galeriItem) => {
+      images.push(getImageUrl(galeriItem.path_file));
+    });
+  }
+  if (images.length === 0) {
+    images.push("/api/placeholder/400/250");
+  }
+  return images;
+};
+
+const truncateText = (text, length = 100) => {
+  if (!text) return "";
+  if (text.length <= length) return text;
+  return text.substring(0, length) + "...";
+};
+
+const formatPrice = (price) => {
+  if (!price) return "0";
+  return new Intl.NumberFormat("id-ID").format(price);
+};
+
+const getFacilitiesPreview = (facilities) => {
+  if (!facilities) return [];
+
+  let facilityList = [];
+  if (typeof facilities === "string") {
+    try {
+      facilityList = JSON.parse(facilities);
+    } catch (e) {
+      facilityList = facilities.split(",").map((f) => f.trim());
+    }
+  } else if (Array.isArray(facilities)) {
+    facilityList = facilities;
+  }
+
+  return facilityList.slice(0, 3); // Show only first 3 facilities
+};
+
+const contactHotel = (akomodasi) => {
+  if (akomodasi.kontak_hotel) {
+    const phone = akomodasi.kontak_hotel.replace(/\D/g, "");
+    const message = `Halo, saya tertarik dengan ${akomodasi.nama_hotel}. Bisakah Anda memberikan informasi lebih lanjut?`;
+    const whatsappUrl = `https://wa.me/${phone}?text=${encodeURIComponent(
+      message
+    )}`;
+    window.open(whatsappUrl, "_blank");
+  } else if (akomodasi.website_hotel) {
+    window.open(akomodasi.website_hotel, "_blank");
   }
 };
 
@@ -485,7 +730,7 @@ onMounted(async () => {
     behavior: "smooth",
   });
   loading.value = true;
-  await Promise.all([fetchPariwisata(), fetchKategori()]);
+  await Promise.all([fetchPariwisata(), fetchKategori(), fetchAkomodasi()]);
   loading.value = false;
   startCarousel();
   startFeaturedCarousel();
@@ -1437,6 +1682,59 @@ onUnmounted(() => {
   font-size: 1.1rem;
 }
 
+/* Destination location styling */
+.luxury-destination-location {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+  font-size: 0.9rem;
+  color: #6b7280;
+}
+
+/* Akomodasi-specific location icon */
+.akomodasi-card .location-icon {
+  width: 14px;
+  height: 14px;
+  font-size: 14px;
+  color: #10b981;
+}
+
+.akomodasi-card .luxury-destination-location {
+  margin-bottom: 0.5rem;
+}
+
+/* Akomodasi-specific title and description */
+.akomodasi-card .luxury-destination-title {
+  font-size: 1.3rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 0.5rem;
+  line-height: 1.4;
+}
+
+.akomodasi-card .luxury-destination-description {
+  font-size: 0.85rem;
+  color: #6b7280;
+  line-height: 1.5;
+  margin-bottom: 1rem;
+}
+
+/* Card content container */
+.luxury-card-content {
+  padding: 1.5rem;
+  background: white;
+  position: relative;
+  z-index: 2;
+}
+
+.akomodasi-card .luxury-card-content {
+  padding: 1.25rem;
+}
+
 .destination-features {
   margin-bottom: 2rem;
 }
@@ -1975,6 +2273,261 @@ onUnmounted(() => {
 
   .slide-title {
     font-size: 1.8rem;
+  }
+}
+
+/* ========== AKOMODASI SPECIFIC STYLES ========== */
+
+.akomodasi-section {
+  background: linear-gradient(
+    135deg,
+    rgba(16, 185, 129, 0.05) 0%,
+    rgba(34, 197, 94, 0.08) 50%,
+    rgba(59, 130, 246, 0.05) 100%
+  );
+  padding: 60px 0 !important; /* Kurangi padding untuk akomodasi */
+}
+
+.akomodasi-card {
+  border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+.akomodasi-card.hovered {
+  border-color: rgba(16, 185, 129, 0.4);
+  box-shadow: 0 25px 50px rgba(16, 185, 129, 0.15);
+}
+
+.akomodasi-badge {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+}
+
+.akomodasi-image {
+  transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.akomodasi-card.hovered .akomodasi-image {
+  transform: scale(1.08) rotate(1deg);
+}
+
+/* Hotel Information Grid */
+.hotel-info-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin: 1rem 0;
+}
+
+.price-section {
+  background: linear-gradient(
+    135deg,
+    rgba(16, 185, 129, 0.1) 0%,
+    rgba(34, 197, 94, 0.1) 100%
+  );
+  padding: 0.75rem;
+  border-radius: 12px;
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  text-align: center;
+}
+
+.price-label {
+  display: block;
+  font-size: 0.75rem;
+  color: #6b7280;
+  margin-bottom: 0.25rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.price-value {
+  display: block;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #10b981;
+  margin-bottom: 0.2rem;
+}
+
+.price-unit {
+  font-size: 0.8rem;
+  color: #6b7280;
+}
+
+.facilities-preview {
+  background: rgba(59, 130, 246, 0.05);
+  padding: 0.75rem;
+  border-radius: 12px;
+  border: 1px solid rgba(59, 130, 246, 0.1);
+}
+
+.facilities-icon {
+  font-size: 1rem;
+  margin-right: 0.5rem;
+}
+
+.facilities-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.facility-item {
+  background: rgba(59, 130, 246, 0.1);
+  color: #3b82f6;
+  padding: 0.25rem 0.5rem;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.hotel-stats {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  flex: 1;
+  padding: 0.5rem;
+  background: rgba(16, 185, 129, 0.05);
+  border-radius: 8px;
+  border: 1px solid rgba(16, 185, 129, 0.1);
+}
+
+.stat-icon {
+  font-size: 1rem;
+  margin-bottom: 0.25rem;
+}
+
+.stat-value {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #374151;
+}
+
+.booking-action {
+  margin-top: 1rem;
+}
+
+.book-now-btn {
+  width: 100%;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+  border: none;
+  padding: 0.75rem 1rem;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
+}
+
+.book-now-btn:hover {
+  background: linear-gradient(135deg, #059669 0%, #047857 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(16, 185, 129, 0.3);
+}
+
+.btn-icon {
+  font-size: 1rem;
+}
+
+.stat-value {
+  font-weight: 500;
+  color: #374151;
+}
+
+.facilities-preview {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+  padding: 0.5rem 0.75rem;
+  background: rgba(59, 130, 246, 0.05);
+  border-radius: 8px;
+  border-left: 3px solid #3b82f6;
+}
+
+.facilities-icon {
+  color: #3b82f6;
+  font-size: 0.9rem;
+}
+
+.facilities-text {
+  font-size: 0.8rem;
+  color: #4b5563;
+  font-weight: 500;
+}
+
+.card-glow-effect {
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  background: linear-gradient(
+    45deg,
+    transparent,
+    rgba(16, 185, 129, 0.1),
+    transparent,
+    rgba(59, 130, 246, 0.1),
+    transparent
+  );
+  border-radius: 25px;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  z-index: -1;
+}
+
+.akomodasi-card.hovered .card-glow-effect {
+  opacity: 1;
+}
+
+/* Responsive Adjustments for Akomodasi */
+@media (max-width: 768px) {
+  .hotel-info-grid {
+    gap: 0.75rem;
+  }
+
+  .price-section {
+    padding: 0.5rem;
+  }
+
+  .price-value {
+    font-size: 1rem;
+  }
+
+  .hotel-stats {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .stat-item {
+    flex-direction: row;
+    justify-content: space-between;
+    padding: 0.5rem;
+  }
+
+  .facilities-list {
+    gap: 0.25rem;
+  }
+
+  .facility-item {
+    font-size: 0.7rem;
+    padding: 0.2rem 0.4rem;
+  }
+
+  .book-now-btn {
+    padding: 0.6rem 0.8rem;
+    font-size: 0.85rem;
   }
 }
 </style>

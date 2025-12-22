@@ -169,6 +169,19 @@
             <a href="#" class="footer-link">Panduan Wisata</a>
             <a href="#" class="footer-link">Pemesanan Online</a>
             <a href="#" class="footer-link">Pusat Bantuan</a>
+            <router-link
+              v-if="!isLoggedIn"
+              to="/login"
+              class="footer-link">
+              Login Admin
+            </router-link>
+            <router-link
+              v-else
+              to="/admin"
+              class="footer-link admin-link">
+              <img :src="avatarUrl" alt="Admin Avatar" class="footer-mini-avatar" />
+              {{ username }}
+            </router-link>
           </div>
         </div>
         <div class="legal-links">
@@ -201,7 +214,86 @@
 </template>
 
 <script setup>
-// Tidak ada logika JavaScript khusus yang dibutuhkan di sini.
+import { ref, onMounted, onBeforeUnmount, watch } from "vue";
+import { useRoute } from "vue-router";
+import {
+  checkLoginStatus,
+  isTokenExpired,
+} from "../utils/auth.js";
+
+const isLoggedIn = ref(false);
+const username = ref("");
+const avatarUrl = ref("https://placehold.co/40x40/cccccc/ffffff?text=AD");
+const route = useRoute();
+
+// Updated login status check using auth utility
+const updateLoginStatus = () => {
+  try {
+    const loginStatus = checkLoginStatus();
+
+    if (loginStatus.isLoggedIn) {
+      isLoggedIn.value = true;
+      const userData = localStorage.getItem("user");
+
+      if (userData) {
+        try {
+          const user = JSON.parse(userData);
+          username.value = user.username || "Admin";
+          avatarUrl.value =
+            user.photoUrl || "https://placehold.co/40x40/cccccc/ffffff?text=AD";
+        } catch (e) {
+          username.value = "Admin";
+          avatarUrl.value = "https://placehold.co/40x40/cccccc/ffffff?text=AD";
+        }
+      }
+    } else {
+      isLoggedIn.value = false;
+      username.value = "";
+      avatarUrl.value = "https://placehold.co/40x40/cccccc/ffffff?text=AD";
+    }
+  } catch (error) {
+    isLoggedIn.value = false;
+    username.value = "";
+    avatarUrl.value = "https://placehold.co/40x40/cccccc/ffffff?text=AD";
+  }
+};
+
+// Handle storage changes (for multi-tab synchronization)
+const handleStorageChange = (event) => {
+  if (event.key === "access_token" || event.key === "user") {
+    updateLoginStatus();
+  }
+};
+
+onMounted(() => {
+  // Initial login status check
+  updateLoginStatus();
+
+  // Listen for storage changes (multi-tab sync)
+  window.addEventListener("storage", handleStorageChange);
+
+  // Listen for auth events from auth.js
+  window.addEventListener("authLoginSuccess", updateLoginStatus);
+  window.addEventListener("authSessionExpired", () => {
+    isLoggedIn.value = false;
+    username.value = "";
+    avatarUrl.value = "https://placehold.co/40x40/cccccc/ffffff?text=AD";
+  });
+});
+
+onBeforeUnmount(() => {
+  window.removeEventListener("storage", handleStorageChange);
+  window.removeEventListener("authLoginSuccess", updateLoginStatus);
+  window.removeEventListener("authSessionExpired", () => {});
+});
+
+// Watch route changes for login status updates
+watch(
+  () => route.path,
+  () => {
+    updateLoginStatus();
+  }
+);
 </script>
 
 <style scoped>
@@ -724,6 +816,20 @@
 
 .legal-link:hover {
   color: rgba(255, 215, 0, 0.8);
+}
+
+.footer-mini-avatar {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-right: 4px;
+}
+
+.admin-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
 }
 
 /* Footer Bottom */

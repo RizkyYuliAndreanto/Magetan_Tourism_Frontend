@@ -277,14 +277,15 @@ const openAkomodasiForm = async (akomodasi = null) => {
   } else {
     formAkomodasi.value = {
       id_akomodasi: null,
-      nama_akomodasi: "",
-      deskripsi_akomodasi: "",
-      alamat: "",
-      kontak: "",
-      link_website: "",
-      harga_akomodasi: null,
+      nama_hotel: "",
+      deskripsi_hotel: "",
+      alamat_hotel: "",
+      kontak_hotel: "",
+      website_hotel: "",
+      rating_hotel: null,
       gambar_akomodasi: null,
       koordinat_lokasi: "",
+      fasilitas: "",
     };
     editingAkomodasiGallery.value = [];
   }

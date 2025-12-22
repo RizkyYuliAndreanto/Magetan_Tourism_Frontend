@@ -31,6 +31,7 @@ import StrukturAnggotaUserView from "../views/struktur-anggota/StrukturAnggotaUs
 import PpidView from "../views/ppid/PpidView.vue";
 import PariwisataView from "../views/Pariwisata/PariwisataView.vue";
 import DetailPariwisata from "../views/Pariwisata/DetailPariwisata.vue";
+import AkomodasiDetail from "../views/akomodasi/AkomodasiDetail.vue";
 import BudayaView from "../views/budaya/BudayaView.vue";
 import DetailBudayaView from "../views/budaya/DetailBudayaView.vue";
 import Ekrafview from "../views/ekraf/ekrafview.vue";
@@ -114,6 +115,12 @@ const routes = [
     path: "/destinasi/:id",
     name: "DetailPariwisata",
     component: DetailPariwisata,
+    props: true,
+  },
+  {
+    path: "/akomodasi/:id",
+    name: "AkomodasiDetail",
+    component: AkomodasiDetail,
     props: true,
   },
   {
