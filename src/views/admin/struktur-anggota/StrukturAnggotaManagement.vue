@@ -110,12 +110,14 @@
                     @click="openAnggotaForm(anggota)"
                     title="Edit">
                     <i class="fas fa-edit"></i>
+                    <span>Edit</span>
                   </button>
                   <button
                     class="action-button delete-button"
                     @click="showDeleteConfirm(anggota.id_anggota)"
                     title="Hapus">
                     <i class="fas fa-trash-alt"></i>
+                    <span>Hapus</span>
                   </button>
                 </td>
               </tr>
@@ -525,10 +527,17 @@ onMounted(() => {
   padding: 1rem;
   border-bottom: 1px solid #f1f3f4;
   vertical-align: middle;
+  color: #212529;
+  font-size: 0.95rem;
+  background-color: white;
 }
 
 .table tbody tr:hover {
   background-color: #f8f9fa;
+}
+
+.table tbody tr:hover td {
+  color: #000000;
 }
 
 /* Empty State */
@@ -562,15 +571,27 @@ onMounted(() => {
 }
 
 .actions button {
-  padding: 0.5rem 1rem;
+  padding: 0.5rem 0.75rem;
   border: none;
-  border-radius: 6px;
+  border-radius: 4px;
   cursor: pointer;
   font-weight: 500;
   transition: all 0.2s ease;
   display: flex;
   align-items: center;
-  gap: 0.25rem;
+  gap: 0.4rem;
+  font-size: 0.813rem;
+  white-space: nowrap;
+  min-width: fit-content;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.actions button i {
+  font-size: 0.813rem;
+}
+
+.actions button span {
+  font-size: 0.813rem;
 }
 
 .actions .edit-button {

@@ -103,7 +103,7 @@ const pageTitle = computed(() => {
   flex-direction: column;
   padding-top: var(--navbar-height);
   background-color: var(--background-light); 
-  margin-top: 80px;
+  
 }
 .admin-header {
   position: fixed;

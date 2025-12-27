@@ -917,9 +917,7 @@ onBeforeUnmount(() => {
   -webkit-text-fill-color: transparent;
   background-clip: text;
   display: block;
-  text-shadow: 0 0 20px rgba(37, 99, 235, 0.8), 0 0 40px rgba(59, 130, 246, 0.6),
-    0 4px 8px rgba(0, 0, 0, 0.3);
-  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.4));
   animation: titleShimmer 3s ease-in-out infinite;
 }
 
@@ -930,19 +928,17 @@ onBeforeUnmount(() => {
   background-clip: text;
   display: block;
   margin-top: 0.5rem;
-  text-shadow: 0 0 15px rgba(255, 255, 255, 0.9),
-    0 0 30px rgba(219, 234, 254, 0.7), 0 2px 6px rgba(0, 0, 0, 0.2);
-  filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.15));
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.4));
   animation: titleFloat 4s ease-in-out infinite;
 }
 
 @keyframes titleShimmer {
   0%,
   100% {
-    filter: brightness(1) drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+    filter: brightness(1);
   }
   50% {
-    filter: brightness(1.2) drop-shadow(0 4px 8px rgba(37, 99, 235, 0.4));
+    filter: brightness(1.2);
   }
 }
 
@@ -1186,9 +1182,7 @@ onBeforeUnmount(() => {
   -webkit-text-fill-color: transparent;
   background-clip: text;
   background-size: 200% 200%;
-  text-shadow: 0 0 25px rgba(59, 130, 246, 0.9), 0 0 50px rgba(37, 99, 235, 0.7),
-    0 4px 12px rgba(0, 0, 0, 0.3);
-  filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.25));
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.4));
   animation: textShimmer 3s ease-in-out infinite;
 }
 
@@ -1231,10 +1225,10 @@ onBeforeUnmount(() => {
 
 .luxury-cards-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 1.5rem;
+  grid-template-columns: repeat(auto-fill, minmax(420px, 1fr));
+  gap: 48px;
   margin-top: 3rem;
-  max-width: 1200px;
+  max-width: 1280px;
   margin-left: auto;
   margin-right: auto;
 }
@@ -1242,20 +1236,22 @@ onBeforeUnmount(() => {
 .luxury-umkm-card {
   background: linear-gradient(
     135deg,
-    rgba(255, 255, 255, 0.9) 0%,
-    rgba(254, 252, 232, 0.8) 100%
+    rgba(255, 255, 255, 0.95) 0%,
+    rgba(254, 252, 232, 0.85) 100%
   );
-  border-radius: 28px;
+  border-radius: 20px;
   overflow: hidden;
   position: relative;
-  transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 20px 60px rgba(59, 130, 246, 0.08),
-    0 8px 32px rgba(0, 0, 0, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+  border: 1px solid #f1f5f9;
   backdrop-filter: blur(20px);
   opacity: 0;
   transform: translateY(50px);
   animation: luxuryCardReveal 0.8s ease-out forwards;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
 }
 
 @keyframes luxuryCardReveal {
@@ -1266,9 +1262,9 @@ onBeforeUnmount(() => {
 }
 
 .luxury-umkm-card.hovered {
-  transform: translateY(-20px) rotateX(5deg) rotateY(2deg);
-  box-shadow: 0 40px 80px rgba(59, 130, 246, 0.2),
-    0 20px 40px rgba(0, 0, 0, 0.1);
+  transform: translateY(-8px);
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15), 0 12px 20px rgba(0, 0, 0, 0.1);
+  border-color: #e2e8f0;
 }
 
 .luxury-umkm-card::before {
@@ -1296,9 +1292,14 @@ onBeforeUnmount(() => {
 /* Premium Image Container - Compact Portrait Layout */
 .luxury-image-container {
   position: relative;
-  height: 220px;
+  height: 280px;
   overflow: hidden;
-  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+  background: linear-gradient(135deg, #f8fafc 0%, #e0f2fe 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 16/9;
+  height: auto;
 }
 
 .image-carousel {
@@ -1308,39 +1309,38 @@ onBeforeUnmount(() => {
 }
 
 .luxury-umkm-image {
-  position: absolute;
-  top: 0;
-  left: 0;
   width: 100%;
   height: 100%;
-  object-fit: cover;
-  transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
-  filter: brightness(1.1) contrast(1.05) saturate(1.2);
+  object-fit: contain;
+  object-position: center;
+  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  filter: brightness(1) contrast(1) saturate(1.05);
+  padding: 8px;
 }
 
 .luxury-umkm-card.hovered .luxury-umkm-image {
-  transform: scale(1.15) rotate(1deg);
-  filter: brightness(1.2) contrast(1.1) saturate(1.3);
+  transform: scale(1.02);
+  filter: brightness(1.05) contrast(1.05) saturate(1.1);
 }
 
 /* Floating Category Badge */
 .floating-category-badge {
   position: absolute;
-  top: 20px;
-  left: 20px;
+  top: 12px;
+  left: 12px;
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(15px);
-  padding: 8px 16px;
-  border-radius: 20px;
+  padding: 6px 12px;
+  border-radius: 16px;
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-size: 0.85rem;
+  gap: 6px;
+  font-size: 0.8rem;
   font-weight: 600;
   color: #1e3a8a;
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   border: 1px solid rgba(59, 130, 246, 0.2);
-  transform: scale(0.9);
+  transform: scale(0.95);
   transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
   z-index: 3;
 }
@@ -1357,17 +1357,17 @@ onBeforeUnmount(() => {
 /* Premium Rating */
 .luxury-rating {
   position: absolute;
-  top: 20px;
-  right: 20px;
+  top: 12px;
+  right: 12px;
   background: rgba(0, 0, 0, 0.7);
   backdrop-filter: blur(15px);
-  padding: 8px 12px;
-  border-radius: 20px;
+  padding: 6px 10px;
+  border-radius: 16px;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   color: #ffffff;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   font-weight: 600;
   z-index: 3;
   transition: all 0.3s ease;
@@ -1384,7 +1384,7 @@ onBeforeUnmount(() => {
 }
 
 .luxury-star {
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   filter: grayscale(1);
   transition: filter 0.3s ease;
 }
@@ -1394,7 +1394,7 @@ onBeforeUnmount(() => {
 }
 
 .rating-text {
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   margin-left: 4px;
 }
 
@@ -1458,18 +1458,22 @@ onBeforeUnmount(() => {
 
 /* Premium Content Container */
 .luxury-content-container {
-  padding: 1.5rem 1.4rem;
+  padding: 32px 28px 28px;
   position: relative;
   z-index: 2;
   background: linear-gradient(
     135deg,
-    rgba(255, 255, 255, 0.95) 0%,
-    rgba(254, 252, 232, 0.9) 100%
+    rgba(255, 255, 255, 0.98) 0%,
+    rgba(254, 252, 232, 0.95) 100%
   );
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
 
 .umkm-header {
-  margin-bottom: 1rem;
+  margin-bottom: 0;
 }
 
 .luxury-umkm-title {
@@ -1479,7 +1483,7 @@ onBeforeUnmount(() => {
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  margin-bottom: 0.4rem;
+  margin-bottom: 0.3rem;
   line-height: 1.3;
   font-family: "Georgia", serif;
 }
@@ -1487,9 +1491,9 @@ onBeforeUnmount(() => {
 .umkm-location {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   color: rgba(146, 64, 14, 0.7);
-  font-size: 1rem;
+  font-size: 0.8rem;
   font-weight: 500;
 }
 
@@ -1499,9 +1503,9 @@ onBeforeUnmount(() => {
 
 .umkm-description {
   color: rgba(55, 65, 81, 0.8);
-  font-size: 0.9rem;
-  line-height: 1.5;
-  margin-bottom: 1rem;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  margin-bottom: 0;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   line-clamp: 2;
@@ -1510,33 +1514,33 @@ onBeforeUnmount(() => {
 }
 
 .umkm-details {
-  margin-bottom: 1rem;
+  margin-bottom: 0.5rem;
   display: grid;
-  gap: 6px;
+  gap: 3px;
 }
 
 .detail-item {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 6px 10px;
+  gap: 5px;
+  padding: 4px 8px;
   background: rgba(59, 130, 246, 0.05);
-  border-radius: 10px;
+  border-radius: 8px;
   border: 1px solid rgba(59, 130, 246, 0.1);
 }
 
 .detail-icon {
-  font-size: 1rem;
+  font-size: 0.85rem;
 }
 
 .detail-text {
-  font-size: 0.9rem;
+  font-size: 0.8rem;
   font-weight: 500;
   color: #374151;
 }
 
 .detail-link {
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   font-weight: 500;
   color: #3b82f6;
   text-decoration: none;
@@ -1598,29 +1602,31 @@ onBeforeUnmount(() => {
 
 .day-icon,
 .time-icon {
-  font-size: 1rem;
+  font-size: 0.9rem;
 }
 
 .operational-text {
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   font-weight: 500;
   color: #374151;
 }
 
 .umkm-features {
-  margin-bottom: 1.5rem;
+  margin-top: auto;
+  padding-top: 16px;
+  border-top: 1px solid #f1f5f9;
 }
 
 .feature-tags {
   display: flex;
-  gap: 8px;
+  gap: 5px;
   flex-wrap: wrap;
 }
 
 .feature-tag {
-  padding: 6px 12px;
-  border-radius: 15px;
-  font-size: 0.8rem;
+  padding: 4px 8px;
+  border-radius: 10px;
+  font-size: 0.7rem;
   font-weight: 500;
   display: inline-flex;
   align-items: center;
@@ -1677,24 +1683,24 @@ onBeforeUnmount(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
+  gap: 5px;
   width: 100%;
-  padding: 12px 20px;
+  padding: 8px 14px;
   background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
   color: #ffffff;
-  border-radius: 20px;
+  border-radius: 10px;
   text-decoration: none;
   font-weight: 600;
-  font-size: 0.9rem;
+  font-size: 0.825rem;
   position: relative;
   overflow: hidden;
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 6px 20px rgba(59, 130, 246, 0.3);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25);
 }
 
 .luxury-cta-button:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 15px 40px rgba(59, 130, 246, 0.4);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(59, 130, 246, 0.35);
   background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%);
 }
 

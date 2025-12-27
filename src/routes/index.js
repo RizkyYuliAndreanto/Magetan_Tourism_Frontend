@@ -35,6 +35,7 @@ import AkomodasiDetail from "../views/akomodasi/AkomodasiDetail.vue";
 import BudayaView from "../views/budaya/BudayaView.vue";
 import DetailBudayaView from "../views/budaya/DetailBudayaView.vue";
 import Ekrafview from "../views/ekraf/ekrafview.vue";
+import DetailEkrafView from "../views/ekraf/detailekrafview.vue";
 import InformasiView from "../views/informasi/InformasiView.vue";
 import DetailInformasiView from "../views/informasi/DetailInformasiView.vue";
 
@@ -139,6 +140,12 @@ const routes = [
     path: "/ekonomi-kreatif",
     name: "Ekraf",
     component: Ekrafview,
+    props: true,
+  },
+  {
+    path: "/ekonomi-kreatif/detail/:id",
+    name: "DetailEkraf",
+    component: DetailEkrafView,
     props: true,
   },
   {

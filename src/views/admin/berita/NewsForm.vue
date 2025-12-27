@@ -4,7 +4,7 @@
       <h3 class="form-title">
         {{ isEditing ? "Edit Berita" : "Tambah Berita Baru & Galeri" }}
       </h3>
-      <button class="close-form-btn" @click="$emit('close-form')">
+      <button class="close-form-btn" @click="$emit('close-form')" title="Tutup Form">
         <svg
           xmlns="http://www.w3.org/2000/svg"
           width="24"
@@ -101,6 +101,33 @@
           <div class="form-group span-2">
             <label for="gambar_hero_berita">Gambar Hero Berita</label>
             <div
+              v-if="formData.preview_gambar_hero"
+              class="image-actions-top">
+              <button
+                type="button"
+                class="remove-image-btn-top"
+                @click="removeHeroImage">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  class="feather">
+                  <polyline points="3,6 5,6 21,6"></polyline>
+                  <path
+                    d="M19,6V20A2,2,0,0,1,17,22H7A2,2,0,0,1,5,20V6M8,6V4A2,2,0,0,1,10,2H14A2,2,0,0,1,16,4V6"></path>
+                  <line x1="10" y1="11" x2="10" y2="17"></line>
+                  <line x1="14" y1="11" x2="14" y2="17"></line>
+                </svg>
+                Hapus Gambar
+              </button>
+            </div>
+            <div
               class="file-drop-area"
               @dragover.prevent
               @drop="handleDropHeroFile">
@@ -138,37 +165,10 @@
             <div
               v-if="formData.preview_gambar_hero"
               class="image-preview-container">
-              <div class="image-preview-inner">
-                <img
-                  :src="formData.preview_gambar_hero"
-                  alt="Preview"
-                  class="hero-image-preview" />
-                <div class="image-preview-actions">
-                  <button
-                    type="button"
-                    class="remove-image-btn"
-                    @click="removeHeroImage">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="16"
-                      height="16"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="2"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      class="feather">
-                      <polyline points="3,6 5,6 21,6"></polyline>
-                      <path
-                        d="M19,6V20A2,2,0,0,1,17,22H7A2,2,0,0,1,5,20V6M8,6V4A2,2,0,0,1,10,2H14A2,2,0,0,1,16,4V6"></path>
-                      <line x1="10" y1="11" x2="10" y2="17"></line>
-                      <line x1="14" y1="11" x2="14" y2="17"></line>
-                    </svg>
-                    Hapus
-                  </button>
-                </div>
-              </div>
+              <img
+                :src="formData.preview_gambar_hero"
+                alt="Preview"
+                class="hero-image-preview" />
             </div>
           </div>
         </div>
@@ -851,30 +851,14 @@ textarea.form-input {
   margin-top: 1rem;
 }
 
-.image-preview-inner {
+.image-actions-top {
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 1rem;
+  justify-content: flex-end;
+  margin-bottom: 0.5rem;
+  margin-top: 0.5rem;
 }
 
-.hero-image-preview {
-  max-width: 320px;
-  max-height: 220px;
-  border-radius: 8px;
-  box-shadow: 0 2px 12px rgba(37, 99, 235, 0.08);
-  background: #fff;
-  object-fit: contain;
-  display: block;
-}
-
-.image-preview-actions {
-  display: flex;
-  gap: 0.75rem;
-}
-
-.remove-image-btn,
-.cancel-image-btn {
+.remove-image-btn-top {
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -885,26 +869,30 @@ textarea.form-input {
   padding: 0.5rem 1rem;
   cursor: pointer;
   font-size: 0.9rem;
-  transition: background 0.2s;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.2);
 }
 
-.remove-image-btn .feather,
-.cancel-image-btn .feather {
+.remove-image-btn-top:hover {
+  background: #dc2626;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+}
+
+.remove-image-btn-top .feather {
   width: 1rem;
   height: 1rem;
   stroke: white;
 }
 
-.cancel-image-btn {
-  background: #64748b;
-}
-
-.remove-image-btn:hover {
-  background: #dc2626;
-}
-
-.cancel-image-btn:hover {
-  background: #475569;
+.hero-image-preview {
+  max-width: 320px;
+  max-height: 220px;
+  border-radius: 8px;
+  box-shadow: 0 2px 12px rgba(37, 99, 235, 0.08);
+  background: #fff;
+  object-fit: contain;
+  display: block;
 }
 
 .image-preview {

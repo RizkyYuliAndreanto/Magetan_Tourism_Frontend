@@ -72,7 +72,7 @@ const changeTab = (tab) => {
   flex-direction: column;
   background-color: var(--background-light); 
   padding-top: calc(var(--navbar-height) + 2rem);
-  margin-top: 80px;
+  
 }
 
 .admin-header {

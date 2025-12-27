@@ -61,7 +61,7 @@ const pageTitle = computed(() => 'Manajemen Visi Misi');
   flex-direction: column;
   background-color: var(--background-light); 
   padding-top: calc(var(--navbar-height) + 2rem);
-  margin-top: 80px; /* Tambahkan margin atas untuk menghindari tumpang tindih dengan header */
+  /* Tambahkan margin atas untuk menghindari tumpang tindih dengan header */
 }
 .admin-header {
   position: fixed;

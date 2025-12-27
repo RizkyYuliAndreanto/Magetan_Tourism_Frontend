@@ -115,12 +115,14 @@
                     @click="openPengumumanForm(pengumuman)"
                     title="Edit">
                     <i class="fas fa-edit"></i>
+                    <span>Edit</span>
                   </button>
                   <button
                     class="action-button delete-button"
                     @click="showDeleteConfirm(pengumuman.id_pengumuman)"
                     title="Hapus">
                     <i class="fas fa-trash-alt"></i>
+                    <span>Hapus</span>
                   </button>
                 </td>
               </tr>
@@ -742,18 +744,29 @@ onMounted(() => {
 }
 
 .actions .action-button {
-  padding: 0.625rem;
-  width: 2.5rem;
-  height: 2.5rem;
-  border-radius: 8px;
+  padding: 0.5rem 0.75rem;
+  border-radius: 4px;
   border: none;
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   display: flex;
   align-items: center;
   justify-content: center;
+  gap: 0.4rem;
   position: relative;
   overflow: hidden;
+  font-size: 0.813rem;
+  font-weight: 500;
+  white-space: nowrap;
+  min-width: fit-content;
+}
+
+.actions .action-button i {
+  font-size: 0.813rem;
+}
+
+.actions .action-button span {
+  font-size: 0.813rem;
 }
 
 .actions .action-button::before {

@@ -167,9 +167,11 @@ const closePopUp = () => {
 const fetchVisiMisiData = async () => {
   try {
     const response = await axios.get("http://localhost:5000/api/visi-misi");
+    
+    console.log("Response visi-misi:", response.data); // Debug log
 
-    // Jika berhasil mendapat response
-    if (response.data && response.data.id_visi_misi) {
+    // Jika berhasil mendapat response dan ada data
+    if (response.data && Object.keys(response.data).length > 0) {
       // Ada data visi misi
       visiMisiData.value = response.data;
       formVisiMisi.value = { ...response.data, visi_misi_file: null };
@@ -265,6 +267,19 @@ const handleUpdate = async (id, formData) => {
 
 const getFilePath = (path) => {
   return `http://localhost:5000${path}`;
+};
+
+const formatDate = (dateString) => {
+  if (!dateString) return "-";
+  const date = new Date(dateString);
+  const options = { 
+    year: 'numeric', 
+    month: 'long', 
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  };
+  return date.toLocaleDateString('id-ID', options);
 };
 
 onMounted(() => {

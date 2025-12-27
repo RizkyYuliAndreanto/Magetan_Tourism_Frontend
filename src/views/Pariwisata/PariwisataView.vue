@@ -488,7 +488,7 @@ const travelInspirations = ref([
   {
     id: 2,
     icon: "🏖️",
-    title: "Wisata Pantai",
+    title: "Wisata Danau",
     description: "Nikmati keindahan pesisir Indonesia",
   },
   {

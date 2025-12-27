@@ -118,12 +118,14 @@
                     @click="openDestinasiForm(destinasi)"
                     title="Edit">
                     <i class="fas fa-edit"></i>
+                    <span>Edit</span>
                   </button>
                   <button
                     class="action-button delete-button"
                     @click="showDeleteConfirm(destinasi.id_destinasi)"
                     title="Hapus">
                     <i class="fas fa-trash-alt"></i>
+                    <span>Hapus</span>
                   </button>
                 </td>
               </tr>
@@ -787,18 +789,28 @@ onMounted(() => {
 }
 
 .actions .action-button {
-  padding: 0.5rem;
-  width: 2rem;
-  height: 2rem;
-  border-radius: 0.375rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: 4px;
   display: flex;
   align-items: center;
   justify-content: center;
+  gap: 0.4rem;
   border: none;
   cursor: pointer;
   transition: all 0.2s ease-in-out;
-  font-size: 0.875rem;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  font-size: 0.813rem;
+  font-weight: 500;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  white-space: nowrap;
+  min-width: fit-content;
+}
+
+.actions .action-button i {
+  font-size: 0.813rem;
+}
+
+.actions .action-button span {
+  font-size: 0.813rem;
 }
 
 .actions .edit-button {

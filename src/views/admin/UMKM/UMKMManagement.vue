@@ -114,12 +114,14 @@
                   @click="openUMKMForm(umkm)"
                   title="Edit">
                   <i class="fas fa-edit"></i>
+                  <span>Edit</span>
                 </button>
                 <button
                   class="action-button delete-button"
                   @click="showDeleteConfirm(umkm.id_umkm)"
                   title="Hapus">
                   <i class="fas fa-trash-alt"></i>
+                  <span>Hapus</span>
                 </button>
               </td>
             </tr>
@@ -555,17 +557,28 @@ onMounted(() => {
 }
 
 .actions .action-button {
-  width: 2.5rem;
-  height: 2.5rem;
-  border-radius: 8px;
+  padding: 0.5rem 0.75rem;
+  border-radius: 4px;
   border: none;
   display: flex;
   align-items: center;
   justify-content: center;
+  gap: 0.4rem;
   cursor: pointer;
   transition: all 0.2s ease;
-  font-size: 0.875rem;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  font-size: 0.813rem;
+  font-weight: 500;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  white-space: nowrap;
+  min-width: fit-content;
+}
+
+.actions .action-button i {
+  font-size: 0.813rem;
+}
+
+.actions .action-button span {
+  font-size: 0.813rem;
 }
 
 .actions .edit-button {

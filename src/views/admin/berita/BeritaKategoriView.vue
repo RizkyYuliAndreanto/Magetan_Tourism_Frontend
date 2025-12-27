@@ -120,7 +120,7 @@ const changeTab = (tab) => {
   padding-top: var(--navbar-height);
   /* Latar belakang yang seragam */
   background-color: var(--background-light); 
-  margin-top: 80px; 
+  
 }
 .admin-header {
   position: fixed;

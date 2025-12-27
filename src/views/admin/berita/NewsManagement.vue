@@ -122,12 +122,14 @@
                     @click="openBeritaForm(berita)"
                     title="Edit">
                     <i class="fas fa-edit"></i>
+                    <span>Edit</span>
                   </button>
                   <button
                     class="action-button delete-button"
                     @click="showDeleteConfirm(berita.id_berita)"
                     title="Hapus">
                     <i class="fas fa-trash-alt"></i>
+                    <span>Hapus</span>
                   </button>
                 </td>
               </tr>
@@ -917,18 +919,27 @@ onUnmounted(() => {
   gap: 0.375rem;
 }
 .actions .action-button {
-  padding: 0.5rem;
-  width: 2rem;
-  height: 2rem;
+  padding: 0.5rem 1rem;
   border-radius: 0.375rem;
   display: flex;
   align-items: center;
   justify-content: center;
+  gap: 0.5rem;
   border: none;
   cursor: pointer;
   transition: all 0.2s ease-in-out;
   font-size: 0.875rem;
+  font-weight: 500;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  white-space: nowrap;
+}
+
+.actions .action-button i {
+  font-size: 0.875rem;
+}
+
+.actions .action-button span {
+  font-size: 0.875rem;
 }
 .actions .edit-button {
   background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);

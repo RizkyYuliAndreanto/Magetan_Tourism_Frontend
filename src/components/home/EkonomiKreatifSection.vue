@@ -3,7 +3,7 @@
     <div class="ekonomi-kreatif-container">
       <div class="carousel-ekraf-container">
         <button
-          v-if="kategoriList.length > 4"
+          v-if="kategoriList.length > 1"
           class="carousel-nav nav-left"
           @click="prevSlide"
           aria-label="Sebelumnya">
@@ -12,7 +12,14 @@
               d="M15.41 7.41L14 6L8 12L14 18L15.41 16.59L10.83 12L15.41 7.41Z" />
           </svg>
         </button>
-        <div class="carousel-track-wrapper-ekraf" ref="trackWrapper">
+        <div 
+          class="carousel-track-wrapper-ekraf" 
+          ref="trackWrapper"
+          @mouseenter="pauseAutoSlide"
+          @mouseleave="resumeAutoSlide"
+          @touchstart="handleTouchStart"
+          @touchmove="handleTouchMove"
+          @touchend="handleTouchEnd">
           <div ref="carouselTrack" class="carousel-track-ekraf">
             <template v-if="loading">
               <div class="no-data-message">Memuat data...</div>
@@ -21,6 +28,9 @@
               <div class="no-data-message" style="color: #e53e3e">
                 {{ error }}
               </div>
+            </template>
+            <template v-else-if="kategoriList.length === 0">
+              <div class="no-data-message">Tidak ada data kategori.</div>
             </template>
             <template v-else>
               <div
@@ -83,7 +93,7 @@
           </div>
         </div>
         <button
-          v-if="kategoriList.length > 4"
+          v-if="kategoriList.length > 1"
           class="carousel-nav nav-right"
           @click="nextSlide"
           aria-label="Berikutnya">
@@ -136,22 +146,29 @@ export default {
       error: null,
       logoEkraf: logoEkraf,
       currentSlideIndex: 0,
-      slideCount: 4, // Jumlah slide yang terlihat
+      slideCount: 0, // Will be calculated based on available items
       isSliding: false,
+      autoSlideInterval: null,
+      touchStartX: 0,
+      touchEndX: 0,
     };
   },
   computed: {
+    effectiveSlideCount() {
+      // Use minimum of 4 or actual item count
+      return Math.min(4, this.kategoriList.length);
+    },
     clonedKategoriListStart() {
       // Kloning beberapa elemen dari akhir ke awal
-      if (this.kategoriList.length > 0) {
-        return this.kategoriList.slice(0, this.slideCount);
+      if (this.kategoriList.length > 4) {
+        return this.kategoriList.slice(0, this.effectiveSlideCount);
       }
       return [];
     },
     clonedKategoriListEnd() {
       // Kloning beberapa elemen dari awal ke akhir
-      if (this.kategoriList.length > 0) {
-        return this.kategoriList.slice(-this.slideCount);
+      if (this.kategoriList.length > 4) {
+        return this.kategoriList.slice(-this.effectiveSlideCount);
       }
       return [];
     },
@@ -163,13 +180,16 @@ export default {
           "http://localhost:5000/api/kategori-umkm/"
         );
         this.kategoriList = response.data;
+        console.log("Kategori loaded:", this.kategoriList.length);
       } catch (err) {
         this.error = "Gagal memuat data kategori UMKM.";
-        console.error(err);
+        console.error("Error loading kategori:", err);
       } finally {
         this.loading = false;
         this.$nextTick(() => {
-          this.initializeCarousel();
+          if (this.kategoriList.length > 0) {
+            this.initializeCarousel();
+          }
         });
       }
     },
@@ -185,23 +205,44 @@ export default {
     nextSlide() {
       if (this.isSliding) return;
       this.isSliding = true;
+      this.pauseAutoSlide();
+      
       const totalItems = this.kategoriList.length;
-      if (this.currentSlideIndex >= totalItems) {
-        this.currentSlideIndex = totalItems;
+      
+      if (totalItems > 4) {
+        // Carousel mode with cloning
+        if (this.currentSlideIndex >= totalItems) {
+          this.currentSlideIndex = totalItems;
+        } else {
+          this.currentSlideIndex++;
+        }
+        this.slideTo(this.currentSlideIndex);
       } else {
-        this.currentSlideIndex++;
+        // Simple mode for <= 4 items
+        this.currentSlideIndex = (this.currentSlideIndex + 1) % totalItems;
+        this.simpleSlide();
       }
-      this.slideTo(this.currentSlideIndex);
     },
     prevSlide() {
       if (this.isSliding) return;
       this.isSliding = true;
-      if (this.currentSlideIndex <= -1) {
-        this.currentSlideIndex = -1;
+      this.pauseAutoSlide();
+      
+      const totalItems = this.kategoriList.length;
+      
+      if (totalItems > 4) {
+        // Carousel mode with cloning
+        if (this.currentSlideIndex <= -1) {
+          this.currentSlideIndex = -1;
+        } else {
+          this.currentSlideIndex--;
+        }
+        this.slideTo(this.currentSlideIndex);
       } else {
-        this.currentSlideIndex--;
+        // Simple mode for <= 4 items
+        this.currentSlideIndex = (this.currentSlideIndex - 1 + totalItems) % totalItems;
+        this.simpleSlide();
       }
-      this.slideTo(this.currentSlideIndex);
     },
     slideTo(index) {
       const track = this.$refs.carouselTrack;
@@ -209,7 +250,7 @@ export default {
       const card = track.querySelector(".kategori-card:not(.cloned)");
       if (!card) return;
       const cardWidth = card.offsetWidth + 48; // gap
-      const targetX = -(index + this.slideCount) * cardWidth;
+      const targetX = -(index + this.effectiveSlideCount) * cardWidth;
 
       track.style.transition = `transform 0.5s cubic-bezier(0.25, 0.8, 0.25, 1)`;
       track.style.transform = `translateX(${targetX}px)`;
@@ -220,18 +261,38 @@ export default {
           track.style.transition = "none";
           this.currentSlideIndex = 0;
           const newTargetX =
-            -(this.currentSlideIndex + this.slideCount) * cardWidth;
+            -(this.currentSlideIndex + this.effectiveSlideCount) * cardWidth;
           track.style.transform = `translateX(${newTargetX}px)`;
         } else if (index < 0) {
           track.style.transition = "none";
           this.currentSlideIndex = this.kategoriList.length - 1;
           const newTargetX =
-            -(this.currentSlideIndex + this.slideCount) * cardWidth;
+            -(this.currentSlideIndex + this.effectiveSlideCount) * cardWidth;
           track.style.transform = `translateX(${newTargetX}px)`;
         }
         this.isSliding = false;
+        this.resumeAutoSlide();
         track.ontransitionend = null;
       };
+    },
+    simpleSlide() {
+      // For cases with <= 4 items, just fade or simple transition
+      const track = this.$refs.carouselTrack;
+      if (!track) return;
+      
+      const card = track.querySelector(".kategori-card:not(.cloned)");
+      if (!card) return;
+      
+      const cardWidth = card.offsetWidth + 48;
+      const targetX = -this.currentSlideIndex * cardWidth;
+      
+      track.style.transition = `transform 0.5s cubic-bezier(0.25, 0.8, 0.25, 1)`;
+      track.style.transform = `translateX(${targetX}px)`;
+      
+      setTimeout(() => {
+        this.isSliding = false;
+        this.resumeAutoSlide();
+      }, 500);
     },
     handleImageError(event) {
       // Set placeholder image jika gambar gagal dimuat
@@ -246,19 +307,100 @@ export default {
         : description;
     },
     initializeCarousel() {
-      // Geser ke posisi awal yang benar
+      // Cek apakah refs tersedia
+      if (!this.$refs.carouselTrack) {
+        console.error("Carousel track ref not found");
+        return;
+      }
+      
+      const firstCard = this.$refs.carouselTrack.querySelector(".kategori-card:not(.cloned)");
+      if (!firstCard) {
+        console.error("No cards found in carousel");
+        return;
+      }
+      
+      // Set initial position
       this.currentSlideIndex = 0;
-      this.slideTo(this.currentSlideIndex);
+      const cardWidth = firstCard.offsetWidth + 48; // card width + gap
+      
+      // If items <= 4, don't offset (no cloning)
+      // If items > 4, offset by cloned items
+      let initialX = 0;
+      if (this.kategoriList.length > 4) {
+        initialX = -this.effectiveSlideCount * cardWidth;
+      }
+      
+      console.log("Initializing carousel:", { 
+        cardWidth, 
+        initialX, 
+        effectiveSlideCount: this.effectiveSlideCount,
+        totalCards: this.kategoriList.length 
+      });
+      
       this.$refs.carouselTrack.style.transition = "none";
-      const cardWidth =
-        this.$refs.carouselTrack.querySelector(".kategori-card:not(.cloned)")
-          .offsetWidth + 48;
-      const initialX = -this.slideCount * cardWidth;
       this.$refs.carouselTrack.style.transform = `translateX(${initialX}px)`;
+      
+      // Force reflow
+      this.$refs.carouselTrack.offsetHeight;
+      
+      // Start auto-slide if more than 1 item
+      if (this.kategoriList.length > 1) {
+        this.startAutoSlide();
+      }
+    },
+    startAutoSlide() {
+      // Clear existing interval
+      if (this.autoSlideInterval) {
+        clearInterval(this.autoSlideInterval);
+      }
+      
+      // Only auto-slide if we have items
+      if (this.kategoriList.length > 1) {
+        this.autoSlideInterval = setInterval(() => {
+          this.nextSlide();
+        }, 4000); // Auto-slide every 4 seconds
+      }
+    },
+    pauseAutoSlide() {
+      if (this.autoSlideInterval) {
+        clearInterval(this.autoSlideInterval);
+        this.autoSlideInterval = null;
+      }
+    },
+    resumeAutoSlide() {
+      this.startAutoSlide();
+    },
+    handleTouchStart(event) {
+      this.touchStartX = event.touches[0].clientX;
+      this.pauseAutoSlide();
+    },
+    handleTouchMove(event) {
+      // Optional: add visual feedback during touch move
+    },
+    handleTouchEnd(event) {
+      this.touchEndX = event.changedTouches[0].clientX;
+      const deltaX = this.touchEndX - this.touchStartX;
+      
+      // Threshold for swipe
+      if (Math.abs(deltaX) > 50) {
+        if (deltaX > 0) {
+          // Swipe right - previous
+          this.prevSlide();
+        } else {
+          // Swipe left - next
+          this.nextSlide();
+        }
+      }
+      
+      this.resumeAutoSlide();
     },
   },
   mounted() {
     this.fetchKategori();
+  },
+  beforeUnmount() {
+    // Clean up auto-slide interval
+    this.pauseAutoSlide();
   },
 };
 </script>
@@ -282,6 +424,7 @@ text-xl
   align-items: center;
   justify-content: center;
   z-index: 5;
+  overflow: visible;
 }
 
 /* Top wave transition dari EventSection */
@@ -337,22 +480,23 @@ text-xl
 
 .kategori-card.portrait-card {
   position: relative;
-  background-color: #f3f3f3;
-  border-radius: 22px;
-  min-width: 180px;
-  min-height: 320px;
-  max-width: 220px;
-  max-height: 360px;
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
+  background-color: #ffffff;
+  border-radius: 24px;
+  width: 280px;
+  height: 480px;
+  box-shadow: 0 20px 40px rgba(30, 58, 138, 0.15);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: flex-end;
   cursor: pointer;
   text-decoration: none;
-  transition: box-shadow 0.2s, transform 0.2s, border-color 0.2s;
+  transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
   overflow: hidden;
-  border: 3px solid #bdbdbd;
+  border: 2px solid transparent;
+  flex-shrink: 0;
+  z-index: 10;
+  transform-style: preserve-3d;
 }
 
 .card-image-container {
@@ -362,7 +506,7 @@ text-xl
   width: 100%;
   height: 100%;
   overflow: hidden;
-  border-radius: 19px; /* Sedikit lebih kecil dari border card */
+  border-radius: 22px;
 }
 
 .card-image-container::after {
@@ -371,15 +515,16 @@ text-xl
   bottom: 0;
   left: 0;
   right: 0;
-  height: 80px;
+  height: 100%;
   background: linear-gradient(
     to top,
-    rgba(0, 0, 0, 0.3) 0%,
-    rgba(0, 0, 0, 0.1) 50%,
-    transparent 100%
+    rgba(0, 0, 0, 0.8) 0%,
+    rgba(0, 0, 0, 0.4) 30%,
+    transparent 70%
   );
   z-index: 1;
   pointer-events: none;
+  transition: all 0.5s ease;
 }
 
 .card-image {
@@ -390,9 +535,20 @@ text-xl
   transition: transform 0.3s ease;
 }
 .kategori-card.portrait-card:hover {
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.16);
-  transform: translateY(-6px) scale(1.05);
-  border-color: #d4af37;
+  box-shadow: 0 25px 50px rgba(30, 58, 138, 0.25),
+    0 15px 30px rgba(0, 0, 0, 0.15), 0 0 40px rgba(37, 99, 235, 0.2);
+  transform: translateY(-10px) scale(1.02);
+  border-color: rgba(37, 99, 235, 0.3);
+}
+
+.kategori-card.portrait-card:hover .card-image-container::after {
+  background: linear-gradient(
+    to top,
+    rgba(30, 58, 138, 0.95) 0%,
+    rgba(30, 58, 138, 0.7) 25%,
+    rgba(0, 0, 0, 0.3) 50%,
+    transparent 75%
+  );
 }
 
 .kategori-card.portrait-card:hover .card-image {
@@ -400,50 +556,62 @@ text-xl
 }
 .portrait-label {
   width: 100%;
-  background: linear-gradient(
-    to top,
-    rgba(255, 255, 255, 0.95) 0%,
-    rgba(255, 255, 255, 0.85) 100%
-  );
-  backdrop-filter: blur(10px);
-  border-radius: 0 0 18px 18px;
+  background: transparent;
+  backdrop-filter: none;
+  border-radius: 0 0 22px 22px;
   text-align: center;
-  padding: 16px 8px 12px 8px;
+  padding: 2.5rem 2rem;
   position: absolute;
   left: 0;
   bottom: 0;
   z-index: 2;
   box-sizing: border-box;
-  border-top: 1px solid rgba(255, 255, 255, 0.8);
-  min-height: 80px;
+  border-top: none;
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: flex-end;
+  align-items: center;
+  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.kategori-card.portrait-card:hover .portrait-label {
+  background: linear-gradient(
+    to top,
+    rgba(30, 58, 138, 0.95) 0%,
+    rgba(30, 58, 138, 0.7) 50%,
+    transparent 100%
+  );
+  backdrop-filter: blur(15px);
+  padding: 3rem 2rem;
 }
 .portrait-label .kategori-nama {
-  font-size: 1.15rem;
-  font-weight: bold;
-  color: #333;
-  margin: 0 0 8px 0;
-  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #ffffff;
+  margin: 0 0 1rem 0;
+  text-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
   line-height: 1.2;
+  letter-spacing: 0.5px;
+  transition: all 0.4s ease;
 }
 
 .kategori-deskripsi {
-  font-size: 0.85rem;
-  color: #555;
-  margin: 0;
-  line-height: 1.3;
-  opacity: 0.9;
+  font-size: 1rem;
+  color: #ffffff;
+  margin: 0 0 1.5rem 0;
+  line-height: 1.6;
+  opacity: 0;
   font-weight: 400;
   text-align: center;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+  letter-spacing: 0.3px;
+  transform: translateY(20px);
+  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.kategori-nama {
-  font-size: 1.15rem;
-  font-weight: bold;
-  color: #333;
-  margin: 0;
+.kategori-card.portrait-card:hover .kategori-deskripsi {
+  opacity: 0.95;
+  transform: translateY(0);
 }
 
 .title-wrapper {
@@ -660,18 +828,22 @@ text-xl
   flex-grow: 1;
   position: relative;
   width: 100%;
+  z-index: 10;
 }
 .carousel-track-wrapper-ekraf {
   overflow: hidden;
   width: 100%;
   max-width: 900px;
   position: relative;
+  z-index: 10;
 }
 .carousel-track-ekraf {
   display: flex;
   gap: 48px;
   transition: transform 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
   will-change: transform;
+  position: relative;
+  z-index: 10;
 }
 .carousel-nav {
   background: #fff;

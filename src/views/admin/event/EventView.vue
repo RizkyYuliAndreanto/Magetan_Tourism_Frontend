@@ -66,7 +66,7 @@ const pageTitle = computed(() => 'Manajemen Event');
   padding-top: var(--navbar-height);
   /* Latar belakang yang seragam */
   background-color: var(--background-light); 
-  margin-top: 80px; 
+  
 }
 .admin-header {
   position: fixed;
